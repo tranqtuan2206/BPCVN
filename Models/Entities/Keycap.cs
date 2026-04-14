@@ -1,0 +1,30 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace BPCVN.Models.Entities;
+
+public class Keycap
+{
+    [Key]
+    public int KeycapId { get; set; }
+
+    [Required(ErrorMessage = "Tên keycap là bắt buộc.")]
+    [StringLength(100)]
+    public string Name { get; set; } = string.Empty;
+
+    [StringLength(100)]
+    public string? Brand { get; set; }
+
+    /// <summary>Ví dụ: "Cherry", "SA", "KAT", "MT3"</summary>
+    [StringLength(50)]
+    public string? Profile { get; set; }
+
+    /// <summary>Ví dụ: "ABS", "PBT"</summary>
+    [StringLength(50)]
+    public string? Material { get; set; }
+
+    [StringLength(500)]
+    public string? ImageUrl { get; set; }
+
+    // Navigation
+    public ICollection<Spec> Specs { get; set; } = new List<Spec>();
+}

@@ -1,0 +1,92 @@
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<!-- Hero -->
+<div class="rounded-4 p-5 mb-5 text-center"
+     style="background:linear-gradient(135deg,#ede9fe 0%,#f5f4fb 100%);border:1px solid #e0dafc">
+    <i class="bi bi-keyboard display-3 mb-3 d-block" style="color:#6c5ce7"></i>
+    <h1 class="fw-800 mb-2" style="font-size:2.4rem;color:#1a1a2e;font-weight:800">
+        Cộng đồng Bàn Phím Cơ Việt Nam
+    </h1>
+    <p class="text-muted fs-5 mb-4">
+        Khám phá kits, switches, keycaps và chia sẻ sound test của bạn.
+    </p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <a asp-controller="Kit" asp-action="Index"
+           class="btn btn-lg px-4 fw-600"
+           style="background:#6c5ce7;color:#fff;border-radius:12px;font-weight:600">
+            <i class="bi bi-cpu me-2"></i>Xem Kit Catalog
+        </a>
+        <a asp-controller="Switch" asp-action="Index"
+           class="btn btn-lg px-4 fw-600"
+           style="background:#fff;color:#6c5ce7;border:2px solid #6c5ce7;border-radius:12px;font-weight:600">
+            <i class="bi bi-toggles me-2"></i>Xem Switches
+        </a>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-4 mb-5 text-center">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 rounded-4 p-4">
+            <i class="bi bi-cpu fs-1 mb-2" style="color:#6c5ce7"></i>
+            <div class="display-6 fw-bold" style="color:#6c5ce7">@ViewBag.KitCount</div>
+            <div class="text-muted fw-500">Kits</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 rounded-4 p-4">
+            <i class="bi bi-toggles fs-1 mb-2" style="color:#00b894"></i>
+            <div class="display-6 fw-bold" style="color:#00b894">@ViewBag.SwitchCount</div>
+            <div class="text-muted fw-500">Switches</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 rounded-4 p-4">
+            <i class="bi bi-file-earmark-music fs-1 mb-2" style="color:#fd79a8"></i>
+            <div class="display-6 fw-bold" style="color:#fd79a8">@ViewBag.SpecCount</div>
+            <div class="text-muted fw-500">Builds đã chia sẻ</div>
+        </div>
+    </div>
+</div>
+
+<!-- Feature cards -->
+<h4 class="fw-bold mb-4" style="color:#1a1a2e">
+    <i class="bi bi-stars me-2" style="color:#6c5ce7"></i>Tính năng nổi bật
+</h4>
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="rounded-3 d-inline-flex p-3 mb-3" style="background:#ede9fe">
+                <i class="bi bi-search fs-4" style="color:#6c5ce7"></i>
+            </div>
+            <h5 class="fw-bold">Tra cứu linh kiện</h5>
+            <p class="text-muted small mb-0">
+                Tìm kiếm kit, switch, keycap với đầy đủ thông số kỹ thuật chi tiết.
+            </p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="rounded-3 d-inline-flex p-3 mb-3" style="background:#e8f8f1">
+                <i class="bi bi-soundwave fs-4" style="color:#00b894"></i>
+            </div>
+            <h5 class="fw-bold">Sound Test</h5>
+            <p class="text-muted small mb-0">
+                Nghe thử âm thanh thực tế từ cộng đồng trước khi quyết định mua.
+            </p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="rounded-3 d-inline-flex p-3 mb-3" style="background:#fde8f1">
+                <i class="bi bi-share fs-4" style="color:#fd79a8"></i>
+            </div>
+            <h5 class="fw-bold">Chia sẻ Build</h5>
+            <p class="text-muted small mb-0">
+                Upload cấu hình build của bạn kèm sound test để truyền cảm hứng cho cộng đồng.
+            </p>
+        </div>
+    </div>
+</div>

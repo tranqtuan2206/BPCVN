@@ -1,0 +1,101 @@
+@model IEnumerable<BPCVN.Models.Entities.Switch>
+@{
+    ViewData["Title"] = "Switch Catalog";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+    <div>
+        <h2 class="fw-bold mb-1" style="color:#1a1a2e">
+            <i class="bi bi-toggles me-2" style="color:#00b894"></i>Switch Catalog
+        </h2>
+        <p class="text-muted mb-0">@Model.Count() switches trong cơ sở dữ liệu</p>
+    </div>
+    <span class="badge rounded-pill px-3 py-2 fs-6"
+          style="background:#e8f8f1;color:#00816a">
+        @Model.Count() Switches
+    </span>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-inbox display-4 d-block mb-3 opacity-25"></i>
+        <p class="fs-5">Chua co switch nao.</p>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+        @foreach (var sw in Model)
+        {
+                string badgeBg, badgeColor, iconClass;
+                if (sw.Type == "Linear")
+                {
+                    badgeBg   = "#ede9fe";
+                    badgeColor = "#5849c2";
+                    iconClass  = "bi-arrow-down";
+                }
+                else if (sw.Type == "Tactile")
+                {
+                    badgeBg   = "#e8f8f1";
+                    badgeColor = "#00816a";
+                    iconClass  = "bi-arrow-down-up";
+                }
+                else if (sw.Type == "Clicky")
+                {
+                    badgeBg   = "#fde8f1";
+                    badgeColor = "#c0397a";
+                    iconClass  = "bi-volume-up";
+                }
+                else
+                {
+                    badgeBg   = "#f1f1f1";
+                    badgeColor = "#666666";
+                    iconClass  = "bi-question-circle";
+                }
+
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm rounded-4" style="overflow:hidden">
+
+                    <div class="d-flex align-items-center justify-content-center"
+                         style="height:140px;background:linear-gradient(135deg,@badgeBg,#f5f4fb)">
+                        <i class="bi @iconClass" style="font-size:3.5rem;color:@badgeColor;opacity:.5"></i>
+                    </div>
+
+                    <div class="card-body pb-2">
+                        @if (!string.IsNullOrEmpty(sw.Type))
+                        {
+                            <span class="badge mb-2"
+                                  style="background:@badgeBg;color:@badgeColor;font-size:.75rem;font-weight:600">
+                                @sw.Type
+                            </span>
+                        }
+
+                        <h5 class="card-title fw-bold mb-1" style="color:#1a1a2e">@sw.Name</h5>
+                        <p class="text-muted small mb-3">
+                            <i class="bi bi-building me-1"></i>@(sw.Brand ?? "Unknown Brand")
+                        </p>
+
+                        @if (!string.IsNullOrEmpty(sw.ActuationForce))
+                        {
+                            <ul class="list-unstyled small text-secondary mb-0">
+                                <li>
+                                    <i class="bi bi-speedometer2 me-2" style="color:#00b894"></i>
+                                    Actuation Force: <strong>@sw.ActuationForce</strong>
+                                </li>
+                            </ul>
+                        }
+                    </div>
+
+                    <div class="card-footer bg-white border-0 px-3 pb-3 pt-2">
+                        <a href="#" class="btn btn-sm w-100"
+                           style="background:@badgeBg;color:@badgeColor;border-radius:8px;font-weight:600">
+                            <i class="bi bi-arrow-right-circle me-1"></i>Xem chi tiet
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+}

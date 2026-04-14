@@ -1,0 +1,23 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+## EF Migrations (giữ lại file Migrations/ nhưng ignore snapshot nếu muốn)
+# Uncomment dòng dưới nếu muốn ignore snapshot:
+# **/Migrations/*ModelSnapshot.cs
+
+## Logs
+*.log
+logs/
+
+## Uploads
+wwwroot/uploads/soundtests/*
+!wwwroot/uploads/soundtests/.gitkeep
+
+## Secrets
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
