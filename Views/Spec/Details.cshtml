@@ -1,0 +1,158 @@
+@model BPCVN.Models.Entities.Spec
+@using System.Security.Claims
+@{
+    ViewData["Title"] = Model.BuildName;
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var isOwner       = currentUserId == Model.UserId.ToString();
+}
+
+<!-- Header -->
+<div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1" style="color:#1a1a2e">@Model.BuildName</h2>
+        <p class="text-muted mb-0">
+            <i class="bi bi-person-circle me-1"></i>@Model.User.Username &nbsp;·&nbsp;
+            <i class="bi bi-clock me-1"></i>@Model.CreatedAt.ToString("dd/MM/yyyy")
+        </p>
+    </div>
+    @if (isOwner)
+    {
+        <a asp-controller="SoundTest" asp-action="Upload"
+           asp-route-specId="@Model.SpecId"
+           class="btn rounded-3"
+           style="background:#6c5ce7;color:#fff;font-weight:600">
+            <i class="bi bi-cloud-upload me-2"></i>Upload Sound Test
+        </a>
+    }
+</div>
+
+<!-- Thông số build -->
+<div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+    <h5 class="fw-bold mb-3" style="color:#6c5ce7">
+        <i class="bi bi-sliders me-2"></i>Thông số cấu hình
+    </h5>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="p-3 rounded-3" style="background:#f5f4fb">
+                <div class="small text-muted mb-1"><i class="bi bi-cpu me-1"></i>Kit</div>
+                <div class="fw-bold">@Model.Kit.Name</div>
+                <div class="small text-muted">@Model.Kit.Brand · @Model.Kit.Layout</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 rounded-3" style="background:#f5f4fb">
+                <div class="small text-muted mb-1"><i class="bi bi-toggles me-1"></i>Switch</div>
+                <div class="fw-bold">@Model.Switch.Name</div>
+                <div class="small text-muted">@Model.Switch.Brand · @Model.Switch.Type</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 rounded-3" style="background:#f5f4fb">
+                <div class="small text-muted mb-1">
+                    <i class="bi bi-grid me-1"></i>Keycap
+                </div>
+                @if (Model.Keycap != null)
+                {
+                    <div class="fw-bold">@Model.Keycap.Name</div>
+                    <div class="small text-muted">@Model.Keycap.Brand · @Model.Keycap.Profile</div>
+                }
+                else
+                {
+                    <div class="text-muted fst-italic">Không có</div>
+                }
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.PlateMaterial))
+        {
+            <div class="col-md-4">
+                <div class="p-3 rounded-3" style="background:#f5f4fb">
+                    <div class="small text-muted mb-1"><i class="bi bi-layers me-1"></i>Plate</div>
+                    <div class="fw-bold">@Model.PlateMaterial</div>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.FoamSetup))
+        {
+            <div class="col-md-4">
+                <div class="p-3 rounded-3" style="background:#f5f4fb">
+                    <div class="small text-muted mb-1"><i class="bi bi-stack me-1"></i>Foam Setup</div>
+                    <div class="fw-bold">@Model.FoamSetup</div>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.Mods))
+        {
+            <div class="col-12">
+                <div class="p-3 rounded-3" style="background:#f5f4fb">
+                    <div class="small text-muted mb-1"><i class="bi bi-tools me-1"></i>Mods</div>
+                    <div class="fw-bold">@Model.Mods</div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Sound Tests -->
+<div class="card border-0 shadow-sm rounded-4 p-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="fw-bold mb-0" style="color:#6c5ce7">
+            <i class="bi bi-soundwave me-2"></i>Sound Tests
+            <span class="badge ms-2 rounded-pill"
+                  style="background:#ede9fe;color:#5849c2;font-size:.8rem">
+                @Model.SoundTests.Count
+            </span>
+        </h5>
+    </div>
+
+    @if (!Model.SoundTests.Any())
+    {
+        <div class="text-center py-4 text-muted">
+            <i class="bi bi-mic-mute display-5 d-block mb-2 opacity-25"></i>
+            <p class="mb-0">Chưa có sound test nào.</p>
+            @if (isOwner)
+            {
+                <a asp-controller="SoundTest" asp-action="Upload"
+                   asp-route-specId="@Model.SpecId"
+                   class="btn btn-sm mt-3 rounded-3"
+                   style="background:#6c5ce7;color:#fff;font-weight:600">
+                    Upload ngay
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="d-flex flex-column gap-3">
+            @foreach (var st in Model.SoundTests)
+            {
+                <div class="p-3 rounded-3 border" style="background:#fafafe">
+                    <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+                        <div>
+                            <span class="fw-600 me-2" style="font-weight:600">
+                                <i class="bi bi-mic me-1" style="color:#6c5ce7"></i>
+                                @(st.MicUsed ?? "Không rõ mic")
+                            </span>
+                            <span class="text-muted small">
+                                @st.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                            </span>
+                        </div>
+                        <span class="badge rounded-pill"
+                              style="background:#ede9fe;color:#5849c2">
+                            <i class="bi bi-hand-thumbs-up me-1"></i>@st.Upvotes
+                        </span>
+                    </div>
+
+                    <!-- HTML5 Audio Player -->
+                    <audio controls class="w-100" style="height:40px;border-radius:8px">
+                        <source src="@st.AudioUrl" type="audio/mpeg" />
+                        <source src="@st.AudioUrl" />
+                        Trình duyệt của bạn không hỗ trợ audio.
+                    </audio>
+                </div>
+            }
+        </div>
+    }
+</div>

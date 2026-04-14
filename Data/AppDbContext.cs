@@ -7,11 +7,11 @@ public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-    public DbSet<User>      Users      { get; set; }
-    public DbSet<Kit>       Kits       { get; set; }
-    public DbSet<Switch>    Switches   { get; set; }
-    public DbSet<Keycap>    Keycaps    { get; set; }
-    public DbSet<Spec>      Specs      { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<Kit> Kits { get; set; }
+    public DbSet<Switch> Switches { get; set; }
+    public DbSet<Keycap> Keycaps { get; set; }
+    public DbSet<Spec> Specs { get; set; }
     public DbSet<SoundTest> SoundTests { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

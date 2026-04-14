@@ -1,92 +1,226 @@
+@model IEnumerable<BPCVN.Models.Entities.Spec>
 @{
     ViewData["Title"] = "Trang chủ";
 }
 
 <!-- Hero -->
-<div class="rounded-4 p-5 mb-5 text-center"
-     style="background:linear-gradient(135deg,#ede9fe 0%,#f5f4fb 100%);border:1px solid #e0dafc">
+<div class="rounded-4 p-4 p-md-5 mb-5 text-center"
+     style="background:linear-gradient(135deg,#ede9fe 0%,#f5f4fb 100%);
+            border:1px solid #e0dafc">
     <i class="bi bi-keyboard display-3 mb-3 d-block" style="color:#6c5ce7"></i>
-    <h1 class="fw-800 mb-2" style="font-size:2.4rem;color:#1a1a2e;font-weight:800">
+    <h1 class="mb-2" style="font-size:2.2rem;color:#1a1a2e;font-weight:800">
         Cộng đồng Bàn Phím Cơ Việt Nam
     </h1>
     <p class="text-muted fs-5 mb-4">
-        Khám phá kits, switches, keycaps và chia sẻ sound test của bạn.
+        Khám phá, nghe thử và chia sẻ sound test của bạn.
     </p>
     <div class="d-flex justify-content-center gap-3 flex-wrap">
         <a asp-controller="Kit" asp-action="Index"
-           class="btn btn-lg px-4 fw-600"
-           style="background:#6c5ce7;color:#fff;border-radius:12px;font-weight:600">
-            <i class="bi bi-cpu me-2"></i>Xem Kit Catalog
+           class="btn btn-lg px-4 rounded-3"
+           style="background:#6c5ce7;color:#fff;font-weight:600">
+            <i class="bi bi-cpu me-2"></i>Kit Catalog
         </a>
-        <a asp-controller="Switch" asp-action="Index"
-           class="btn btn-lg px-4 fw-600"
-           style="background:#fff;color:#6c5ce7;border:2px solid #6c5ce7;border-radius:12px;font-weight:600">
-            <i class="bi bi-toggles me-2"></i>Xem Switches
+        <a asp-controller="Spec" asp-action="Index"
+           class="btn btn-lg px-4 rounded-3"
+           style="background:#fff;color:#6c5ce7;
+                  border:2px solid #6c5ce7;font-weight:600">
+            <i class="bi bi-search me-2"></i>Khám phá Build
         </a>
     </div>
 </div>
 
 <!-- Stats -->
-<div class="row g-4 mb-5 text-center">
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100 rounded-4 p-4">
-            <i class="bi bi-cpu fs-1 mb-2" style="color:#6c5ce7"></i>
-            <div class="display-6 fw-bold" style="color:#6c5ce7">@ViewBag.KitCount</div>
-            <div class="text-muted fw-500">Kits</div>
+<div class="row g-3 mb-5 text-center">
+    <div class="col-4">
+        <div class="card border-0 shadow-sm rounded-4 py-3">
+            <div class="fs-3 fw-bold" style="color:#6c5ce7">@ViewBag.KitCount</div>
+            <div class="text-muted small">Kits</div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100 rounded-4 p-4">
-            <i class="bi bi-toggles fs-1 mb-2" style="color:#00b894"></i>
-            <div class="display-6 fw-bold" style="color:#00b894">@ViewBag.SwitchCount</div>
-            <div class="text-muted fw-500">Switches</div>
+    <div class="col-4">
+        <div class="card border-0 shadow-sm rounded-4 py-3">
+            <div class="fs-3 fw-bold" style="color:#00b894">@ViewBag.SwitchCount</div>
+            <div class="text-muted small">Switches</div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100 rounded-4 p-4">
-            <i class="bi bi-file-earmark-music fs-1 mb-2" style="color:#fd79a8"></i>
-            <div class="display-6 fw-bold" style="color:#fd79a8">@ViewBag.SpecCount</div>
-            <div class="text-muted fw-500">Builds đã chia sẻ</div>
+    <div class="col-4">
+        <div class="card border-0 shadow-sm rounded-4 py-3">
+            <div class="fs-3 fw-bold" style="color:#fd79a8">@ViewBag.SpecCount</div>
+            <div class="text-muted small">Builds</div>
         </div>
     </div>
 </div>
 
-<!-- Feature cards -->
-<h4 class="fw-bold mb-4" style="color:#1a1a2e">
-    <i class="bi bi-stars me-2" style="color:#6c5ce7"></i>Tính năng nổi bật
-</h4>
-<div class="row g-4">
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-            <div class="rounded-3 d-inline-flex p-3 mb-3" style="background:#ede9fe">
-                <i class="bi bi-search fs-4" style="color:#6c5ce7"></i>
-            </div>
-            <h5 class="fw-bold">Tra cứu linh kiện</h5>
-            <p class="text-muted small mb-0">
-                Tìm kiếm kit, switch, keycap với đầy đủ thông số kỹ thuật chi tiết.
-            </p>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-            <div class="rounded-3 d-inline-flex p-3 mb-3" style="background:#e8f8f1">
-                <i class="bi bi-soundwave fs-4" style="color:#00b894"></i>
-            </div>
-            <h5 class="fw-bold">Sound Test</h5>
-            <p class="text-muted small mb-0">
-                Nghe thử âm thanh thực tế từ cộng đồng trước khi quyết định mua.
-            </p>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-            <div class="rounded-3 d-inline-flex p-3 mb-3" style="background:#fde8f1">
-                <i class="bi bi-share fs-4" style="color:#fd79a8"></i>
-            </div>
-            <h5 class="fw-bold">Chia sẻ Build</h5>
-            <p class="text-muted small mb-0">
-                Upload cấu hình build của bạn kèm sound test để truyền cảm hứng cho cộng đồng.
-            </p>
-        </div>
-    </div>
+<!-- Feed -->
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h4 class="fw-bold mb-0" style="color:#1a1a2e">
+        <i class="bi bi-rss me-2" style="color:#6c5ce7"></i>Mới nhất từ cộng đồng
+    </h4>
+    <a asp-controller="Spec" asp-action="Index"
+       class="text-decoration-none small" style="color:#6c5ce7;font-weight:600">
+        Xem tất cả <i class="bi bi-arrow-right"></i>
+    </a>
 </div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-inbox display-4 d-block mb-3 opacity-25"></i>
+        <p>Chưa có build nào. Hãy là người đầu tiên chia sẻ!</p>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <a asp-controller="Spec" asp-action="Create"
+               class="btn rounded-3 px-4"
+               style="background:#6c5ce7;color:#fff;font-weight:600">
+                Tạo Build ngay
+            </a>
+        }
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var spec in Model)
+        {
+            <div class="col-12 col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 h-100" style="overflow:hidden">
+
+                    <!-- Card Header — màu gradient -->
+                    <div class="px-4 pt-4 pb-3"
+                         style="background:linear-gradient(135deg,#ede9fe,#f5f4fb)">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <!-- Avatar chữ cái đầu -->
+                            <div class="rounded-circle d-flex align-items-center
+                                        justify-content-center fw-bold text-white"
+                                 style="width:36px;height:36px;
+                                        background:#6c5ce7;font-size:.9rem;flex-shrink:0">
+                                @spec.User.Username[0].ToString().ToUpper()
+                            </div>
+                            <div>
+                                <div class="fw-bold small" style="color:#1a1a2e">
+                                    @spec.User.Username
+                                </div>
+                                <div class="text-muted" style="font-size:.75rem">
+                                    @spec.CreatedAt.ToString("dd/MM/yyyy")
+                                </div>
+                            </div>
+                        </div>
+                        <h5 class="fw-bold mb-0" style="color:#1a1a2e">
+                            <a asp-controller="Spec" asp-action="Details"
+                               asp-route-id="@spec.SpecId"
+                               class="text-decoration-none" style="color:inherit">
+                                @spec.BuildName
+                            </a>
+                        </h5>
+                    </div>
+
+                    <!-- Thông số nhanh -->
+                    <div class="px-4 py-3 d-flex flex-wrap gap-2">
+                        <span class="badge rounded-pill px-3 py-2"
+                              style="background:#ede9fe;color:#5849c2;font-size:.8rem">
+                            <i class="bi bi-cpu me-1"></i>@spec.Kit.Name
+                        </span>
+                        <span class="badge rounded-pill px-3 py-2"
+                              style="background:#e8f8f1;color:#00816a;font-size:.8rem">
+                            <i class="bi bi-toggles me-1"></i>@spec.Switch.Name
+                        </span>
+                        @if (!string.IsNullOrEmpty(spec.PlateMaterial))
+                        {
+                            <span class="badge rounded-pill px-3 py-2"
+                                  style="background:#f1f1f1;color:#555;font-size:.8rem">
+                                <i class="bi bi-layers me-1"></i>@spec.PlateMaterial
+                            </span>
+                        }
+                    </div>
+
+                    <!-- Audio player -->
+                    @if (spec.SoundTests.Any())
+                    {
+                        var firstAudio = spec.SoundTests
+                                             .OrderByDescending(st => st.Upvotes)
+                                             .First();
+                        <div class="px-4 pb-3">
+                            <div class="p-3 rounded-3" style="background:#fafafe;border:1px solid #ede9fe">
+                                <div class="d-flex align-items-center
+                                            justify-content-between mb-2">
+                                    <span class="small fw-600" style="font-weight:600;color:#6c5ce7">
+                                        <i class="bi bi-soundwave me-1"></i>Sound Test
+                                    </span>
+                                    <!-- Nút upvote AJAX -->
+                                    <button class="btn btn-sm upvote-btn rounded-pill px-3"
+                                            style="background:#ede9fe;color:#5849c2;
+                                                   border:none;font-size:.8rem;font-weight:600"
+                                            data-test-id="@firstAudio.TestId"
+                                            onclick="upvote(this)">
+                                        <i class="bi bi-heart me-1"></i>
+                                        <span class="upvote-count">@firstAudio.Upvotes</span>
+                                    </button>
+                                </div>
+                                <audio controls class="w-100" style="height:36px">
+                                    <source src="@firstAudio.AudioUrl" />
+                                </audio>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="px-4 pb-3">
+                            <div class="p-3 rounded-3 text-center text-muted small"
+                                 style="background:#fafafe;border:1px dashed #ddd">
+                                <i class="bi bi-mic-mute me-1"></i>Chưa có sound test
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Footer card -->
+                    <div class="px-4 pb-4 mt-auto">
+                        <a asp-controller="Spec" asp-action="Details"
+                           asp-route-id="@spec.SpecId"
+                           class="btn btn-sm w-100 rounded-3"
+                           style="background:#ede9fe;color:#5849c2;font-weight:600">
+                            <i class="bi bi-arrow-right-circle me-1"></i>Xem chi tiết
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+<script>
+async function upvote(btn) {
+    // Lấy testId từ data attribute
+    const testId = btn.dataset.testId;
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(`/SoundTest/Upvote`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Gửi AntiForgery token để tránh CSRF
+                'RequestVerificationToken':
+                    document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? ''
+            },
+            body: JSON.stringify({ testId })
+        });
+
+        if (!res.ok) throw new Error('Server error');
+
+        const data = await res.json();
+
+        if (data.success) {
+            // Cập nhật số like không reload trang
+            btn.querySelector('.upvote-count').textContent = data.newCount;
+            btn.style.background = '#6c5ce7';
+            btn.style.color      = '#fff';
+        }
+    } catch (err) {
+        console.error('Upvote failed:', err);
+        btn.disabled = false;
+    }
+}
+</script>
+}

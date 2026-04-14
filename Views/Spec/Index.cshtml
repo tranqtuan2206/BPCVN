@@ -1,0 +1,181 @@
+@model IEnumerable<BPCVN.Models.Entities.Spec>
+@{
+    ViewData["Title"] = "Khám phá Builds";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-1" style="color:#1a1a2e">
+            <i class="bi bi-search me-2" style="color:#6c5ce7"></i>Khám phá Builds
+        </h2>
+        <p class="text-muted mb-0">Tìm thấy @Model.Count() kết quả</p>
+    </div>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <a asp-action="Create"
+           class="btn rounded-3" style="background:#6c5ce7;color:#fff;font-weight:600">
+            <i class="bi bi-plus-circle me-1"></i>Tạo Build
+        </a>
+    }
+</div>
+
+<!-- Form search & filter -->
+<div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+    <form asp-action="Index" method="get" class="row g-3 align-items-end">
+
+        <div class="col-12 col-md-6">
+            <label class="form-label fw-500 small">Tìm kiếm</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="bi bi-search text-muted"></i>
+                </span>
+                <input type="text"
+                       name="searchString"
+                       value="@ViewBag.SearchString"
+                       class="form-control border-start-0 rounded-end-3"
+                       placeholder="Tên build, kit, switch..." />
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <label class="form-label fw-500 small">Loại Switch</label>
+            <select name="switchType" class="form-select rounded-3">
+                <option value="">-- Tất cả --</option>
+                @foreach (var t in new[] { "Linear", "Tactile", "Clicky" })
+                {
+                    if (ViewBag.SwitchType == t)
+                    {
+                        <option value="@t" selected>@t</option>
+                    }
+                    else
+                    {
+                        <option value="@t">@t</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="col-12 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn rounded-3 flex-grow-1"
+                    style="background:#6c5ce7;color:#fff;font-weight:600">
+                <i class="bi bi-funnel me-1"></i>Lọc
+            </button>
+            @if (!string.IsNullOrEmpty(ViewBag.SearchString as string) ||
+                 !string.IsNullOrEmpty(ViewBag.SwitchType as string))
+            {
+                <a asp-action="Index" class="btn btn-light rounded-3 border">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            }
+        </div>
+
+    </form>
+</div>
+
+<!-- Kết quả -->
+@if (!Model.Any())
+{
+    <div class="text-center py-5 text-muted card border-0 shadow-sm rounded-4">
+        <i class="bi bi-search display-4 d-block mb-3 opacity-25"></i>
+        <p class="mb-0">Không tìm thấy build nào phù hợp.</p>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+        @foreach (var spec in Model)
+        {
+                string swBg, swColor;
+                if (spec.Switch.Type == "Linear")       { swBg = "#ede9fe"; swColor = "#5849c2"; }
+                else if (spec.Switch.Type == "Tactile") { swBg = "#e8f8f1"; swColor = "#00816a"; }
+                else if (spec.Switch.Type == "Clicky")  { swBg = "#fde8f1"; swColor = "#c0397a"; }
+                else                                    { swBg = "#f1f1f1"; swColor = "#666";    }
+
+            <div class="col">
+                <div class="card border-0 shadow-sm rounded-4 h-100" style="overflow:hidden">
+
+                    <!-- Header -->
+                    <div class="px-4 pt-4 pb-3"
+                         style="background:linear-gradient(135deg,#ede9fe,#f5f4fb)">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <div class="rounded-circle d-flex align-items-center
+                                        justify-content-center text-white fw-bold"
+                                 style="width:32px;height:32px;
+                                        background:#6c5ce7;font-size:.85rem;flex-shrink:0">
+                                @spec.User.Username[0].ToString().ToUpper()
+                            </div>
+                            <span class="small fw-500">@spec.User.Username</span>
+                            <span class="text-muted ms-auto"
+                                  style="font-size:.75rem">
+                                @spec.CreatedAt.ToString("dd/MM/yy")
+                            </span>
+                        </div>
+                        <h6 class="fw-bold mb-0" style="color:#1a1a2e">
+                            @spec.BuildName
+                        </h6>
+                    </div>
+
+                    <div class="px-4 py-3 d-flex flex-wrap gap-2">
+                        <span class="badge rounded-pill"
+                              style="background:#ede9fe;color:#5849c2;font-size:.75rem">
+                            <i class="bi bi-cpu me-1"></i>@spec.Kit.Name
+                        </span>
+                        <span class="badge rounded-pill"
+                              style="background:@swBg;color:@swColor;font-size:.75rem">
+                            <i class="bi bi-toggles me-1"></i>@spec.Switch.Name
+                        </span>
+                    </div>
+
+                    @if (spec.SoundTests.Any())
+                    {
+                        var top = spec.SoundTests.OrderByDescending(st => st.Upvotes).First();
+                        <div class="px-4 pb-3">
+                            <audio controls class="w-100" style="height:34px">
+                                <source src="@top.AudioUrl" />
+                            </audio>
+                        </div>
+                    }
+
+                    <div class="px-4 pb-4 mt-auto d-flex gap-2 align-items-center">
+                        <a asp-action="Details" asp-route-id="@spec.SpecId"
+                           class="btn btn-sm rounded-3 flex-grow-1"
+                           style="background:#ede9fe;color:#5849c2;font-weight:600">
+                            <i class="bi bi-arrow-right-circle me-1"></i>Chi tiết
+                        </a>
+                        <span class="text-muted small">
+                            <i class="bi bi-soundwave me-1"></i>
+                            @spec.SoundTests.Count
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+<script>
+async function upvote(btn) {
+    const testId = btn.dataset.testId;
+    btn.disabled = true;
+    try {
+        const res = await fetch('/SoundTest/Upvote', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken':
+                    document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? ''
+            },
+            body: JSON.stringify({ testId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            btn.querySelector('.upvote-count').textContent = data.newCount;
+            btn.style.background = '#6c5ce7';
+            btn.style.color      = '#fff';
+        }
+    } catch { btn.disabled = false; }
+}
+</script>
+}
