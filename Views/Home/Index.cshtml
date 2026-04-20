@@ -6,18 +6,16 @@
 <!-- ── Hero Section ──────────────────────────────────────────────────────── -->
 <div class="hero-section mb-5">
     <i class="bi bi-keyboard d-block mb-3" style="font-size:3rem;color:var(--color-charcoal);opacity:0.7"></i>
-    <h1 class="text-display mb-2">
+    <h1 class="text-display mb-2" data-i18n="home.title">
         Cộng đồng Bàn Phím Cơ Việt Nam
     </h1>
-    <p class="text-body-lg mb-4">Khám phá, nghe thử và chia sẻ trải nghiệm của bạn.</p>
+    <p class="text-body-lg mb-4" data-i18n="home.subtitle">Khám phá, nghe thử và chia sẻ trải nghiệm của bạn.</p>
     <div class="d-flex justify-content-center gap-3 flex-wrap">
-        <!-- CTA chính — Primary Dark -->
         <a asp-controller="Kit" asp-action="Index" class="btn-dark-lovable px-4 py-2">
-            <i class="bi bi-cpu"></i>Kit Catalog
+            <i class="bi bi-cpu"></i><span data-i18n="home.btnKit">Kit Catalog</span>
         </a>
-        <!-- CTA phụ — Ghost -->
         <a asp-controller="Spec" asp-action="Explore" class="btn-ghost px-4 py-2">
-            <i class="bi bi-compass"></i>Khám phá Build
+            <i class="bi bi-compass"></i><span data-i18n="home.btnExplore">Khám phá Build</span>
         </a>
     </div>
 </div>
@@ -47,114 +45,36 @@
 <!-- ── Feed header ───────────────────────────────────────────────────────── -->
 <div class="section-header">
     <h4 class="section-title">
-        <i class="bi bi-rss me-2" style="opacity:0.5"></i>Mới nhất từ cộng đồng
+        <i class="bi bi-rss me-2" style="opacity:0.5"></i><span data-i18n="home.feedTitle">Mới nhất từ cộng đồng</span>
     </h4>
     <a asp-controller="Spec" asp-action="Explore" class="link-muted">
-        Xem tất cả <i class="bi bi-arrow-right"></i>
+        <span data-i18n="home.viewAll">Xem tất cả</span> <i class="bi bi-arrow-right"></i>
     </a>
 </div>
 
 @if (!Model.Any())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 {
-    <!-- Empty state -->
     <div class="empty-state">
         <i class="bi bi-inbox empty-icon"></i>
-        <p>Chưa có build nào. Hãy là người đầu tiên chia sẻ!</p>
+        <p data-i18n="home.emptyState">Chưa có build nào. Hãy là người đầu tiên chia sẻ!</p>
         @if (User.Identity?.IsAuthenticated == true)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         {
             <a asp-controller="Spec" asp-action="Create" class="btn-dark-lovable px-4">
-                Tạo Build ngay
+                <span data-i18n="home.createFirst">Tạo Build ngay</span>
             </a>
         }
     </div>
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 else
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 {
     <div class="row g-4">
         @foreach (var spec in Model)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         {
             <div class="col-12 col-lg-6">
                 <div class="card-lovable h-100 d-flex flex-column">
-
                     <!-- Card header -->
                     <div class="px-4 pt-4 pb-3">
                         <div class="d-flex align-items-center gap-2 mb-2">
-                            <!-- Avatar chữ cái đầu -->
                             <div class="avatar avatar-md">
                                 @spec.User.Username[0].ToString().ToUpper()
                             </div>
@@ -167,7 +87,6 @@ else
                                 </div>
                             </div>
                         </div>
-                        <!-- Build name — link giữ nguyên asp-controller/action/route -->
                         <h5 style="font-weight:600;color:var(--color-charcoal);margin:0">
                             <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId"
                                 class="text-decoration-none" style="color:inherit">
@@ -176,7 +95,7 @@ else
                         </h5>
                     </div>
 
-                    <!-- Badges thông số -->
+                    <!-- Badges -->
                     <div class="px-4 py-2 d-flex flex-wrap gap-2">
                         <span class="badge-warm badge-kit">
                             <i class="bi bi-cpu"></i>@spec.Kit.Name
@@ -185,21 +104,6 @@ else
                             <i class="bi bi-toggles"></i>@spec.Switch.Name
                         </span>
                         @if (!string.IsNullOrEmpty(spec.PlateMaterial))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                         {
                             <span class="badge-warm badge-type">
                                 <i class="bi bi-layers"></i>@spec.PlateMaterial
@@ -209,79 +113,16 @@ else
 
                     <!-- Audio player + Upvote -->
                     @if (spec.SoundTests.Any())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        var topAudio = spec.SoundTests
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        .OrderByDescending(st => st.Upvotes)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        .First();
+                        var topAudio = spec.SoundTests.OrderByDescending(st => st.Upvotes).First();
                         <div class="px-4 pb-3">
                             <div class="audio-container">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
                                     <span class="audio-label">
                                         <i class="bi bi-soundwave me-1"></i>Sound Test
                                     </span>
-                                    <!-- Upvote button — JS xử lý bên dưới -->
-                                    <button class="upvote-btn-lovable upvote-btn" data-test-id="@topAudio.TestId"
-                                        onclick="handleUpvote(this)">
+                                    <button class="upvote-btn-lovable upvote-btn"
+                                        data-test-id="@topAudio.TestId" onclick="handleUpvote(this)">
                                         <i class="bi bi-heart"></i>
                                         <span class="upvote-count">@topAudio.Upvotes</span>
                                     </button>
@@ -292,74 +133,36 @@ else
                             </div>
                         </div>
                     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     else
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     {
                         <div class="px-4 pb-3">
                             <div class="audio-container text-center" style="border-style:dashed">
-                                <span class="text-caption">
+                                <span class="text-caption" data-i18n="home.noSoundTest">
                                     <i class="bi bi-mic-mute me-1"></i>Chưa có sound test
                                 </span>
                             </div>
                         </div>
                     }
 
-                    <!-- Footer — Xem chi tiết -->
+                    <!-- Footer -->
                     <div class="px-4 pb-4 mt-auto">
                         <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId"
                             class="btn-ghost btn-sm-lovable btn-block text-center">
-                            <i class="bi bi-arrow-right-circle"></i>Xem chi tiết
+                            <i class="bi bi-arrow-right-circle"></i><span data-i18n="home.viewDetail">Xem chi tiết</span>
                         </a>
                     </div>
-
                 </div>
             </div>
         }
     </div>
 }
 
-@*
-── JAVASCRIPT UPVOTE ────────────────────────────────────────────────────────
-@section Scripts{} phải nằm CUỐI file, sau toàn bộ HTML.
-_Layout.cshtml đã có @Html.AntiForgeryToken() — JS lấy token từ đó.
-*@
 @section Scripts {
     <script>
         async function handleUpvote(btn) {
             const testId = btn.dataset.testId;
             btn.disabled = true;
-
             const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
-
             try {
                 const res = await fetch('/SoundTest/Upvote', {
                     method: 'POST',
@@ -369,14 +172,10 @@ _Layout.cshtml đã có @Html.AntiForgeryToken() — JS lấy token từ đó.
                     },
                     body: JSON.stringify({ testId: testId })
                 });
-
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
                 const data = await res.json();
-
                 if (data.success) {
                     btn.querySelector('.upvote-count').textContent = data.newCount;
-                    /* Đổi sang trạng thái "đã upvote" — charcoal */
                     btn.classList.add('upvoted');
                 } else {
                     btn.disabled = false;

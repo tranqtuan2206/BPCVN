@@ -5,58 +5,39 @@
 
 <div class="row justify-content-center">
     <div class="col-md-5">
-        <!-- Card đăng nhập — Lovable card style -->
         <div class="card-lovable card-body-lovable mt-3">
-
-            <!-- Header icon + title -->
             <div class="text-center mb-4">
                 <i class="bi bi-keyboard" style="font-size:2.5rem;color:var(--color-charcoal)"></i>
-                <h3 class="text-subheading mt-2">Đăng nhập</h3>
-                <p class="text-caption">Chào mừng trở lại BPCVN</p>
+                <h3 class="text-subheading mt-2" data-i18n="login.title">Đăng nhập</h3>
+                <p class="text-caption" data-i18n="login.subtitle">Chào mừng trở lại BPCVN</p>
             </div>
-
-            <!-- Form — giữ nguyên asp-action, asp-for, asp-validation-* -->
             <form asp-action="Login" method="post">
                 <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
-
-                <div asp-validation-summary="ModelOnly"
-                     class="validation-summary-lovable"></div>
-
-                <!-- Email -->
+                <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
                 <div class="mb-3">
                     <label asp-for="Email" class="form-label-lovable"></label>
-                    <input asp-for="Email" class="form-control"
-                           placeholder="example@email.com" />
+                    <input asp-for="Email" class="form-control" placeholder="example@email.com" />
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
-
-                <!-- Password -->
                 <div class="mb-3">
                     <label asp-for="Password" class="form-label-lovable"></label>
-                    <input asp-for="Password" class="form-control"
-                           placeholder="Mật khẩu của bạn" />
+                    <input asp-for="Password" class="form-control" data-i18n-placeholder="login.passwordPlaceholder" placeholder="Mật khẩu của bạn" />
                     <span asp-validation-for="Password" class="text-danger small"></span>
                 </div>
-
-                <!-- Remember me -->
                 <div class="mb-4 form-check form-check-lovable">
                     <input asp-for="RememberMe" class="form-check-input" />
                     <label asp-for="RememberMe" class="form-check-label text-caption"></label>
                 </div>
-
-                <!-- Submit — Primary Dark button -->
                 <button type="submit" class="btn-dark-lovable btn-block py-2">
-                    <i class="bi bi-box-arrow-in-right"></i>Đăng nhập
+                    <i class="bi bi-box-arrow-in-right"></i><span data-i18n="login.submit">Đăng nhập</span>
                 </button>
             </form>
-
             <hr class="divider">
             <p class="text-center text-caption mb-0">
-                Chưa có tài khoản?
-                <a asp-controller="Auth" asp-action="Register"
-                   class="link-lovable" style="font-weight:600">Đăng ký ngay</a>
+                <span data-i18n="login.noAccount">Chưa có tài khoản?</span>
+                <a asp-controller="Auth" asp-action="Register" class="link-lovable" style="font-weight:600"
+                    data-i18n="login.registerLink">Đăng ký ngay</a>
             </p>
-
         </div>
     </div>
 </div>

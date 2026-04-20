@@ -5,66 +5,44 @@
 
 <div class="row justify-content-center">
     <div class="col-md-5">
-        <!-- Card đăng ký — Lovable card style -->
         <div class="card-lovable card-body-lovable mt-3">
-
-            <!-- Header icon + title -->
             <div class="text-center mb-4">
                 <i class="bi bi-person-plus-fill" style="font-size:2.5rem;color:var(--color-charcoal)"></i>
-                <h3 class="text-subheading mt-2">Tạo tài khoản</h3>
-                <p class="text-caption">Tham gia cộng đồng BPCVN ngay hôm nay</p>
+                <h3 class="text-subheading mt-2" data-i18n="register.title">Tạo tài khoản</h3>
+                <p class="text-caption" data-i18n="register.subtitle">Tham gia cộng đồng BPCVN ngay hôm nay</p>
             </div>
-
-            <!-- Form — giữ nguyên asp-action, asp-for, asp-validation-* -->
             <form asp-action="Register" method="post">
-                <div asp-validation-summary="ModelOnly"
-                     class="validation-summary-lovable" style="display:none"></div>
-
-                <!-- Username -->
+                <div asp-validation-summary="ModelOnly" class="validation-summary-lovable" style="display:none"></div>
                 <div class="mb-3">
                     <label asp-for="Username" class="form-label-lovable"></label>
-                    <input asp-for="Username" class="form-control"
-                           placeholder="Nhập username..." />
+                    <input asp-for="Username" class="form-control" placeholder="Nhập username..." />
                     <span asp-validation-for="Username" class="text-danger small"></span>
                 </div>
-
-                <!-- Email -->
                 <div class="mb-3">
                     <label asp-for="Email" class="form-label-lovable"></label>
-                    <input asp-for="Email" class="form-control"
-                           placeholder="example@email.com" />
+                    <input asp-for="Email" class="form-control" placeholder="example@email.com" />
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
-
-                <!-- Password -->
                 <div class="mb-3">
                     <label asp-for="Password" class="form-label-lovable"></label>
-                    <input asp-for="Password" class="form-control"
-                           placeholder="Tối thiểu 6 ký tự" />
+                    <input asp-for="Password" class="form-control" placeholder="Tối thiểu 6 ký tự" />
                     <span asp-validation-for="Password" class="text-danger small"></span>
                 </div>
-
-                <!-- Confirm Password -->
                 <div class="mb-4">
                     <label asp-for="ConfirmPassword" class="form-label-lovable"></label>
-                    <input asp-for="ConfirmPassword" class="form-control"
-                           placeholder="Nhập lại mật khẩu" />
+                    <input asp-for="ConfirmPassword" class="form-control" placeholder="Nhập lại mật khẩu" />
                     <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
                 </div>
-
-                <!-- Submit — Primary Dark button -->
                 <button type="submit" class="btn-dark-lovable btn-block py-2">
-                    <i class="bi bi-person-check"></i>Đăng ký
+                    <i class="bi bi-person-check"></i><span data-i18n="register.submit">Đăng ký</span>
                 </button>
             </form>
-
             <hr class="divider">
             <p class="text-center text-caption mb-0">
-                Đã có tài khoản?
-                <a asp-controller="Auth" asp-action="Login"
-                   class="link-lovable" style="font-weight:600">Đăng nhập</a>
+                <span data-i18n="register.hasAccount">Đã có tài khoản?</span>
+                <a asp-controller="Auth" asp-action="Login" class="link-lovable" style="font-weight:600"
+                    data-i18n="register.loginLink">Đăng nhập</a>
             </p>
-
         </div>
     </div>
 </div>

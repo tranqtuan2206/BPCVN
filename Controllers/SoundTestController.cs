@@ -14,12 +14,12 @@ public class SoundTestController : Controller
     private readonly IWebHostEnvironment _env;
 
     // Cấu hình upload
-    private static readonly string[] AllowedExtensions = [".mp3", ".wav", ".flac", ".ogg"];
+    private static readonly string[] AllowedExtensions = [".mp4", ".mp3", ".wav", ".flac", ".ogg"];
     private const long MaxFileSizeBytes = 50 * 1024 * 1024; // 50 MB
 
     public SoundTestController(AppDbContext db, IWebHostEnvironment env)
     {
-        _db  = db;
+        _db = db;
         _env = env;
     }
 
@@ -99,9 +99,9 @@ public class SoundTestController : Controller
         // ── Lưu DB ───────────────────────────────────────────────────────────
         var soundTest = new SoundTest
         {
-            SpecId    = specId,
-            MicUsed   = micUsed?.Trim(),
-            AudioUrl  = $"/uploads/soundtests/{fileName}",
+            SpecId = specId,
+            MicUsed = micUsed?.Trim(),
+            AudioUrl = $"/uploads/soundtests/{fileName}",
             CreatedAt = DateTime.UtcNow
         };
 

@@ -3,10 +3,9 @@
 @{
     ViewData["Title"] = Model.BuildName;
     var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-    var isOwner       = currentUserId == Model.UserId.ToString();
+    var isOwner = currentUserId == Model.UserId.ToString();
 }
 
-<!-- ── Header ────────────────────────────────────────────────────────────── -->
 <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
     <div>
         <h2 class="section-title mb-1">@Model.BuildName</h2>
@@ -17,22 +16,18 @@
     </div>
     @if (isOwner)
     {
-        <!-- Upload button — Primary Dark -->
-        <a asp-controller="SoundTest" asp-action="Upload"
-           asp-route-specId="@Model.SpecId"
-           class="btn-dark-lovable">
-            <i class="bi bi-cloud-upload"></i>Upload Sound Test
+        <a asp-controller="SoundTest" asp-action="Upload" asp-route-specId="@Model.SpecId" class="btn-dark-lovable">
+            <i class="bi bi-cloud-upload"></i><span data-i18n="details.uploadBtn">Upload Sound Test</span>
         </a>
     }
 </div>
 
-<!-- ── Thông số build ────────────────────────────────────────────────────── -->
+<!-- Thông số build -->
 <div class="card-lovable card-body-lovable mb-4">
     <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:16px">
-        <i class="bi bi-sliders me-2" style="opacity:0.5"></i>Thông số cấu hình
+        <i class="bi bi-sliders me-2" style="opacity:0.5"></i><span data-i18n="details.specTitle">Thông số cấu hình</span>
     </h5>
     <div class="row g-3">
-        <!-- Kit -->
         <div class="col-md-4">
             <div class="info-block">
                 <div class="text-caption mb-1"><i class="bi bi-cpu me-1"></i>Kit</div>
@@ -40,7 +35,6 @@
                 <div class="text-caption">@Model.Kit.Brand · @Model.Kit.Layout</div>
             </div>
         </div>
-        <!-- Switch -->
         <div class="col-md-4">
             <div class="info-block">
                 <div class="text-caption mb-1"><i class="bi bi-toggles me-1"></i>Switch</div>
@@ -48,12 +42,9 @@
                 <div class="text-caption">@Model.Switch.Brand · @Model.Switch.Type</div>
             </div>
         </div>
-        <!-- Keycap -->
         <div class="col-md-4">
             <div class="info-block">
-                <div class="text-caption mb-1">
-                    <i class="bi bi-grid me-1"></i>Keycap
-                </div>
+                <div class="text-caption mb-1"><i class="bi bi-grid me-1"></i>Keycap</div>
                 @if (Model.Keycap != null)
                 {
                     <div style="font-weight:600;color:var(--color-charcoal)">@Model.Keycap.Name</div>
@@ -61,11 +52,10 @@
                 }
                 else
                 {
-                    <div class="text-caption" style="font-style:italic">Không có</div>
+                    <div class="text-caption" style="font-style:italic" data-i18n="details.none">Không có</div>
                 }
             </div>
         </div>
-
         @if (!string.IsNullOrEmpty(Model.PlateMaterial))
         {
             <div class="col-md-4">
@@ -75,7 +65,6 @@
                 </div>
             </div>
         }
-
         @if (!string.IsNullOrEmpty(Model.FoamSetup))
         {
             <div class="col-md-4">
@@ -85,7 +74,6 @@
                 </div>
             </div>
         }
-
         @if (!string.IsNullOrEmpty(Model.Mods))
         {
             <div class="col-12">
@@ -98,29 +86,23 @@
     </div>
 </div>
 
-<!-- ── Sound Tests ───────────────────────────────────────────────────────── -->
+<!-- Sound Tests -->
 <div class="card-lovable card-body-lovable">
     <div class="d-flex align-items-center justify-content-between mb-3">
         <h5 style="font-weight:600;color:var(--color-charcoal);margin:0">
             <i class="bi bi-soundwave me-2" style="opacity:0.5"></i>Sound Tests
-            <span class="badge-count ms-2">
-                @Model.SoundTests.Count
-            </span>
+            <span class="badge-count ms-2">@Model.SoundTests.Count</span>
         </h5>
     </div>
-
     @if (!Model.SoundTests.Any())
     {
         <div class="empty-state" style="padding:32px 16px">
             <i class="bi bi-mic-mute empty-icon" style="font-size:2.5rem"></i>
-            <p class="mb-0">Chưa có sound test nào.</p>
+            <p class="mb-0" data-i18n="details.noSoundTest">Chưa có sound test nào.</p>
             @if (isOwner)
             {
-                <a asp-controller="SoundTest" asp-action="Upload"
-                   asp-route-specId="@Model.SpecId"
-                   class="btn-dark-lovable btn-sm-lovable mt-3">
-                    Upload ngay
-                </a>
+                <a asp-controller="SoundTest" asp-action="Upload" asp-route-specId="@Model.SpecId"
+                    class="btn-dark-lovable btn-sm-lovable mt-3" data-i18n="details.uploadNow">Upload ngay</a>
             }
         </div>
     }
@@ -136,20 +118,15 @@
                                 <i class="bi bi-mic me-1"></i>
                                 @(st.MicUsed ?? "Không rõ mic")
                             </span>
-                            <span class="text-caption ms-2">
-                                @st.CreatedAt.ToString("dd/MM/yyyy HH:mm")
-                            </span>
+                            <span class="text-caption ms-2">@st.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
                         </div>
                         <span class="badge-count">
                             <i class="bi bi-hand-thumbs-up me-1"></i>@st.Upvotes
                         </span>
                     </div>
-
-                    <!-- HTML5 Audio Player -->
                     <audio controls class="w-100" style="height:40px">
                         <source src="@st.AudioUrl" type="audio/mpeg" />
                         <source src="@st.AudioUrl" />
-                        Trình duyệt của bạn không hỗ trợ audio.
                     </audio>
                 </div>
             }

@@ -3,13 +3,14 @@
     ViewData["Title"] = "Switch Catalog";
 }
 
-<!-- ── Page header ───────────────────────────────────────────────────────── -->
 <div class="section-header">
     <div>
         <h2 class="section-title">
             <i class="bi bi-toggles me-2" style="opacity:0.5"></i>Switch Catalog
         </h2>
-        <p class="section-subtitle">@Model.Count() switches trong cơ sở dữ liệu</p>
+        <p class="section-subtitle">
+            @Model.Count() <span data-i18n="switch.countSuffix">switches trong cơ sở dữ liệu</span>
+        </p>
     </div>
     <span class="badge-count" style="font-size:0.9375rem;padding:6px 16px">
         @Model.Count() Switches
@@ -18,10 +19,9 @@
 
 @if (!Model.Any())
 {
-    <!-- Empty state -->
     <div class="empty-state">
         <i class="bi bi-inbox empty-icon"></i>
-        <p class="text-body-lg">Chưa có switch nào.</p>
+        <p class="text-body-lg" data-i18n="switch.empty">Chưa có switch nào.</p>
     </div>
 }
 else
@@ -29,67 +29,41 @@ else
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
         @foreach (var sw in Model)
         {
-                /* Icon theo loại switch — giữ nguyên logic */
                 string iconClass;
-                if (sw.Type == "Linear")
-                {
-                    iconClass = "bi-arrow-down";
-                }
-                else if (sw.Type == "Tactile")
-                {
-                    iconClass = "bi-arrow-down-up";
-                }
-                else if (sw.Type == "Clicky")
-                {
-                    iconClass = "bi-volume-up";
-                }
-                else
-                {
-                    iconClass = "bi-question-circle";
-                }
+                if (sw.Type == "Linear") { iconClass = "bi-arrow-down"; }
+                else if (sw.Type == "Tactile") { iconClass = "bi-arrow-down-up"; }
+                else if (sw.Type == "Clicky") { iconClass = "bi-volume-up"; }
+                else { iconClass = "bi-question-circle"; }
 
             <div class="col">
                 <div class="card-lovable h-100 d-flex flex-column">
-
-                    <!-- Icon placeholder -->
                     <div class="img-placeholder" style="height:140px">
                         <i class="bi @iconClass" style="font-size:3.5rem"></i>
                     </div>
-
                     <div class="p-3 flex-grow-1">
-                        <!-- Type badge -->
                         @if (!string.IsNullOrEmpty(sw.Type))
                         {
-                            <span class="badge-warm mb-2" style="font-size:.75rem">
-                                @sw.Type
-                            </span>
+                            <span class="badge-warm mb-2" style="font-size:.75rem">@sw.Type</span>
                         }
-
-                        <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:4px">
-                            @sw.Name
-                        </h5>
+                        <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:4px">@sw.Name</h5>
                         <p class="text-caption mb-3">
                             <i class="bi bi-building me-1"></i>@(sw.Brand ?? "Unknown Brand")
                         </p>
-
                         @if (!string.IsNullOrEmpty(sw.ActuationForce))
                         {
                             <ul class="list-unstyled text-caption mb-0">
                                 <li>
                                     <i class="bi bi-speedometer2 me-2" style="color:var(--color-charcoal)"></i>
-                                    Actuation Force: <strong>@sw.ActuationForce</strong>
+                                    <span data-i18n="switch.actuationForce">Actuation Force</span>: <strong>@sw.ActuationForce</strong>
                                 </li>
                             </ul>
                         }
                     </div>
-
-                    <!-- Footer button — Ghost style -->
                     <div class="px-3 pb-3 pt-1">
                         <a href="#" class="btn-ghost btn-sm-lovable btn-block text-center">
-                            <i class="bi bi-arrow-right-circle"></i>Xem chi tiết
+                            <i class="bi bi-arrow-right-circle"></i><span data-i18n="switch.viewDetail">Xem chi tiết</span>
                         </a>
                     </div>
-
                 </div>
             </div>
         }

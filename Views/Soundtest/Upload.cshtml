@@ -1,68 +1,49 @@
 @{
     ViewData["Title"] = "Upload Sound Test";
+
     var spec = ViewBag.Spec as BPCVN.Models.Entities.Spec;
+
     if (spec == null) { return; }
 }
 
 <div class="row justify-content-center">
     <div class="col-md-6">
-        <!-- Back link -->
         <div class="mb-4">
-            <a asp-controller="Spec" asp-action="Details"
-               asp-route-id="@spec.SpecId"
-               class="link-muted">
-                <i class="bi bi-arrow-left me-1"></i>Quay về @spec.BuildName
+            <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId" class="link-muted">
+                <i class="bi bi-arrow-left me-1"></i><span data-i18n="upload.backTo">Quay về</span> @spec.BuildName
             </a>
         </div>
-
-        <!-- Upload card — Lovable style -->
         <div class="card-lovable card-body-lovable">
             <div class="text-center mb-4">
                 <i class="bi bi-cloud-upload" style="font-size:2.5rem;color:var(--color-charcoal)"></i>
-                <h4 class="text-subheading mt-2" style="font-size:1.3rem">Upload Sound Test</h4>
+                <h4 class="text-subheading mt-2" style="font-size:1.3rem" data-i18n="upload.title">Upload Sound Test</h4>
                 <p class="text-caption mb-0">
                     Build: <strong>@spec.BuildName</strong>
                 </p>
             </div>
-
-            <!-- Form — giữ nguyên asp-action, enctype, hidden inputs -->
             <form asp-action="Upload" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="specId" value="@spec.SpecId" />
-
-                <div asp-validation-summary="ModelOnly"
-                     class="validation-summary-lovable"></div>
-
-                <!-- File upload -->
+                <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
                 <div class="mb-3">
                     <label class="form-label-lovable">
-                        File âm thanh <span style="color:#b91c1c">*</span>
+                        <span data-i18n="upload.fileLabel">File âm thanh</span> <span style="color:#b91c1c">*</span>
                     </label>
-                    <input type="file" name="audioFile" accept=".mp3,.wav,.flac,.ogg"
-                           class="form-control" required />
-                    <div class="form-hint">
-                        Chấp nhận: .mp3, .wav, .flac, .ogg — Tối đa 50MB
+                    <input type="file" name="audioFile" accept=".mp4,.mp3,.wav,.flac,.ogg" class="form-control" required />
+                    <div class="form-hint" data-i18n="upload.fileHint">
+                        Chấp nhận: .mp4, .mp3, .wav, .flac, .ogg — Tối đa 50MB
                     </div>
                 </div>
-
-                <!-- Mic used -->
                 <div class="mb-4">
-                    <label class="form-label-lovable">Microphone sử dụng</label>
+                    <label class="form-label-lovable" data-i18n="upload.micLabel">Microphone sử dụng</label>
                     <input type="text" name="micUsed" class="form-control"
-                           placeholder="VD: Blue Yeti, Rode NT-USB, điện thoại..." />
+                        placeholder="VD: Blue Yeti, Rode NT-USB, điện thoại..." />
                 </div>
-
-                <!-- Buttons -->
                 <div class="d-flex gap-2">
-                    <!-- Primary Dark -->
                     <button type="submit" class="btn-dark-lovable px-4 py-2">
-                        <i class="bi bi-cloud-upload"></i>Upload
+                        <i class="bi bi-cloud-upload"></i><span data-i18n="upload.submit">Upload</span>
                     </button>
-                    <!-- Ghost cancel -->
-                    <a asp-controller="Spec" asp-action="Details"
-                       asp-route-id="@spec.SpecId"
-                       class="btn-ghost px-4 py-2">
-                        Huỷ
-                    </a>
+                    <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId"
+                        class="btn-ghost px-4 py-2" data-i18n="common.cancel">Huỷ</a>
                 </div>
             </form>
         </div>

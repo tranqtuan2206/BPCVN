@@ -47,7 +47,7 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-2 gap-1">
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Home" asp-action="Index">
-                            <i class="bi bi-house-door me-1"></i>Trang chủ
+                            <i class="bi bi-house-door me-1"></i><span data-i18n="nav.home">Trang chủ</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -62,7 +62,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Spec" asp-action="Explore">
-                            <i class="bi bi-search me-1"></i>Khám phá
+                            <i class="bi bi-search me-1"></i><span data-i18n="nav.explore">Khám phá</span>
                         </a>
                     </li>
                     @if (User.Identity?.IsAuthenticated == true)
@@ -70,20 +70,41 @@
                     {
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="User" asp-action="Profile">
-                                <i class="bi bi-person-circle me-1"></i>Của tôi
+                                <i class="bi bi-person-circle me-1"></i><span data-i18n="nav.mypage">Của tôi</span>
                             </a>
                         </li>
                     }
                 </ul>
 
                 <!-- Menu phải — thay đổi theo trạng thái đăng nhập -->
-                @if (User.Identity?.IsAuthenticated == true)
+                <div class="d-flex align-items-center gap-2">
 
-                {
-                    <div class="d-flex align-items-center gap-2">
+                    <!-- ── Language Switcher — nằm trong navbar, góc phải ────── -->
+                    <div class="lang-switcher" id="langSwitcher">
+                        <button class="lang-toggle" onclick="toggleLangMenu()" title="Chuyển ngôn ngữ">
+                            <span class="lang-flag" id="langFlag">VN</span>
+                            <span class="lang-label" id="langLabel">VN</span>
+                            <i class="bi bi-chevron-down" style="font-size:0.6rem;opacity:0.5"></i>
+                        </button>
+                        <div class="lang-dropdown" id="langDropdown">
+                            <button class="lang-option" data-lang="en" onclick="setLang('en')">
+                                <span class="lang-flag">GB</span>
+                                <span>English</span>
+                                <i class="bi bi-check2 lang-check" id="checkEn"></i>
+                            </button>
+                            <button class="lang-option" data-lang="vi" onclick="setLang('vi')">
+                                <span class="lang-flag">VN</span>
+                                <span>Tiếng Việt</span>
+                                <i class="bi bi-check2 lang-check" id="checkVi"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
                         <!-- Nút tạo build — Primary Dark button -->
                         <a class="btn-dark-lovable" asp-controller="Spec" asp-action="Create">
-                            <i class="bi bi-plus-circle"></i>Tạo Build
+                            <i class="bi bi-plus-circle"></i><span data-i18n="nav.createBuild">Tạo Build</span>
                         </a>
 
                         <!-- Nút logout hiển thị tên user — Ghost button -->
@@ -94,23 +115,20 @@
                                 <i class="bi bi-box-arrow-right ms-1" style="opacity:0.5"></i>
                             </button>
                         </form>
-                    </div>
-                }
-
-                else
-
-                {
-                    <div class="d-flex gap-2">
+                    }
+                    else
+                    {
                         <!-- Đăng nhập — Ghost button -->
                         <a class="btn-ghost" asp-controller="Auth" asp-action="Login">
-                            <i class="bi bi-box-arrow-in-right"></i>Đăng nhập
+                            <i class="bi bi-box-arrow-in-right"></i><span data-i18n="nav.login">Đăng nhập</span>
                         </a>
                         <!-- Đăng ký — Primary Dark button -->
                         <a class="btn-dark-lovable" asp-controller="Auth" asp-action="Register">
-                            <i class="bi bi-person-plus"></i>Đăng ký
+                            <i class="bi bi-person-plus"></i><span data-i18n="nav.register">Đăng ký</span>
                         </a>
-                    </div>
-                }
+                    }
+
+                </div>
 
             </div>
         </div>
@@ -156,10 +174,10 @@
         @RenderBody()
     </main>
 
+
     <!-- ── Dark/Light Mode Toggle — góc dưới bên phải ────────────────────── -->
     <button id="themeToggle" class="theme-toggle" title="Chuyển chế độ sáng/tối"
             onclick="toggleTheme()">
-        <!-- Icon mặt trời (light) / mặt trăng (dark) -->
         <i class="bi bi-moon-fill theme-icon-dark"></i>
         <i class="bi bi-sun-fill theme-icon-light"></i>
     </button>
@@ -169,7 +187,7 @@
         <div class="container">
             <i class="bi bi-keyboard me-1"></i>
             <strong>BPCVN</strong> &mdash;
-            Cộng đồng Bàn Phím Cơ Việt Nam &copy; @DateTime.Now.Year
+            <span data-i18n="footer.text">Cộng đồng Bàn Phím Cơ Việt Nam</span> &copy; @DateTime.Now.Year
         </div>
     </footer>
 
@@ -205,6 +223,251 @@
             const isDark = html.classList.contains('dark');
             localStorage.setItem('bpcvn-theme', isDark ? 'dark' : 'light');
         }
+    </script>
+
+    <!-- ── Language Switcher Script ────────────────────────────────────────── -->
+    <script>
+        /*
+         * Bảng dịch i18n — key: data-i18n attribute, value: text theo ngôn ngữ
+         * Thêm key mới tại đây khi cần dịch thêm phần tử
+         */
+        const translations = {
+            en: {
+                /* ── Navbar ─── */
+                'nav.home': 'Home',
+                'nav.explore': 'Explore',
+                'nav.mypage': 'My Page',
+                'nav.createBuild': 'Create Build',
+                'nav.login': 'Login',
+                'nav.register': 'Register',
+                'footer.text': 'Vietnamese Mechanical Keyboard Community',
+
+                /* ── Home ─── */
+                'home.title': 'Vietnamese Mechanical Keyboard Community',
+                'home.subtitle': 'Explore, listen and share your experience.',
+                'home.btnKit': 'Kit Catalog',
+                'home.btnExplore': 'Explore Builds',
+                'home.feedTitle': 'Latest from the community',
+                'home.viewAll': 'View all',
+                'home.emptyState': 'No builds yet. Be the first to share!',
+                'home.createFirst': 'Create Build now',
+                'home.noSoundTest': 'No sound test yet',
+                'home.viewDetail': 'View details',
+
+                /* ── Login ─── */
+                'login.title': 'Login',
+                'login.subtitle': 'Welcome back to BPCVN',
+                'login.submit': 'Login',
+                'login.noAccount': "Don't have an account?",
+                'login.registerLink': 'Register now',
+
+                /* ── Register ─── */
+                'register.title': 'Create Account',
+                'register.subtitle': 'Join the BPCVN community today',
+                'register.submit': 'Register',
+                'register.hasAccount': 'Already have an account?',
+                'register.loginLink': 'Login',
+
+                /* ── Kit ─── */
+                'kit.countSuffix': 'kits in database',
+                'kit.empty': 'No kits found. Run the seeder!',
+                'kit.viewDetail': 'View details',
+
+                /* ── Switch ─── */
+                'switch.countSuffix': 'switches in database',
+                'switch.empty': 'No switches found.',
+                'switch.viewDetail': 'View details',
+                'switch.actuationForce': 'Actuation Force',
+
+                /* ── Create Build ─── */
+                'create.title': 'Create New Build',
+                'create.subtitle': 'Share your keyboard config with the community',
+                'create.save': 'Save Build',
+
+                /* ── Details ─── */
+                'details.specTitle': 'Build Specifications',
+                'details.uploadBtn': 'Upload Sound Test',
+                'details.none': 'None',
+                'details.noSoundTest': 'No sound test yet.',
+                'details.uploadNow': 'Upload now',
+
+                /* ── Explore ─── */
+                'explore.title': 'Explore Builds',
+                'explore.found': 'Found',
+                'explore.results': 'results',
+                'explore.searchLabel': 'Search',
+                'explore.switchType': 'Switch Type',
+                'explore.allTypes': '-- All types --',
+                'explore.filter': 'Filter',
+                'explore.noResult': 'No matching builds found.',
+                'explore.tryAgain': 'Try different keywords or remove filters.',
+
+                /* ── Upload ─── */
+                'upload.backTo': 'Back to',
+                'upload.title': 'Upload Sound Test',
+                'upload.fileLabel': 'Audio file',
+                'upload.fileHint': 'Accepted: .mp4, .mp3, .wav, .flac, .ogg — Max 50MB',
+                'upload.micLabel': 'Microphone used',
+                'upload.submit': 'Upload',
+
+                /* ── Profile ─── */
+                'profile.joined': 'Joined',
+                'profile.upvotesReceived': 'Upvotes received',
+                'profile.newBuild': 'New Build',
+                'profile.myBuilds': 'My Builds',
+                'profile.noBuilds': "You don't have any builds yet.",
+                'profile.createFirst': 'Create your first build',
+                'profile.view': 'View',
+                'profile.delete': 'Delete',
+
+                /* ── Common ─── */
+                'common.cancel': 'Cancel',
+            },
+            vi: {
+                /* ── Navbar ─── */
+                'nav.home': 'Trang chủ',
+                'nav.explore': 'Khám phá',
+                'nav.mypage': 'Của tôi',
+                'nav.createBuild': 'Tạo Build',
+                'nav.login': 'Đăng nhập',
+                'nav.register': 'Đăng ký',
+                'footer.text': 'Cộng đồng Bàn Phím Cơ Việt Nam',
+
+                /* ── Home ─── */
+                'home.title': 'Cộng đồng Bàn Phím Cơ Việt Nam',
+                'home.subtitle': 'Khám phá, nghe thử và chia sẻ trải nghiệm của bạn.',
+                'home.btnKit': 'Kit Catalog',
+                'home.btnExplore': 'Khám phá Build',
+                'home.feedTitle': 'Mới nhất từ cộng đồng',
+                'home.viewAll': 'Xem tất cả',
+                'home.emptyState': 'Chưa có build nào. Hãy là người đầu tiên chia sẻ!',
+                'home.createFirst': 'Tạo Build ngay',
+                'home.noSoundTest': 'Chưa có sound test',
+                'home.viewDetail': 'Xem chi tiết',
+
+                /* ── Login ─── */
+                'login.title': 'Đăng nhập',
+                'login.subtitle': 'Chào mừng trở lại BPCVN',
+                'login.submit': 'Đăng nhập',
+                'login.noAccount': 'Chưa có tài khoản?',
+                'login.registerLink': 'Đăng ký ngay',
+
+                /* ── Register ─── */
+                'register.title': 'Tạo tài khoản',
+                'register.subtitle': 'Tham gia cộng đồng BPCVN ngay hôm nay',
+                'register.submit': 'Đăng ký',
+                'register.hasAccount': 'Đã có tài khoản?',
+                'register.loginLink': 'Đăng nhập',
+
+                /* ── Kit ─── */
+                'kit.countSuffix': 'kits trong cơ sở dữ liệu',
+                'kit.empty': 'Chưa có kit nào. Hãy chạy seeder!',
+                'kit.viewDetail': 'Xem chi tiết',
+
+                /* ── Switch ─── */
+                'switch.countSuffix': 'switches trong cơ sở dữ liệu',
+                'switch.empty': 'Chưa có switch nào.',
+                'switch.viewDetail': 'Xem chi tiết',
+                'switch.actuationForce': 'Actuation Force',
+
+                /* ── Create Build ─── */
+                'create.title': 'Tạo Build mới',
+                'create.subtitle': 'Chia sẻ cấu hình bàn phím của bạn với cộng đồng',
+                'create.save': 'Lưu Build',
+
+                /* ── Details ─── */
+                'details.specTitle': 'Thông số cấu hình',
+                'details.uploadBtn': 'Upload Sound Test',
+                'details.none': 'Không có',
+                'details.noSoundTest': 'Chưa có sound test nào.',
+                'details.uploadNow': 'Upload ngay',
+
+                /* ── Explore ─── */
+                'explore.title': 'Khám phá Builds',
+                'explore.found': 'Tìm thấy',
+                'explore.results': 'kết quả',
+                'explore.searchLabel': 'Tìm kiếm',
+                'explore.switchType': 'Loại Switch',
+                'explore.allTypes': '-- Tất cả loại --',
+                'explore.filter': 'Lọc',
+                'explore.noResult': 'Không tìm thấy build nào phù hợp.',
+                'explore.tryAgain': 'Thử tìm với từ khóa khác hoặc bỏ bộ lọc.',
+
+                /* ── Upload ─── */
+                'upload.backTo': 'Quay về',
+                'upload.title': 'Upload Sound Test',
+                'upload.fileLabel': 'File âm thanh',
+                'upload.fileHint': 'Chấp nhận: .mp4, .mp3, .wav, .flac, .ogg — Tối đa 50MB',
+                'upload.micLabel': 'Microphone sử dụng',
+                'upload.submit': 'Upload',
+
+                /* ── Profile ─── */
+                'profile.joined': 'Tham gia',
+                'profile.upvotesReceived': 'Upvotes nhận được',
+                'profile.newBuild': 'Build mới',
+                'profile.myBuilds': 'Builds của tôi',
+                'profile.noBuilds': 'Bạn chưa có build nào.',
+                'profile.createFirst': 'Tạo build đầu tiên',
+                'profile.view': 'Xem',
+                'profile.delete': 'Xóa',
+
+                /* ── Common ─── */
+                'common.cancel': 'Huỷ',
+            }
+        };
+
+        /* Áp dụng ngôn ngữ: quét tất cả [data-i18n] và thay text */
+        function applyLang(lang) {
+            const dict = translations[lang];
+            if (!dict) return;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) el.textContent = dict[key];
+            });
+
+            // Cập nhật flag + label trên nút chính
+            document.getElementById('langFlag').textContent = lang === 'vi' ? 'VN' : 'EN';
+            document.getElementById('langLabel').textContent = lang === 'vi' ? 'VN' : 'EN';
+
+            // Cập nhật dấu check trong dropdown
+            document.getElementById('checkVi').style.display = lang === 'vi' ? 'inline' : 'none';
+            document.getElementById('checkEn').style.display = lang === 'en' ? 'inline' : 'none';
+
+            // Cập nhật lang attribute trên html
+            document.documentElement.setAttribute('lang', lang);
+        }
+
+        /* Đặt ngôn ngữ + lưu localStorage */
+        function setLang(lang) {
+            localStorage.setItem('bpcvn-lang', lang);
+            applyLang(lang);
+            closeLangMenu();
+        }
+
+        /* Toggle dropdown menu */
+        function toggleLangMenu() {
+            const dd = document.getElementById('langDropdown');
+            dd.classList.toggle('show');
+        }
+
+        /* Đóng dropdown */
+        function closeLangMenu() {
+            document.getElementById('langDropdown').classList.remove('show');
+        }
+
+        /* Đóng dropdown khi click ra ngoài */
+        document.addEventListener('click', function (e) {
+            if (!document.getElementById('langSwitcher').contains(e.target)) {
+                closeLangMenu();
+            }
+        });
+
+        /* Khôi phục ngôn ngữ khi load trang */
+        (function () {
+            const saved = localStorage.getItem('bpcvn-lang') || 'vi';
+            applyLang(saved);
+        })();
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

@@ -3,13 +3,14 @@
     ViewData["Title"] = "Kit Catalog";
 }
 
-<!-- ── Page header ───────────────────────────────────────────────────────── -->
 <div class="section-header">
     <div>
         <h2 class="section-title">
             <i class="bi bi-cpu me-2" style="opacity:0.5"></i>Kit Catalog
         </h2>
-        <p class="section-subtitle">@Model.Count() kits trong cơ sở dữ liệu</p>
+        <p class="section-subtitle">
+            @Model.Count() <span data-i18n="kit.countSuffix">kits trong cơ sở dữ liệu</span>
+        </p>
     </div>
     <span class="badge-count" style="font-size:0.9375rem;padding:6px 16px">
         @Model.Count() Kits
@@ -18,10 +19,9 @@
 
 @if (!Model.Any())
 {
-    <!-- Empty state -->
     <div class="empty-state">
         <i class="bi bi-inbox empty-icon"></i>
-        <p class="text-body-lg">Chưa có kit nào. Hãy chạy seeder!</p>
+        <p class="text-body-lg" data-i18n="kit.empty">Chưa có kit nào. Hãy chạy seeder!</p>
     </div>
 }
 else
@@ -31,8 +31,6 @@ else
         {
             <div class="col">
                 <div class="card-lovable h-100 d-flex flex-column">
-
-                    <!-- Ảnh hoặc placeholder -->
                     @if (!string.IsNullOrEmpty(kit.ImageUrl))
                     {
                         <img src="@kit.ImageUrl" class="img-lovable"
@@ -41,29 +39,19 @@ else
                     }
                     else
                     {
-                        <div class="img-placeholder"
-                             style="height:190px">
+                        <div class="img-placeholder" style="height:190px">
                             <i class="bi bi-keyboard" style="font-size:4rem"></i>
                         </div>
                     }
-
                     <div class="p-3 flex-grow-1">
-                        <!-- Layout badge -->
                         @if (!string.IsNullOrEmpty(kit.Layout))
                         {
-                            <span class="badge-warm badge-kit mb-2" style="font-size:.75rem">
-                                @kit.Layout
-                            </span>
+                            <span class="badge-warm badge-kit mb-2" style="font-size:.75rem">@kit.Layout</span>
                         }
-
-                        <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:4px">
-                            @kit.Name
-                        </h5>
+                        <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:4px">@kit.Name</h5>
                         <p class="text-caption mb-3">
                             <i class="bi bi-building me-1"></i>@(kit.Brand ?? "Unknown Brand")
                         </p>
-
-                        <!-- Quick specs -->
                         <ul class="list-unstyled text-caption mb-0">
                             @if (!string.IsNullOrEmpty(kit.MountType))
                             {
@@ -79,14 +67,11 @@ else
                             }
                         </ul>
                     </div>
-
-                    <!-- Footer button — Ghost style -->
                     <div class="px-3 pb-3 pt-1">
                         <a href="#" class="btn-ghost btn-sm-lovable btn-block text-center">
-                            <i class="bi bi-arrow-right-circle"></i>Xem chi tiết
+                            <i class="bi bi-arrow-right-circle"></i><span data-i18n="kit.viewDetail">Xem chi tiết</span>
                         </a>
                     </div>
-
                 </div>
             </div>
         }

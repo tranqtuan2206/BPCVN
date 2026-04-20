@@ -1212,3 +1212,136 @@ html.dark .validation-summary-lovable {
 html.dark .shadow-sm {
     box-shadow: none !important;
 }
+
+
+/* ── 26. Language Switcher ────────────────────────────────────────────────── */
+
+/* Container — nằm trong navbar, position relative để dropdown mở từ đây */
+.lang-switcher {
+    position: relative;
+    z-index: 100;
+}
+
+/* Text label bên cạnh flag (VN / EN) */
+.lang-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-charcoal);
+}
+
+/* Nút toggle chính — hiển thị flag ngôn ngữ hiện tại */
+.lang-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--color-cream);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
+    cursor: pointer;
+    font-family: var(--font-family);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-charcoal);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.15s ease;
+}
+
+.lang-toggle:hover {
+    border-color: var(--border-interactive);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Flag text label (VN, GB, EN) */
+.lang-flag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 20px;
+    border-radius: 4px;
+    background-color: #fb7aec;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Dropdown menu — mở xuống dưới */
+.lang-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 180px;
+    background-color: var(--color-cream);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    padding: 6px;
+    display: none;                   /* ẩn mặc định */
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Hiển thị dropdown khi có class "show" */
+.lang-dropdown.show {
+    display: flex;
+}
+
+/* Mỗi option trong dropdown */
+.lang-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-comfortable);
+    cursor: pointer;
+    font-family: var(--font-family);
+    font-size: 0.9375rem;
+    font-weight: 400;
+    color: var(--color-charcoal);
+    transition: background-color 0.12s ease;
+    text-align: left;
+}
+
+.lang-option:hover {
+    background-color: var(--color-charcoal-04);
+}
+
+/* Dấu check — hiển thị cho ngôn ngữ đang chọn */
+.lang-check {
+    margin-left: auto;
+    color: #fb7aec;
+    font-size: 1rem;
+    display: none;                   /* JS sẽ toggle */
+}
+
+
+/* ── Language Switcher Dark Mode ─────────────────────────────────────────── */
+html.dark .lang-toggle {
+    background-color: #2e2e33;
+    border-color: #3e3e44;
+    color: #f0ede6;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+html.dark .lang-dropdown {
+    background-color: #1e1e22;
+    border-color: #2e2e33;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+html.dark .lang-option {
+    color: #f0ede6;
+}
+
+html.dark .lang-option:hover {
+    background-color: rgba(240, 237, 230, 0.06);
+}
+
+html.dark .lang-label {
+    color: #f0ede6;
+}

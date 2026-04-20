@@ -7,14 +7,14 @@
 <div class="section-header mb-4">
     <div>
         <h2 class="section-title">
-            <i class="bi bi-search me-2" style="opacity:0.5"></i>Khám phá Builds
+            <i class="bi bi-search me-2" style="opacity:0.5"></i><span data-i18n="explore.title">Khám phá Builds</span>
         </h2>
-        <p class="section-subtitle">Tìm thấy @Model.Count() kết quả</p>
+        <p class="section-subtitle"><span data-i18n="explore.found">Tìm thấy</span> @Model.Count() <span data-i18n="explore.results">kết quả</span></p>
     </div>
     @if (User.Identity?.IsAuthenticated == true)
     {
         <a asp-action="Create" class="btn-dark-lovable">
-            <i class="bi bi-plus-circle"></i>Tạo Build
+            <i class="bi bi-plus-circle"></i><span data-i18n="nav.createBuild">Tạo Build</span>
         </a>
     }
 </div>

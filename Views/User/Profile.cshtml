@@ -2,66 +2,50 @@
 @{
     ViewData["Title"] = "Trang cá nhân";
     int totalSoundTests = Model.Specs.Sum(s => s.SoundTests.Count);
-    int totalUpvotes    = Model.Specs
-                               .SelectMany(s => s.SoundTests)
-                               .Sum(st => st.Upvotes);
+    int totalUpvotes = Model.Specs.SelectMany(s => s.SoundTests).Sum(st => st.Upvotes);
 }
 
-<!-- ── Header profile ────────────────────────────────────────────────────── -->
+<!-- Header profile -->
 <div class="card-featured card-body-lovable mb-4" style="position:relative;overflow:hidden">
-    <!-- Subtle warm gradient wash -->
     <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 20% 30%,
          rgba(244,196,180,0.12) 0%,rgba(196,181,253,0.08) 40%,transparent 70%);
          pointer-events:none;z-index:0"></div>
-
     <div class="d-flex align-items-center gap-4 flex-wrap" style="position:relative;z-index:1">
-        <!-- Avatar -->
-        <div class="avatar avatar-lg">
-            @Model.Username[0].ToString().ToUpper()
-        </div>
+        <div class="avatar avatar-lg">@Model.Username[0].ToString().ToUpper()</div>
         <div class="flex-grow-1">
             <h3 class="text-subheading mb-1">@Model.Username</h3>
             <p class="text-caption mb-2">
-                <i class="bi bi-envelope me-1"></i>@Model.Email
-                &nbsp;·&nbsp;
+                <i class="bi bi-envelope me-1"></i>@Model.Email &nbsp;·&nbsp;
                 <i class="bi bi-calendar3 me-1"></i>
-                Tham gia @Model.CreatedAt.ToString("MM/yyyy")
+                <span data-i18n="profile.joined">Tham gia</span> @Model.CreatedAt.ToString("MM/yyyy")
             </p>
-            <!-- Stats nhanh -->
             <div class="d-flex gap-3 flex-wrap">
+                <span class="badge-warm"><i class="bi bi-collection"></i>@Model.Specs.Count Builds</span>
+                <span class="badge-warm"><i class="bi bi-soundwave"></i>@totalSoundTests Sound Tests</span>
                 <span class="badge-warm">
-                    <i class="bi bi-collection"></i>@Model.Specs.Count Builds
-                </span>
-                <span class="badge-warm">
-                    <i class="bi bi-soundwave"></i>@totalSoundTests Sound Tests
-                </span>
-                <span class="badge-warm">
-                    <i class="bi bi-heart"></i>@totalUpvotes Upvotes nhận được
+                    <i class="bi bi-heart"></i>@totalUpvotes <span data-i18n="profile.upvotesReceived">Upvotes nhận được</span>
                 </span>
             </div>
         </div>
-        <!-- CTA — Primary Dark -->
-        <a asp-controller="Spec" asp-action="Create"
-           class="btn-dark-lovable align-self-start">
-            <i class="bi bi-plus-circle"></i>Build mới
+        <a asp-controller="Spec" asp-action="Create" class="btn-dark-lovable align-self-start">
+            <i class="bi bi-plus-circle"></i><span data-i18n="profile.newBuild">Build mới</span>
         </a>
     </div>
 </div>
 
-<!-- ── Danh sách builds ──────────────────────────────────────────────────── -->
+<!-- Danh sách builds -->
 <h5 class="section-title mb-3" style="font-size:1.25rem">
-    <i class="bi bi-collection me-2" style="opacity:0.5"></i>Builds của tôi
+    <i class="bi bi-collection me-2" style="opacity:0.5"></i><span data-i18n="profile.myBuilds">Builds của tôi</span>
 </h5>
 
 @if (!Model.Specs.Any())
 {
     <div class="card-lovable empty-state">
         <i class="bi bi-inbox empty-icon"></i>
-        <p class="mb-3">Bạn chưa có build nào.</p>
+        <p class="mb-3" data-i18n="profile.noBuilds">Bạn chưa có build nào.</p>
         <a asp-controller="Spec" asp-action="Create"
-           class="btn-dark-lovable px-4 mx-auto" style="width:fit-content">
-            Tạo build đầu tiên
-        </a>
+            class="btn-dark-lovable px-4 mx-auto" style="width:fit-content"
+            data-i18n="profile.createFirst">Tạo build đầu tiên</a>
     </div>
 }
 else
@@ -71,36 +55,24 @@ else
         {
             <div class="card-lovable card-body-lovable">
                 <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
-
-                    <!-- Thông tin build -->
                     <div class="flex-grow-1">
                         <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
-                            <h5 style="font-weight:600;color:var(--color-charcoal);margin:0">
-                                @spec.BuildName
-                            </h5>
-                            <span class="badge-warm badge-kit" style="font-size:.75rem">
-                                @spec.Kit.Layout
-                            </span>
+                            <h5 style="font-weight:600;color:var(--color-charcoal);margin:0">@spec.BuildName</h5>
+                            <span class="badge-warm badge-kit" style="font-size:.75rem">@spec.Kit.Layout</span>
                         </div>
-
                         <div class="d-flex flex-wrap gap-2 mb-3">
                             <span class="text-caption">
-                                <i class="bi bi-cpu me-1" style="color:var(--color-charcoal)"></i>
-                                @spec.Kit.Name
+                                <i class="bi bi-cpu me-1" style="color:var(--color-charcoal)"></i>@spec.Kit.Name
                             </span>
                             <span class="text-caption">·</span>
                             <span class="text-caption">
-                                <i class="bi bi-toggles me-1" style="color:var(--color-charcoal)"></i>
-                                @spec.Switch.Name
+                                <i class="bi bi-toggles me-1" style="color:var(--color-charcoal)"></i>@spec.Switch.Name
                             </span>
                             <span class="text-caption">·</span>
                             <span class="text-caption">
-                                <i class="bi bi-soundwave me-1" style="color:var(--color-charcoal)"></i>
-                                @spec.SoundTests.Count sound test(s)
+                                <i class="bi bi-soundwave me-1" style="color:var(--color-charcoal)"></i>@spec.SoundTests.Count sound test(s)
                             </span>
                         </div>
-
-                        <!-- Audio player nếu có -->
                         @if (spec.SoundTests.Any())
                         {
                             var best = spec.SoundTests.OrderByDescending(st => st.Upvotes).First();
@@ -109,35 +81,25 @@ else
                             </audio>
                         }
                     </div>
-
-                    <!-- Actions -->
                     <div class="d-flex flex-column gap-2 flex-shrink-0">
-                        <!-- Xem — Ghost button -->
-                        <a asp-controller="Spec" asp-action="Details"
-                           asp-route-id="@spec.SpecId"
-                           class="btn-ghost btn-sm-lovable text-center">
-                            <i class="bi bi-eye"></i>Xem
+                        <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId"
+                            class="btn-ghost btn-sm-lovable text-center">
+                            <i class="bi bi-eye"></i><span data-i18n="profile.view">Xem</span>
                         </a>
-                        <!-- Upload — Cream button -->
-                        <a asp-controller="SoundTest" asp-action="Upload"
-                           asp-route-specId="@spec.SpecId"
-                           class="btn-cream btn-sm-lovable text-center">
+                        <a asp-controller="SoundTest" asp-action="Upload" asp-route-specId="@spec.SpecId"
+                            class="btn-cream btn-sm-lovable text-center">
                             <i class="bi bi-cloud-upload"></i>Upload
                         </a>
-
-                        <!-- Nút Xóa với confirm — giữ nguyên form + onsubmit -->
-                        <form asp-controller="User" asp-action="DeleteSpec"
-                              method="post"
-                              onsubmit="return confirm('Xóa build \'@spec.BuildName\'?\nHành động này không thể hoàn tác.')">
+                        <form asp-controller="User" asp-action="DeleteSpec" method="post"
+                            onsubmit="return confirm('Xóa build \'@spec.BuildName\'?\nHành động này không thể hoàn tác.')">
                             <input type="hidden" name="specId" value="@spec.SpecId" />
                             <button type="submit"
-                                    class="btn-ghost btn-sm-lovable btn-block text-center"
-                                    style="color:#b91c1c;border-color:rgba(185,28,28,0.3)">
-                                <i class="bi bi-trash"></i>Xóa
+                                class="btn-ghost btn-sm-lovable btn-block text-center"
+                                style="color:#b91c1c;border-color:rgba(185,28,28,0.3)">
+                                <i class="bi bi-trash"></i><span data-i18n="profile.delete">Xóa</span>
                             </button>
                         </form>
                     </div>
-
                 </div>
             </div>
         }
