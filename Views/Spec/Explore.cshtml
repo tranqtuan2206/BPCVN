@@ -1,0 +1,234 @@
+@model IEnumerable<BPCVN.Models.Entities.Spec>
+@{
+    ViewData["Title"] = "Khám phá Builds";
+}
+
+<!-- ── Page header ───────────────────────────────────────────────────────── -->
+<div class="section-header mb-4">
+    <div>
+        <h2 class="section-title">
+            <i class="bi bi-compass me-2" style="opacity:0.5"></i>Khám phá Builds
+        </h2>
+        <p class="section-subtitle">
+            Tìm thấy <strong>@ViewBag.TotalResults</strong> kết quả
+        </p>
+    </div>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <a asp-controller="Spec" asp-action="Create" class="btn-dark-lovable">
+            <i class="bi bi-plus-circle"></i>Tạo Build
+        </a>
+    }
+</div>
+
+<!-- ── Search & Filter form ──────────────────────────────────────────────── -->
+<div class="card-lovable card-body-lovable mb-4">
+    <form asp-action="Explore" method="get" class="row g-3 align-items-end">
+
+        <!-- Search box -->
+        <div class="col-12 col-md-6">
+            <label class="form-label-lovable">
+                <i class="bi bi-search me-1"></i>Tìm kiếm
+            </label>
+            <input type="text" name="searchString" value="@ViewBag.SearchString" class="form-control"
+                placeholder="Nhập tên build, kit, switch..." />
+        </div>
+
+        <!-- Switch type dropdown -->
+        <div class="col-12 col-md-4">
+            <label class="form-label-lovable">
+                <i class="bi bi-toggles me-1"></i>Loại Switch
+            </label>
+            <select name="switchType" class="form-select">
+                <option value="">-- Tất cả loại --</option>
+                @foreach (var t in new[] { "Linear", "Tactile", "Clicky" })
+                {
+                    if ((string?)ViewBag.SwitchType == t)
+                    {
+                        <option value="@t" selected>@t</option>
+                    }
+                    else
+                    {
+                        <option value="@t">@t</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <!-- Buttons -->
+        <div class="col-12 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn-dark-lovable flex-grow-1">
+                <i class="bi bi-funnel"></i>Lọc
+            </button>
+            @if (!string.IsNullOrEmpty(ViewBag.SearchString as string) ||
+            !string.IsNullOrEmpty(ViewBag.SwitchType as string))
+            {
+                <a asp-action="Explore" class="btn-ghost" title="Xóa bộ lọc">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            }
+        </div>
+
+    </form>
+</div>
+
+<!-- ── Kết quả dạng grid ─────────────────────────────────────────────────── -->
+@if (!Model.Any())
+{
+    <div class="card-lovable empty-state">
+        <i class="bi bi-search empty-icon"></i>
+        <p class="mb-1 text-body-lg">Không tìm thấy build nào phù hợp.</p>
+        <p class="text-caption">Thử tìm với từ khóa khác hoặc bỏ bộ lọc.</p>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+        @foreach (var spec in Model)
+        {
+            <div class="col">
+                <div class="card-lovable h-100 d-flex flex-column">
+
+                    <!-- Card header -->
+                    <div class="px-4 pt-4 pb-3">
+
+                        <!-- User info -->
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <div class="avatar avatar-sm">
+                                @spec.User.Username[0].ToString().ToUpper()
+                            </div>
+                            <span class="text-caption" style="font-weight:500;color:var(--color-charcoal)">
+                                @spec.User.Username
+                            </span>
+                            <span class="text-caption ms-auto" style="font-size:.73rem">
+                                @spec.CreatedAt.ToString("dd/MM/yy")
+                            </span>
+                        </div>
+
+                        <!-- Build name — giữ nguyên asp-controller/action/route -->
+                        <h6 style="font-weight:600;color:var(--color-charcoal);margin:0">
+                            <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId"
+                                class="text-decoration-none" style="color:inherit">
+                                @spec.BuildName
+                            </a>
+                        </h6>
+                    </div>
+
+                    <!-- Badges thông số -->
+                    <div class="px-4 py-2 d-flex flex-wrap gap-2">
+                        <span class="badge-warm badge-kit">
+                            <i class="bi bi-cpu"></i>@spec.Kit.Name
+                        </span>
+                        <span class="badge-warm badge-switch">
+                            <i class="bi bi-toggles"></i>@spec.Switch.Name
+                        </span>
+                        @if (!string.IsNullOrEmpty(spec.Switch.Type))
+                        {
+                            <span class="badge-warm badge-type">
+                                @spec.Switch.Type
+                            </span>
+                        }
+                    </div>
+
+                    <!-- Audio player (sound test có upvotes cao nhất) -->
+                    @if (spec.SoundTests.Any())
+                    {
+                        var top = spec.SoundTests
+                        .OrderByDescending(st => st.Upvotes)
+                        .First();
+                        <div class="px-4 pb-3">
+                            <div class="audio-container">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="audio-label">
+                                        <i class="bi bi-soundwave me-1"></i>Sound Test
+                                    </span>
+                                    <!-- Upvote button — JS xử lý, không reload trang -->
+                                    <button class="upvote-btn-lovable upvote-btn"
+                                        data-test-id="@top.TestId" onclick="handleUpvote(this)">
+                                        <i class="bi bi-heart"></i>
+                                        <span class="upvote-count">@top.Upvotes</span>
+                                    </button>
+                                </div>
+                                <audio controls class="w-100" style="height:34px">
+                                    <source src="@top.AudioUrl" />
+                                    Trình duyệt không hỗ trợ audio.
+                                </audio>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="px-4 pb-3">
+                            <div class="audio-container text-center" style="border-style:dashed">
+                                <span class="text-caption">
+                                    <i class="bi bi-mic-mute me-1"></i>Chưa có sound test
+                                </span>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Footer -->
+                    <div class="px-4 pb-4 mt-auto d-flex gap-2 align-items-center">
+                        <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId"
+                            class="btn-ghost btn-sm-lovable flex-grow-1 text-center">
+                            <i class="bi bi-arrow-right-circle"></i>Chi tiết
+                        </a>
+                        <span class="text-caption flex-shrink-0">
+                            <i class="bi bi-soundwave me-1"></i>@spec.SoundTests.Count
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@*
+── JAVASCRIPT UPVOTE ────────────────────────────────────────────────────────
+Đặt trong @section Scripts {} — chạy sau khi DOM và Bootstrap đã load xong.
+Dùng Fetch API gọi POST /SoundTest/Upvote, nhận JSON, cập nhật DOM.
+Token AntiForgery lấy từ hidden input được _Layout.cshtml render sẵn.
+*@
+@section Scripts {
+    <script>
+        async function handleUpvote(btn) {
+            const testId = btn.dataset.testId;
+
+            // Disable ngay để tránh double-click
+            btn.disabled = true;
+
+            // Lấy AntiForgery token từ hidden input _Layout render
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+
+            try {
+                const response = await fetch('/SoundTest/Upvote', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify({ testId: testId })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Cập nhật số tim trên DOM — không reload trang
+                    btn.querySelector('.upvote-count').textContent = data.newCount;
+
+                    // Đổi sang trạng thái "đã upvote" — charcoal
+                    btn.classList.add('upvoted');
+                } else {
+                    btn.disabled = false;
+                }
+
+            } catch (err) {
+                console.error('Upvote error:', err);
+                btn.disabled = false;
+            }
+        }
+    </script>
+}

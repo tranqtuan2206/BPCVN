@@ -12,7 +12,7 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        // Lấy 10 Spec mới nhất, Include tất cả liên quan — 1 query duy nhất
+        // Include đầy đủ quan hệ trong 1 query — tránh N+1
         var specs = await _db.Specs
             .Include(s => s.User)
             .Include(s => s.Kit)
@@ -20,13 +20,12 @@ public class HomeController : Controller
             .Include(s => s.SoundTests)
             .AsNoTracking()
             .OrderByDescending(s => s.CreatedAt)
-            .Take(10)
+            .Take(15)                           // Phase 3: tăng lên 15
             .ToListAsync();
 
-        // Stats cho hero section
-        ViewBag.KitCount    = await _db.Kits.CountAsync();
+        ViewBag.KitCount = await _db.Kits.CountAsync();
         ViewBag.SwitchCount = await _db.Switches.CountAsync();
-        ViewBag.SpecCount   = await _db.Specs.CountAsync();
+        ViewBag.SpecCount = await _db.Specs.CountAsync();
 
         return View(specs);
     }

@@ -6,56 +6,61 @@
 
 <div class="row justify-content-center">
     <div class="col-md-6">
+        <!-- Back link -->
         <div class="mb-4">
             <a asp-controller="Spec" asp-action="Details"
                asp-route-id="@spec.SpecId"
-               class="text-muted small text-decoration-none">
+               class="link-muted">
                 <i class="bi bi-arrow-left me-1"></i>Quay về @spec.BuildName
             </a>
         </div>
 
-        <div class="card border-0 shadow-sm rounded-4 p-4">
+        <!-- Upload card — Lovable style -->
+        <div class="card-lovable card-body-lovable">
             <div class="text-center mb-4">
-                <i class="bi bi-cloud-upload fs-1" style="color:#6c5ce7"></i>
-                <h4 class="fw-bold mt-2">Upload Sound Test</h4>
-                <p class="text-muted small mb-0">
+                <i class="bi bi-cloud-upload" style="font-size:2.5rem;color:var(--color-charcoal)"></i>
+                <h4 class="text-subheading mt-2" style="font-size:1.3rem">Upload Sound Test</h4>
+                <p class="text-caption mb-0">
                     Build: <strong>@spec.BuildName</strong>
                 </p>
             </div>
 
+            <!-- Form — giữ nguyên asp-action, enctype, hidden inputs -->
             <form asp-action="Upload" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="specId" value="@spec.SpecId" />
 
                 <div asp-validation-summary="ModelOnly"
-                     class="alert alert-danger small rounded-3"></div>
+                     class="validation-summary-lovable"></div>
 
                 <!-- File upload -->
                 <div class="mb-3">
-                    <label class="form-label fw-500">
-                        File âm thanh <span class="text-danger">*</span>
+                    <label class="form-label-lovable">
+                        File âm thanh <span style="color:#b91c1c">*</span>
                     </label>
                     <input type="file" name="audioFile" accept=".mp3,.wav,.flac,.ogg"
-                           class="form-control rounded-3" required />
-                    <div class="form-text">
+                           class="form-control" required />
+                    <div class="form-hint">
                         Chấp nhận: .mp3, .wav, .flac, .ogg — Tối đa 50MB
                     </div>
                 </div>
 
                 <!-- Mic used -->
                 <div class="mb-4">
-                    <label class="form-label fw-500">Microphone sử dụng</label>
-                    <input type="text" name="micUsed" class="form-control rounded-3"
+                    <label class="form-label-lovable">Microphone sử dụng</label>
+                    <input type="text" name="micUsed" class="form-control"
                            placeholder="VD: Blue Yeti, Rode NT-USB, điện thoại..." />
                 </div>
 
+                <!-- Buttons -->
                 <div class="d-flex gap-2">
-                    <button type="submit" class="btn px-4 py-2 rounded-3"
-                            style="background:#6c5ce7;color:#fff;font-weight:600">
-                        <i class="bi bi-cloud-upload me-2"></i>Upload
+                    <!-- Primary Dark -->
+                    <button type="submit" class="btn-dark-lovable px-4 py-2">
+                        <i class="bi bi-cloud-upload"></i>Upload
                     </button>
+                    <!-- Ghost cancel -->
                     <a asp-controller="Spec" asp-action="Details"
                        asp-route-id="@spec.SpecId"
-                       class="btn btn-light px-4 py-2 rounded-3">
+                       class="btn-ghost px-4 py-2">
                         Huỷ
                     </a>
                 </div>

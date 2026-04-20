@@ -153,4 +153,45 @@ public class SpecController : Controller
 
         return View(spec);
     }
+
+    // ── EXPLORE / SEARCH & FILTER ─────────────────────────────────────────────────
+    // GET /Spec/Explore?searchString=...&switchType=...
+
+    [HttpGet]
+    public async Task<IActionResult> Explore(string? searchString, string? switchType)
+    {
+        // IQueryable — tổng hợp điều kiện trước, chỉ gọi DB 1 lần
+        var query = _db.Specs
+            .Include(s => s.User)
+            .Include(s => s.Kit)
+            .Include(s => s.Switch)
+            .Include(s => s.SoundTests)
+            .AsNoTracking()
+            .AsQueryable();
+
+        // Lọc theo tên build / kit / switch (case-insensitive)
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            var kw = searchString.Trim().ToLower();
+            query = query.Where(s =>
+                s.BuildName.ToLower().Contains(kw) ||
+                s.Kit.Name.ToLower().Contains(kw)  ||
+                s.Switch.Name.ToLower().Contains(kw));
+        }
+
+        // Lọc theo loại switch
+        if (!string.IsNullOrWhiteSpace(switchType))
+            query = query.Where(s => s.Switch.Type == switchType);
+
+        var specs = await query
+            .OrderByDescending(s => s.CreatedAt)
+            .ToListAsync();
+
+        // Giữ lại giá trị filter để form hiển thị lại sau submit
+        ViewBag.SearchString = searchString;
+        ViewBag.SwitchType   = switchType;
+        ViewBag.TotalResults = specs.Count;
+
+        return View(specs);
+    }
 }

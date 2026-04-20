@@ -5,57 +5,64 @@
 
 <div class="row justify-content-center">
     <div class="col-md-5">
-        <div class="card border-0 shadow-sm rounded-4 p-4 mt-3">
+        <!-- Card đăng ký — Lovable card style -->
+        <div class="card-lovable card-body-lovable mt-3">
 
+            <!-- Header icon + title -->
             <div class="text-center mb-4">
-                <i class="bi bi-person-plus-fill fs-1" style="color:#6c5ce7"></i>
-                <h3 class="fw-bold mt-2">Tạo tài khoản</h3>
-                <p class="text-muted small">Tham gia cộng đồng BPCVN ngay hôm nay</p>
+                <i class="bi bi-person-plus-fill" style="font-size:2.5rem;color:var(--color-charcoal)"></i>
+                <h3 class="text-subheading mt-2">Tạo tài khoản</h3>
+                <p class="text-caption">Tham gia cộng đồng BPCVN ngay hôm nay</p>
             </div>
 
+            <!-- Form — giữ nguyên asp-action, asp-for, asp-validation-* -->
             <form asp-action="Register" method="post">
                 <div asp-validation-summary="ModelOnly"
-                     class="alert alert-danger small rounded-3" style="display:none"></div>
+                     class="validation-summary-lovable" style="display:none"></div>
 
+                <!-- Username -->
                 <div class="mb-3">
-                    <label asp-for="Username" class="form-label fw-500"></label>
-                    <input asp-for="Username" class="form-control rounded-3"
+                    <label asp-for="Username" class="form-label-lovable"></label>
+                    <input asp-for="Username" class="form-control"
                            placeholder="Nhập username..." />
                     <span asp-validation-for="Username" class="text-danger small"></span>
                 </div>
 
+                <!-- Email -->
                 <div class="mb-3">
-                    <label asp-for="Email" class="form-label fw-500"></label>
-                    <input asp-for="Email" class="form-control rounded-3"
+                    <label asp-for="Email" class="form-label-lovable"></label>
+                    <input asp-for="Email" class="form-control"
                            placeholder="example@email.com" />
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
 
+                <!-- Password -->
                 <div class="mb-3">
-                    <label asp-for="Password" class="form-label fw-500"></label>
-                    <input asp-for="Password" class="form-control rounded-3"
+                    <label asp-for="Password" class="form-label-lovable"></label>
+                    <input asp-for="Password" class="form-control"
                            placeholder="Tối thiểu 6 ký tự" />
                     <span asp-validation-for="Password" class="text-danger small"></span>
                 </div>
 
+                <!-- Confirm Password -->
                 <div class="mb-4">
-                    <label asp-for="ConfirmPassword" class="form-label fw-500"></label>
-                    <input asp-for="ConfirmPassword" class="form-control rounded-3"
+                    <label asp-for="ConfirmPassword" class="form-label-lovable"></label>
+                    <input asp-for="ConfirmPassword" class="form-control"
                            placeholder="Nhập lại mật khẩu" />
                     <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
                 </div>
 
-                <button type="submit" class="btn w-100 fw-600 py-2 rounded-3"
-                        style="background:#6c5ce7;color:#fff;font-weight:600">
-                    <i class="bi bi-person-check me-2"></i>Đăng ký
+                <!-- Submit — Primary Dark button -->
+                <button type="submit" class="btn-dark-lovable btn-block py-2">
+                    <i class="bi bi-person-check"></i>Đăng ký
                 </button>
             </form>
 
-            <hr class="my-4">
-            <p class="text-center text-muted small mb-0">
+            <hr class="divider">
+            <p class="text-center text-caption mb-0">
                 Đã có tài khoản?
                 <a asp-controller="Auth" asp-action="Login"
-                   style="color:#6c5ce7;font-weight:600">Đăng nhập</a>
+                   class="link-lovable" style="font-weight:600">Đăng nhập</a>
             </p>
 
         </div>
