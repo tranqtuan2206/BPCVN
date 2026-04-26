@@ -578,6 +578,118 @@ body {
     margin-bottom: 8px;
 }
 
+/* ── 11b. Waveform Audio Player (WaveSurfer.js) ─────────────────────────── */
+
+/* Container chính bao quanh nút Play + Waveform + thời gian */
+.waveform-player {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+/* Nút Play/Pause hình tròn */
+.waveform-play-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #f97316, #fb923c);
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+}
+
+.waveform-play-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.4);
+}
+
+.waveform-play-btn:active {
+    transform: scale(0.95);
+}
+
+/* Trạng thái đang phát — đổi sang màu hồng brand */
+.waveform-play-btn.playing {
+    background: linear-gradient(135deg, #fb7aec, #e879d8);
+    box-shadow: 0 2px 8px rgba(251, 122, 236, 0.3);
+}
+
+.waveform-play-btn.playing:hover {
+    box-shadow: 0 4px 16px rgba(251, 122, 236, 0.4);
+}
+
+/* Trạng thái disabled (đang loading) */
+.waveform-play-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Icon loading xoay tròn */
+.waveform-icon-loading {
+    animation: waveform-spin 1s linear infinite;
+}
+
+@keyframes waveform-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Vùng chứa sóng âm — chiếm hết không gian còn lại */
+.waveform {
+    flex: 1;
+    min-width: 0;
+    border-radius: var(--radius-standard);
+    overflow: hidden;
+    cursor: pointer;
+}
+
+/* Hiển thị thời gian (current / duration) */
+.waveform-time {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: 'Inter', monospace;
+    color: var(--color-muted);
+    white-space: nowrap;
+    min-width: 70px;
+    justify-content: flex-end;
+}
+
+.waveform-time-separator {
+    opacity: 0.4;
+}
+
+/* ── Waveform Dark Mode ─────────────────────────────────────────────────── */
+
+/* Dark mode: nút Play gradient tím-hồng */
+html.dark .waveform-play-btn {
+    background: linear-gradient(135deg, #fb7aec, #c084fc);
+    box-shadow: 0 2px 8px rgba(251, 122, 236, 0.25);
+}
+
+html.dark .waveform-play-btn:hover {
+    box-shadow: 0 4px 16px rgba(251, 122, 236, 0.35);
+}
+
+html.dark .waveform-play-btn.playing {
+    background: linear-gradient(135deg, #f97316, #fb923c);
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+}
+
+html.dark .waveform-play-btn.playing:hover {
+    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.4);
+}
+
 /* Upvote button */
 .upvote-btn-lovable {
     display: inline-flex;
@@ -1278,7 +1390,8 @@ html.dark .shadow-sm {
     border-radius: var(--radius-card);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     padding: 6px;
-    display: none;                   /* ẩn mặc định */
+    display: none;
+    /* ẩn mặc định */
     flex-direction: column;
     gap: 2px;
 }
@@ -1316,7 +1429,8 @@ html.dark .shadow-sm {
     margin-left: auto;
     color: #fb7aec;
     font-size: 1rem;
-    display: none;                   /* JS sẽ toggle */
+    display: none;
+    /* JS sẽ toggle */
 }
 
 

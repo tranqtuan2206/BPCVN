@@ -127,9 +127,17 @@ else
                                         <span class="upvote-count">@topAudio.Upvotes</span>
                                     </button>
                                 </div>
-                                <audio controls class="w-100" style="height:36px">
-                                    <source src="@topAudio.AudioUrl" />
-                                </audio>
+                                <div class="waveform-player">
+                                    <button type="button" class="waveform-play-btn" title="Play" disabled>
+                                        <i class="bi bi-hourglass-split waveform-icon-loading"></i>
+                                    </button>
+                                    <div class="waveform" data-audio-url="@topAudio.AudioUrl"></div>
+                                    <div class="waveform-time">
+                                        <span class="waveform-current-time">0:00</span>
+                                        <span class="waveform-time-separator">/</span>
+                                        <span class="waveform-duration">0:00</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     }

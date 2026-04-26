@@ -112,9 +112,17 @@ else
                     {
                         var top = spec.SoundTests.OrderByDescending(st => st.Upvotes).First();
                         <div class="px-4 pb-3">
-                            <audio controls class="w-100" style="height:34px">
-                                <source src="@top.AudioUrl" />
-                            </audio>
+                            <div class="waveform-player">
+                                <button type="button" class="waveform-play-btn" title="Play" disabled>
+                                    <i class="bi bi-hourglass-split waveform-icon-loading"></i>
+                                </button>
+                                <div class="waveform" data-audio-url="@top.AudioUrl"></div>
+                                <div class="waveform-time">
+                                    <span class="waveform-current-time">0:00</span>
+                                    <span class="waveform-time-separator">/</span>
+                                    <span class="waveform-duration">0:00</span>
+                                </div>
+                            </div>
                         </div>
                     }
 
