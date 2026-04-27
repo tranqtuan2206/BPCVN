@@ -65,6 +65,11 @@
                             <i class="bi bi-search me-1"></i><span data-i18n="nav.explore">Khám phá</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="TypingTest" asp-action="Index">
+                            <i class="bi bi-keyboard me-1"></i><span data-i18n="nav.typing">Gõ Phím</span>
+                        </a>
+                    </li>
                     @if (User.Identity?.IsAuthenticated == true)
 
                     {
@@ -236,11 +241,22 @@
                 /* ── Navbar ─── */
                 'nav.home': 'Home',
                 'nav.explore': 'Explore',
+                'nav.typing': 'Typing',
                 'nav.mypage': 'My Page',
                 'nav.createBuild': 'Create Build',
                 'nav.login': 'Login',
                 'nav.register': 'Register',
                 'footer.text': 'Vietnamese Mechanical Keyboard Community',
+
+                /* ── Typing Test ─── */
+                'typing.title': 'Typing Test',
+                'typing.subtitle': 'Practice typing speed with Vietnamese vocabulary',
+                'typing.words': 'words',
+                'typing.hint': 'Click here and start typing...',
+                'typing.restart': 'try again',
+                'typing.characters': 'characters',
+                'typing.correctIncorrect': 'correct/incorrect',
+                'typing.time': 'time',
 
                 /* ── Home ─── */
                 'home.title': 'Vietnamese Mechanical Keyboard Community',
@@ -327,11 +343,22 @@
                 /* ── Navbar ─── */
                 'nav.home': 'Trang chủ',
                 'nav.explore': 'Khám phá',
+                'nav.typing': 'Gõ Phím',
                 'nav.mypage': 'Của tôi',
                 'nav.createBuild': 'Tạo Build',
                 'nav.login': 'Đăng nhập',
                 'nav.register': 'Đăng ký',
                 'footer.text': 'Cộng đồng Bàn Phím Cơ Việt Nam',
+
+                /* ── Typing Test ─── */
+                'typing.title': 'Gõ Phím',
+                'typing.subtitle': 'Luyện tốc độ gõ phím với từ vựng tiếng Việt',
+                'typing.words': 'từ',
+                'typing.hint': 'Click vào đây và bắt đầu gõ...',
+                'typing.restart': 'thử lại',
+                'typing.characters': 'ký tự',
+                'typing.correctIncorrect': 'đúng/sai',
+                'typing.time': 'thời gian',
 
                 /* ── Home ─── */
                 'home.title': 'Cộng đồng Bàn Phím Cơ Việt Nam',

@@ -1,0 +1,108 @@
+@{
+    ViewData["Title"] = "Gõ Phím";
+}
+
+<link href="~/css/typing-test.css" rel="stylesheet" />
+
+<!-- ── Hero nhỏ ────────────────────────────────────────────────────────────── -->
+<div class="text-center mb-4">
+    <h2 class="section-title">
+        <i class="bi bi-keyboard me-2" style="opacity:0.5"></i><span data-i18n="typing.title">Gõ Phím</span>
+    </h2>
+    <p class="text-caption" data-i18n="typing.subtitle">Luyện tốc độ gõ phím với từ vựng tiếng Việt</p>
+</div>
+
+<!-- ── TYPING TEST CONTAINER ──────────────────────────────────────────────── -->
+<div class="mt-wrapper" id="mtWrapper">
+
+    <!-- ── TYPING PHASE ────────────────────────────────────────────────── -->
+    <div id="mtTypingPhase">
+
+        <!-- Toolbar: chọn số từ -->
+        <div class="mt-toolbar">
+            <div class="mt-toolbar-group">
+                <span class="mt-toolbar-label"><i class="bi bi-type me-1"></i><span data-i18n="typing.words">từ</span></span>
+                <button class="mt-toolbar-btn" data-count="10">10</button>
+                <button class="mt-toolbar-btn active" data-count="25">25</button>
+                <button class="mt-toolbar-btn" data-count="50">50</button>
+            </div>
+        </div>
+
+        <!-- Live WPM (hiện khi đang gõ) -->
+        <div class="mt-live-stats" id="mtLiveStats">
+            <span class="mt-live-value" id="mtLiveWpm">0</span>
+        </div>
+
+        <!-- Vùng hiển thị text — mỗi ký tự = 1 span -->
+        <div class="mt-words" id="mtWords" tabindex="0">
+            <!-- JS render nội dung vào đây -->
+            <!-- Caret (con trỏ nhấp nháy) — phải ở TRONG mt-words để position:absolute đúng -->
+            <div class="mt-caret" id="mtCaret"></div>
+        </div>
+
+        <!-- Hint -->
+        <p class="mt-hint">
+            <i class="bi bi-cursor-text me-1"></i><span data-i18n="typing.hint">Click vào đây và bắt đầu gõ...</span>
+        </p>
+
+        <!-- Restart -->
+        <div class="mt-restart-row">
+            <button class="mt-restart-btn mt-restart-trigger" title="Thử lại">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── RESULT PHASE ────────────────────────────────────────────────── -->
+    <div class="mt-result" id="mtResultPhase">
+
+        <!-- Grid: Big numbers (trái) + Chart (phải) -->
+        <div class="mt-result-grid">
+            <div class="mt-result-main">
+                <div class="mt-result-big">
+                    <div class="mt-result-big-label">wpm</div>
+                    <div class="mt-result-big-value" id="resWpm">0</div>
+                </div>
+                <div class="mt-result-big acc">
+                    <div class="mt-result-big-label">acc</div>
+                    <div class="mt-result-big-value" id="resAcc">100%</div>
+                </div>
+            </div>
+            <div class="mt-result-chart-container">
+                <canvas id="mtChart" height="220"></canvas>
+            </div>
+        </div>
+
+        <!-- Thông số phụ -->
+        <div class="mt-result-details">
+            <div class="mt-result-detail">
+                <div class="mt-result-detail-label">raw</div>
+                <div class="mt-result-detail-value" id="resRaw">0</div>
+            </div>
+            <div class="mt-result-detail">
+                <div class="mt-result-detail-label" data-i18n="typing.characters">ký tự</div>
+                <div class="mt-result-detail-value">
+                    <span class="mt-chars-correct" id="resCharsCorrect">0</span><span class="mt-chars-sep">/</span><span class="mt-chars-incorrect" id="resCharsIncorrect">0</span>
+                </div>
+                <div class="mt-result-detail-sub" data-i18n="typing.correctIncorrect">đúng/sai</div>
+            </div>
+            <div class="mt-result-detail">
+                <div class="mt-result-detail-label" data-i18n="typing.time">thời gian</div>
+                <div class="mt-result-detail-value" id="resTime">0s</div>
+            </div>
+        </div>
+
+        <!-- Restart -->
+        <div class="mt-result-restart">
+            <button class="mt-restart-btn mt-restart-trigger" title="Thử lại">
+                <i class="bi bi-arrow-counterclockwise"></i> <span data-i18n="typing.restart">thử lại</span>
+            </button>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <script src="~/js/typing-test.js"></script>
+}

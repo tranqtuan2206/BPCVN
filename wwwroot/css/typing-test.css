@@ -1,0 +1,390 @@
+/*
+ * ============================================================================
+ * BPCVN — Mini Typing Test
+ * ============================================================================
+ * Đồng bộ với hệ thống thiết kế Lovable Design System.
+ * Sử dụng CSS Variables từ site.css để tương thích Dark/Light mode.
+ * Accent: #fb7aec (Hồng brand) — dùng cho caret, chart, correct.
+ * ============================================================================
+ */
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap');
+
+/* ── Container chính — nền trong suốt, kế thừa layout ────────────────── */
+.mt-wrapper {
+    background-color: var(--color-charcoal-03);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-container);
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Roboto Mono', 'Inter', ui-monospace, monospace;
+    color: var(--color-muted);
+    min-height: 320px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* ── Toolbar ──────────────────────────────────────────────────────────── */
+.mt-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 28px;
+}
+
+.mt-toolbar-group {
+    display: flex;
+    align-items: center;
+    background-color: var(--color-charcoal-04);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-comfortable);
+    padding: 4px;
+    gap: 2px;
+}
+
+.mt-toolbar-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-muted);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 6px 16px;
+    border-radius: var(--radius-standard);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.mt-toolbar-btn:hover {
+    color: var(--color-charcoal);
+}
+
+.mt-toolbar-btn.active {
+    background-color: #fb7aec;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(251, 122, 236, 0.25);
+}
+
+.mt-toolbar-label {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-right: 4px;
+    text-transform: lowercase;
+}
+
+/* ── Live Stats ───────────────────────────────────────────────────────── */
+.mt-live-stats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 20px;
+    height: 36px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mt-live-stats.visible {
+    opacity: 1;
+}
+
+.mt-live-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fb7aec;
+    line-height: 1;
+}
+
+/* ── Words area ───────────────────────────────────────────────────────── */
+.mt-words {
+    font-size: 1.5rem;
+    line-height: 2;
+    letter-spacing: 1px;
+    cursor: text;
+    user-select: none;
+    position: relative;
+    outline: none;
+    min-height: 120px;
+    overflow: hidden;
+    max-height: 144px;
+    transition: filter 0.3s ease;
+}
+
+.mt-words.blur {
+    filter: blur(4px);
+}
+
+.mt-word {
+    display: inline-block;
+    margin: 0 8px 0 0;
+}
+
+/* ── Character states ─────────────────────────────────────────────────── */
+
+/* Chưa gõ — xám mờ đồng bộ với text muted của web */
+.mt-char {
+    color: var(--color-muted);
+    position: relative;
+    transition: color 0.05s;
+}
+
+/* Gõ đúng — dùng màu charcoal (đậm, dễ đọc) */
+.mt-char.correct {
+    color: var(--color-charcoal);
+}
+
+/* Gõ sai — đỏ */
+.mt-char.incorrect {
+    color: #dc2626;
+}
+
+/* Ký tự thừa (gõ quá nhiều) */
+.mt-char.extra {
+    color: #991b1b;
+}
+
+/* ── Caret — hồng brand, nhấp nháy mượt ──────────────────────────────── */
+.mt-caret {
+    position: absolute;
+    width: 2.5px;
+    height: 1.9rem;
+    background-color: #fb7aec;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 5;
+    transition: left 0.08s ease, top 0.08s ease;
+    animation: mt-caret-blink 1s step-end infinite;
+}
+
+@keyframes mt-caret-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.mt-caret.typing {
+    animation: none;
+    opacity: 1;
+}
+
+/* ── Hint ─────────────────────────────────────────────────────────────── */
+.mt-hint {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    margin-top: 16px;
+    opacity: 0.7;
+}
+
+/* ── Restart ──────────────────────────────────────────────────────────── */
+.mt-restart-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+}
+
+.mt-restart-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--color-muted);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: var(--radius-standard);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.mt-restart-btn:hover {
+    color: var(--color-charcoal);
+    border-color: var(--border-interactive);
+    background-color: var(--color-charcoal-04);
+}
+
+.mt-restart-btn:active {
+    transform: scale(0.95);
+}
+
+.mt-restart-btn i {
+    font-size: 1.1rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESULT SCREEN
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.mt-result { display: none; }
+.mt-result.show { display: block; }
+
+.mt-result-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 32px;
+    align-items: start;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 767.98px) {
+    .mt-result-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+.mt-result-main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 140px;
+}
+
+.mt-result-big {
+    display: flex;
+    flex-direction: column;
+}
+
+.mt-result-big-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #fb7aec;
+    text-transform: lowercase;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+}
+
+.mt-result-big-value {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #fb7aec;
+    line-height: 1;
+    letter-spacing: -2px;
+}
+
+/* Accuracy dùng màu charcoal chính */
+.mt-result-big.acc .mt-result-big-label,
+.mt-result-big.acc .mt-result-big-value {
+    color: var(--color-charcoal);
+}
+
+/* Chart container */
+.mt-result-chart-container {
+    background-color: var(--color-charcoal-04);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
+    padding: 20px;
+    min-height: 200px;
+}
+
+.mt-result-chart-container canvas {
+    width: 100% !important;
+    max-height: 220px;
+}
+
+/* Details row */
+.mt-result-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-light);
+}
+
+.mt-result-detail {
+    display: flex;
+    flex-direction: column;
+}
+
+.mt-result-detail-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: #fb7aec;
+    text-transform: lowercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 2px;
+}
+
+.mt-result-detail-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-charcoal);
+    line-height: 1;
+}
+
+.mt-result-detail-sub {
+    font-size: 0.7rem;
+    color: var(--color-muted);
+    margin-top: 2px;
+}
+
+.mt-chars-correct { color: #16a34a; }
+.mt-chars-sep { color: var(--color-muted); opacity: 0.5; }
+.mt-chars-incorrect { color: #dc2626; }
+
+.mt-result-restart {
+    display: flex;
+    justify-content: center;
+    margin-top: 28px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html.dark .mt-wrapper {
+    background-color: rgba(240, 237, 230, 0.02);
+    border-color: #2e2e33;
+}
+
+html.dark .mt-toolbar-group {
+    background-color: rgba(240, 237, 230, 0.04);
+    border-color: #2e2e33;
+}
+
+html.dark .mt-toolbar-btn:hover {
+    color: #f0ede6;
+}
+
+html.dark .mt-toolbar-btn.active {
+    background-color: #fb7aec;
+    color: #1a1a1e;
+}
+
+html.dark .mt-char.correct {
+    color: #f0ede6;
+}
+
+html.dark .mt-char.incorrect {
+    color: #f87171;
+}
+
+html.dark .mt-char.extra {
+    color: #7e2a33;
+}
+
+html.dark .mt-restart-btn {
+    border-color: #2e2e33;
+    color: #9a9a97;
+}
+
+html.dark .mt-restart-btn:hover {
+    color: #f0ede6;
+    border-color: rgba(240, 237, 230, 0.2);
+    background-color: rgba(240, 237, 230, 0.04);
+}
+
+html.dark .mt-result-chart-container {
+    background-color: rgba(240, 237, 230, 0.03);
+    border-color: #2e2e33;
+}
+
+html.dark .mt-result-details {
+    border-top-color: #2e2e33;
+}
+
+html.dark .mt-chars-correct { color: #4ade80; }
+html.dark .mt-chars-incorrect { color: #f87171; }

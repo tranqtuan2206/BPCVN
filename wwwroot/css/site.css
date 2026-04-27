@@ -588,46 +588,49 @@ body {
     width: 100%;
 }
 
-/* Nút Play/Pause hình tròn */
+/* Nút Play/Pause — chỉ hiển thị icon, không khung viền */
 .waveform-play-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    padding: 0;
     border: none;
-    background: linear-gradient(135deg, #f97316, #fb923c);
-    color: #fff;
-    font-size: 1.2rem;
+    border-radius: 0;
+    background: transparent;
+    color: var(--color-charcoal);
+    font-size: 1.4rem;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+    transition: color 0.15s ease, transform 0.15s ease;
+    box-shadow: none;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .waveform-play-btn:hover {
-    transform: scale(1.08);
-    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.4);
+    color: #fb7aec;
+    transform: scale(1.15);
 }
 
 .waveform-play-btn:active {
-    transform: scale(0.95);
+    transform: scale(0.9);
 }
 
-/* Trạng thái đang phát — đổi sang màu hồng brand */
+/* Trạng thái đang phát */
 .waveform-play-btn.playing {
-    background: linear-gradient(135deg, #fb7aec, #e879d8);
-    box-shadow: 0 2px 8px rgba(251, 122, 236, 0.3);
+    color: #fb7aec;
 }
 
 .waveform-play-btn.playing:hover {
-    box-shadow: 0 4px 16px rgba(251, 122, 236, 0.4);
+    color: #f97316;
 }
 
 /* Trạng thái disabled (đang loading) */
 .waveform-play-btn:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
     transform: none;
 }
@@ -671,23 +674,21 @@ body {
 
 /* ── Waveform Dark Mode ─────────────────────────────────────────────────── */
 
-/* Dark mode: nút Play gradient tím-hồng */
+/* Dark mode: nút Play — icon sáng trên nền tối */
 html.dark .waveform-play-btn {
-    background: linear-gradient(135deg, #fb7aec, #c084fc);
-    box-shadow: 0 2px 8px rgba(251, 122, 236, 0.25);
+    color: #f0ede6;
 }
 
 html.dark .waveform-play-btn:hover {
-    box-shadow: 0 4px 16px rgba(251, 122, 236, 0.35);
+    color: #fb7aec;
 }
 
 html.dark .waveform-play-btn.playing {
-    background: linear-gradient(135deg, #f97316, #fb923c);
-    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+    color: #fb7aec;
 }
 
 html.dark .waveform-play-btn.playing:hover {
-    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.4);
+    color: #f97316;
 }
 
 /* Upvote button */
