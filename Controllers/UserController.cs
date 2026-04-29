@@ -45,7 +45,7 @@ public class UserController : Controller
     }
 
     // ── DELETE SPEC ───────────────────────────────────────────────────────────
-    // POST /User/DeleteSpec
+    // POST /User/DeleteSpec — Giữ lại cho backward compatibility với Profile view
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -56,9 +56,12 @@ public class UserController : Controller
             return Unauthorized();
 
         // Chỉ lấy spec thuộc về user hiện tại — bảo vệ tránh xóa của người khác
+        // Admin cũng có thể xóa bất kỳ build nào
+        var isAdmin = User.IsInRole("Admin");
         var spec = await _db.Specs
             .Include(s => s.SoundTests)
-            .FirstOrDefaultAsync(s => s.SpecId == specId && s.UserId == userId);
+            .FirstOrDefaultAsync(s => s.SpecId == specId &&
+                (s.UserId == userId || isAdmin));
 
         if (spec == null) return NotFound();
 

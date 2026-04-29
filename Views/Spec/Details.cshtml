@@ -4,6 +4,7 @@
     ViewData["Title"] = Model.BuildName;
     var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
     var isOwner = currentUserId == Model.UserId.ToString();
+    var isAdmin = User.IsInRole("Admin");
 }
 
 <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
@@ -14,12 +15,30 @@
             <i class="bi bi-clock me-1"></i>@Model.CreatedAt.ToString("dd/MM/yyyy")
         </p>
     </div>
-    @if (isOwner)
-    {
-        <a asp-controller="SoundTest" asp-action="Upload" asp-route-specId="@Model.SpecId" class="btn-dark-lovable">
-            <i class="bi bi-cloud-upload"></i><span data-i18n="details.uploadBtn">Upload Sound Test</span>
-        </a>
-    }
+    <div class="d-flex gap-2 flex-wrap">
+        @if (isOwner)
+        {
+            <!-- Upload Sound Test — chỉ owner -->
+            <a asp-controller="SoundTest" asp-action="Upload" asp-route-specId="@Model.SpecId" class="btn-dark-lovable">
+                <i class="bi bi-cloud-upload"></i><span data-i18n="details.uploadBtn">Upload Sound Test</span>
+            </a>
+            <!-- Sửa Build — chỉ owner -->
+            <a asp-controller="Spec" asp-action="Edit" asp-route-id="@Model.SpecId" class="btn-ghost">
+                <i class="bi bi-pencil-square"></i>Sửa
+            </a>
+        }
+        @if (isOwner || isAdmin)
+        {
+            <!-- Xóa Build — owner hoặc Admin -->
+            <form asp-controller="Spec" asp-action="Delete" asp-route-id="@Model.SpecId" method="post"
+                  onsubmit="return confirm('Xóa build \'@Model.BuildName\'?\nHành động này không thể hoàn tác.')">
+                <button type="submit" class="btn-ghost btn-sm-lovable"
+                        style="color:#b91c1c;border-color:rgba(185,28,28,0.3)">
+                    <i class="bi bi-trash"></i>Xóa
+                </button>
+            </form>
+        }
+    </div>
 </div>
 
 <!-- Thông số build -->
@@ -120,9 +139,24 @@
                             </span>
                             <span class="text-caption ms-2">@st.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
                         </div>
-                        <span class="badge-count">
-                            <i class="bi bi-hand-thumbs-up me-1"></i>@st.Upvotes
-                        </span>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge-count">
+                                <i class="bi bi-hand-thumbs-up me-1"></i>@st.Upvotes
+                            </span>
+                            @if (isOwner || isAdmin)
+                            {
+                                <!-- Nút xóa Sound Test — owner hoặc Admin -->
+                                <form asp-controller="SoundTest" asp-action="Delete" method="post"
+                                      onsubmit="return confirm('Xóa sound test này?')">
+                                    <input type="hidden" name="testId" value="@st.TestId" />
+                                    <button type="submit" class="btn-ghost btn-sm-lovable"
+                                            style="color:#b91c1c;border-color:rgba(185,28,28,0.3);padding:4px 8px"
+                                            title="Xóa sound test">
+                                        <i class="bi bi-trash" style="font-size:0.8rem"></i>
+                                    </button>
+                                </form>
+                            }
+                        </div>
                     </div>
                     <div class="waveform-player">
                         <button type="button" class="waveform-play-btn" title="Play" disabled>

@@ -4,6 +4,7 @@ using BPCVN.Models.Entities;
 using BPCVN.Models.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,11 +41,13 @@ public class AuthController : Controller
             return View(vm);
         }
 
+        // Tạo user mới — Role mặc định "User" (từ model default)
         var user = new User
         {
             Username = vm.Username.Trim(),
             Email = vm.Email.Trim().ToLower(),
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(vm.Password),
+            Role = "User", // Luôn gán Role User cho đăng ký thường
             CreatedAt = DateTime.UtcNow
         };
 
@@ -109,16 +112,62 @@ public class AuthController : Controller
         return RedirectToAction("Index", "Home");
     }
 
+    // ── CHANGE PASSWORD ───────────────────────────────────────────────────────
+
+    [Authorize]
+    [HttpGet]
+    public IActionResult ChangePassword() => View();
+
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel vm)
+    {
+        if (!ModelState.IsValid) return View(vm);
+
+        // Lấy user hiện tại từ cookie claims
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdStr, out var userId))
+            return Unauthorized();
+
+        var user = await _db.Users.FindAsync(userId);
+        if (user == null) return NotFound();
+
+        // Xác minh mật khẩu hiện tại
+        if (!BCrypt.Net.BCrypt.Verify(vm.CurrentPassword, user.PasswordHash))
+        {
+            ModelState.AddModelError(nameof(vm.CurrentPassword), "Mật khẩu hiện tại không đúng.");
+            return View(vm);
+        }
+
+        // Cập nhật mật khẩu mới (đã hash)
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(vm.NewPassword);
+        await _db.SaveChangesAsync();
+
+        // Đăng nhập lại để refresh cookie claims
+        await SignInUser(user, isPersistent: false);
+
+        TempData["Success"] = "Đổi mật khẩu thành công!";
+        return RedirectToAction("Profile", "User");
+    }
+
+    // ── ACCESS DENIED ─────────────────────────────────────────────────────────
+
+    [HttpGet]
+    public IActionResult AccessDenied() => View();
+
     // ── HELPER ───────────────────────────────────────────────────────────────
 
     private async Task SignInUser(User user, bool isPersistent)
     {
         // Tạo Claims — thông tin được lưu trong cookie
+        // Bao gồm Role claim để [Authorize(Roles = "Admin")] hoạt động
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.UserId.ToString()),
             new(ClaimTypes.Name,           user.Username),
-            new(ClaimTypes.Email,          user.Email)
+            new(ClaimTypes.Email,          user.Email),
+            new(ClaimTypes.Role,           user.Role)  // ← Quan trọng: Role claim
         };
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

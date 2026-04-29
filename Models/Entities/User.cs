@@ -20,6 +20,10 @@ public class User
     [Required]
     public string PasswordHash { get; set; } = string.Empty;
 
+    /// <summary>Phân quyền: "User" (mặc định) hoặc "Admin"</summary>
+    [StringLength(20)]
+    public string Role { get; set; } = "User";
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation

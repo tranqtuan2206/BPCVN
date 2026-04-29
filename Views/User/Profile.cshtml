@@ -94,6 +94,10 @@ else
                             class="btn-ghost btn-sm-lovable text-center">
                             <i class="bi bi-eye"></i><span data-i18n="profile.view">Xem</span>
                         </a>
+                        <a asp-controller="Spec" asp-action="Edit" asp-route-id="@spec.SpecId"
+                            class="btn-ghost btn-sm-lovable text-center">
+                            <i class="bi bi-pencil-square"></i>Sửa
+                        </a>
                         <a asp-controller="SoundTest" asp-action="Upload" asp-route-specId="@spec.SpecId"
                             class="btn-cream btn-sm-lovable text-center">
                             <i class="bi bi-cloud-upload"></i>Upload

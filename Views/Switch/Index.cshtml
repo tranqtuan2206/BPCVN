@@ -142,11 +142,14 @@ else
                             class="btn-ghost btn-sm-lovable flex-grow-1 text-center">
                             <i class="bi bi-arrow-right-circle"></i><span data-i18n="switch.viewDetail">Xem chi tiết</span>
                         </a>
-                        <!-- Nút Chỉnh sửa — điều hướng tới Switch/Edit -->
-                        <a asp-controller="Switch" asp-action="Edit" asp-route-id="@sw.SwitchId"
-                            class="btn-ghost btn-sm-lovable" title="Chỉnh sửa">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <!-- Nút Chỉnh sửa — chỉ Admin mới thấy -->
+                            <a asp-controller="Switch" asp-action="Edit" asp-route-id="@sw.SwitchId"
+                                class="btn-ghost btn-sm-lovable" title="Chỉnh sửa">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                        }
                     </div>
                 </div>
             </div>

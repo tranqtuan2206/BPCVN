@@ -1,0 +1,30 @@
+@{
+    ViewData["Title"] = "Truy cập bị từ chối";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card-lovable card-body-lovable mt-5 text-center" style="padding:48px 32px">
+            <!-- Icon cảnh báo -->
+            <i class="bi bi-shield-exclamation" style="font-size:4rem;color:#ef4444;opacity:0.7"></i>
+
+            <h3 class="text-subheading mt-3 mb-2">Truy cập bị từ chối</h3>
+            <p class="text-body-lg mb-4">
+                Bạn không có quyền truy cập trang này.<br>
+                Vui lòng liên hệ quản trị viên nếu bạn cho rằng đây là nhầm lẫn.
+            </p>
+
+            <div class="d-flex justify-content-center gap-2">
+                <a asp-controller="Home" asp-action="Index" class="btn-dark-lovable px-4 py-2">
+                    <i class="bi bi-house-door"></i>Về trang chủ
+                </a>
+                @if (User.Identity?.IsAuthenticated != true)
+                {
+                    <a asp-controller="Auth" asp-action="Login" class="btn-ghost px-4 py-2">
+                        <i class="bi bi-box-arrow-in-right"></i>Đăng nhập
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

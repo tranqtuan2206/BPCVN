@@ -133,6 +133,20 @@ public static class DbSeeder
             );
         }
 
+        // ── Admin Account ────────────────────────────────────────────────────
+        // Tạo tài khoản Admin mặc định nếu chưa tồn tại
+        if (!await db.Users.AnyAsync(u => u.Email == "admin@twsnwithunikey"))
+        {
+            db.Users.Add(new User
+            {
+                Username     = "Admin",
+                Email        = "admin@twsnwithunikey",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456"),
+                Role         = "Admin",
+                CreatedAt    = DateTime.UtcNow
+            });
+        }
+
         await db.SaveChangesAsync();
     }
 }

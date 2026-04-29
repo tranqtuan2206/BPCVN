@@ -1,0 +1,82 @@
+@model BPCVN.Models.ViewModels.SpecCreateViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa Build";
+    var specId = (Guid)ViewBag.SpecId;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="mb-4">
+            <h2 class="section-title">
+                <i class="bi bi-pencil-square me-2" style="opacity:0.5"></i>Chỉnh sửa Build
+            </h2>
+            <p class="section-subtitle">Cập nhật thông tin cấu hình của bạn</p>
+        </div>
+        <div class="card-lovable card-body-lovable">
+            <form asp-action="Edit" asp-route-id="@specId" method="post">
+                <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
+
+                <!-- Tên Build -->
+                <div class="mb-3">
+                    <label asp-for="BuildName" class="form-label-lovable"></label>
+                    <input asp-for="BuildName" class="form-control" placeholder="VD: Neo65 Endgame Build..." />
+                    <span asp-validation-for="BuildName" class="text-danger small"></span>
+                </div>
+
+                <!-- Kit + Switch -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="KitName" class="form-label-lovable"></label>
+                        <input asp-for="KitName" class="form-control" placeholder="VD: Neo65, QK75, Zoom65 V2..." />
+                        <span asp-validation-for="KitName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="SwitchName" class="form-label-lovable"></label>
+                        <input asp-for="SwitchName" class="form-control" placeholder="VD: Boba U4T, Cherry MX Black..." />
+                        <span asp-validation-for="SwitchName" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Keycap -->
+                <div class="mb-3">
+                    <label asp-for="KeycapName" class="form-label-lovable"></label>
+                    <input asp-for="KeycapName" class="form-control" placeholder="VD: GMK Nord, EPBT BoW..." />
+                </div>
+
+                <!-- Plate + Foam -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="PlateMaterial" class="form-label-lovable"></label>
+                        <input asp-for="PlateMaterial" class="form-control" placeholder="VD: Aluminium, PC, FR4..." />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="FoamSetup" class="form-label-lovable"></label>
+                        <input asp-for="FoamSetup" class="form-control" placeholder="VD: Case foam + PE foam..." />
+                    </div>
+                </div>
+
+                <!-- Mods -->
+                <div class="mb-4">
+                    <label asp-for="Mods" class="form-label-lovable"></label>
+                    <textarea asp-for="Mods" class="form-control" rows="3"
+                              placeholder="VD: Tape mod, tempest mod, switch film..."></textarea>
+                </div>
+
+                <!-- Nút hành động -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn-dark-lovable px-4 py-2">
+                        <i class="bi bi-floppy"></i>Lưu thay đổi
+                    </button>
+                    <a asp-controller="Spec" asp-action="Details" asp-route-id="@specId"
+                       class="btn-ghost px-4 py-2">
+                        <i class="bi bi-x-lg"></i>Huỷ
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

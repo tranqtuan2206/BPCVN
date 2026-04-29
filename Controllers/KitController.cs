@@ -1,5 +1,6 @@
 using BPCVN.Data;
 using BPCVN.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +12,7 @@ public class KitController : Controller
 
     public KitController(AppDbContext db) => _db = db;
 
-    // GET /Kit — Danh sách tất cả Kit
+    // GET /Kit — Danh sách tất cả Kit (public)
     public async Task<IActionResult> Index()
     {
         var kits = await _db.Kits
@@ -22,7 +23,7 @@ public class KitController : Controller
         return View(kits);
     }
 
-    // GET /Kit/Details/5 — Xem chi tiết một Kit
+    // GET /Kit/Details/5 — Xem chi tiết một Kit (public)
     public async Task<IActionResult> Details(int? id)
     {
         if (id == null) return NotFound();
@@ -36,7 +37,8 @@ public class KitController : Controller
         return View(kit);
     }
 
-    // GET /Kit/Edit/5 — Hiển thị form chỉnh sửa Kit
+    // GET /Kit/Edit/5 — Chỉ Admin được chỉnh sửa Kit
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null) return NotFound();
@@ -48,7 +50,8 @@ public class KitController : Controller
         return View(kit);
     }
 
-    // POST /Kit/Edit/5 — Xử lý cập nhật Kit vào database
+    // POST /Kit/Edit/5 — Chỉ Admin được cập nhật Kit
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, Kit kit)

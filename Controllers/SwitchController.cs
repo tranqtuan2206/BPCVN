@@ -1,5 +1,6 @@
 using BPCVN.Data;
 using BPCVN.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +12,7 @@ public class SwitchController : Controller
 
     public SwitchController(AppDbContext db) => _db = db;
 
-    // GET /Switch — Danh sách tất cả Switch
+    // GET /Switch — Danh sách tất cả Switch (public)
     public async Task<IActionResult> Index()
     {
         var switches = await _db.Switches
@@ -22,7 +23,7 @@ public class SwitchController : Controller
         return View(switches);
     }
 
-    // GET /Switch/Details/5 — Xem chi tiết một Switch
+    // GET /Switch/Details/5 — Xem chi tiết một Switch (public)
     public async Task<IActionResult> Details(int? id)
     {
         if (id == null) return NotFound();
@@ -36,7 +37,8 @@ public class SwitchController : Controller
         return View(sw);
     }
 
-    // GET /Switch/Edit/5 — Hiển thị form chỉnh sửa Switch
+    // GET /Switch/Edit/5 — Chỉ Admin được chỉnh sửa Switch
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null) return NotFound();
@@ -48,7 +50,8 @@ public class SwitchController : Controller
         return View(sw);
     }
 
-    // POST /Switch/Edit/5 — Xử lý cập nhật Switch vào database
+    // POST /Switch/Edit/5 — Chỉ Admin được cập nhật Switch
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, Switch switchObj)

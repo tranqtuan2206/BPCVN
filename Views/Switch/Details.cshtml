@@ -2,32 +2,11 @@
 @{
     ViewData["Title"] = Model.Name + " — Switch Details";
 
-
-
-
-
-
-
     // Xác định icon dựa trên loại Switch
-
-
-
     string iconClass;
-
-
-
     if (Model.Type == "Linear") { iconClass = "bi-arrow-down"; }
-
-
-
     else if (Model.Type == "Tactile") { iconClass = "bi-arrow-down-up"; }
-
-
-
     else if (Model.Type == "Clicky") { iconClass = "bi-volume-up"; }
-
-
-
     else { iconClass = "bi-question-circle"; }
 }
 
@@ -42,17 +21,19 @@
             @if (!string.IsNullOrEmpty(Model.Type))
             {
                 <span>&nbsp;·&nbsp;</span>
-                <i class="bi @iconClass me-1"></i>
-
-                @Model.Type
+                <i class="bi @iconClass me-1"></i>@Model.Type
             }
         </p>
     </div>
     <div class="d-flex gap-2">
-        <!-- Nút Chỉnh sửa Switch -->
-        <a asp-controller="Switch" asp-action="Edit" asp-route-id="@Model.SwitchId" class="btn-dark-lovable">
-            <i class="bi bi-pencil-square"></i>Chỉnh sửa
-        </a>
+        @if (User.IsInRole("Admin"))
+        {
+            <!-- Nút Chỉnh sửa Switch — chỉ Admin -->
+            <a asp-controller="Switch" asp-action="Edit" asp-route-id="@Model.SwitchId"
+               class="btn-dark-lovable">
+                <i class="bi bi-pencil-square"></i>Chỉnh sửa
+            </a>
+        }
         <!-- Nút Quay lại danh sách -->
         <a asp-controller="Switch" asp-action="Index" class="btn-ghost">
             <i class="bi bi-arrow-left"></i>Danh sách
@@ -91,7 +72,7 @@
             </div>
         </div>
 
-        <!-- Loại Switch (Linear / Tactile / Clicky) -->
+        <!-- Loại Switch -->
         <div class="col-md-6">
             <div class="info-block">
                 <div class="text-caption mb-1"><i class="bi @iconClass me-1"></i>Loại (Type)</div>
@@ -101,7 +82,7 @@
             </div>
         </div>
 
-        <!-- Lực nhấn (Actuation Force) -->
+        <!-- Lực nhấn -->
         <div class="col-md-6">
             <div class="info-block">
                 <div class="text-caption mb-1"><i class="bi bi-speedometer2 me-1"></i>Lực nhấn</div>
@@ -115,9 +96,13 @@
 
 <!-- Nút hành động dưới cùng -->
 <div class="d-flex gap-2">
-    <a asp-controller="Switch" asp-action="Edit" asp-route-id="@Model.SwitchId" class="btn-dark-lovable">
-        <i class="bi bi-pencil-square"></i>Chỉnh sửa
-    </a>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-controller="Switch" asp-action="Edit" asp-route-id="@Model.SwitchId"
+           class="btn-dark-lovable">
+            <i class="bi bi-pencil-square"></i>Chỉnh sửa
+        </a>
+    }
     <a asp-controller="Switch" asp-action="Index" class="btn-ghost">
         <i class="bi bi-arrow-left"></i>Quay lại danh sách
     </a>

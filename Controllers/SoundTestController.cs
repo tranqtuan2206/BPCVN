@@ -112,6 +112,43 @@ public class SoundTestController : Controller
         return RedirectToAction("Details", "Spec", new { id = specId });
     }
 
+    // ── DELETE POST ───────────────────────────────────────────────────────────
+    // Xóa một SoundTest — owner của Spec HOẶC Admin
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid testId)
+    {
+        var soundTest = await _db.SoundTests
+            .Include(st => st.Spec)
+            .FirstOrDefaultAsync(st => st.TestId == testId);
+
+        if (soundTest == null) return NotFound();
+
+        // Kiểm tra quyền: owner của Spec HOẶC Admin
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isOwner = soundTest.Spec.UserId.ToString() == currentUserId;
+        var isAdmin = User.IsInRole("Admin");
+
+        if (!isOwner && !isAdmin)
+            return Forbid();
+
+        // Xóa file âm thanh vật lý khỏi wwwroot
+        var relativePath = soundTest.AudioUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+        var filePath = Path.Combine(_env.WebRootPath, relativePath);
+
+        if (System.IO.File.Exists(filePath))
+            System.IO.File.Delete(filePath);
+
+        var specId = soundTest.SpecId;
+
+        _db.SoundTests.Remove(soundTest);
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = "Đã xóa sound test thành công.";
+        return RedirectToAction("Details", "Spec", new { id = specId });
+    }
+
     // ── UPVOTE (AJAX endpoint) ────────────────────────────────────────────────
 
     [HttpPost]

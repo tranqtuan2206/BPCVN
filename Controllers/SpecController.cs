@@ -11,8 +11,13 @@ namespace BPCVN.Controllers;
 public class SpecController : Controller
 {
     private readonly AppDbContext _db;
+    private readonly IWebHostEnvironment _env;
 
-    public SpecController(AppDbContext db) => _db = db;
+    public SpecController(AppDbContext db, IWebHostEnvironment env)
+    {
+        _db = db;
+        _env = env;
+    }
 
     // ── INDEX / SEARCH & FILTER ───────────────────────────────────────────────
 
@@ -152,6 +157,155 @@ public class SpecController : Controller
         if (spec == null) return NotFound();
 
         return View(spec);
+    }
+
+    // ── EDIT GET ──────────────────────────────────────────────────────────────
+
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> Edit(Guid id)
+    {
+        var spec = await _db.Specs
+            .Include(s => s.Kit)
+            .Include(s => s.Switch)
+            .Include(s => s.Keycap)
+            .FirstOrDefaultAsync(s => s.SpecId == id);
+
+        if (spec == null) return NotFound();
+
+        // Kiểm tra quyền sở hữu — chỉ owner mới được sửa build của mình
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (spec.UserId.ToString() != currentUserId)
+            return Forbid();
+
+        // Map sang ViewModel để hiển thị trên form
+        var vm = new SpecCreateViewModel
+        {
+            BuildName     = spec.BuildName,
+            KitName       = spec.Kit.Name,
+            SwitchName    = spec.Switch.Name,
+            KeycapName    = spec.Keycap?.Name,
+            PlateMaterial = spec.PlateMaterial,
+            FoamSetup     = spec.FoamSetup,
+            Mods          = spec.Mods
+        };
+
+        ViewBag.SpecId = spec.SpecId;
+        return View(vm);
+    }
+
+    // ── EDIT POST ─────────────────────────────────────────────────────────────
+
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(Guid id, SpecCreateViewModel vm)
+    {
+        if (!ModelState.IsValid)
+        {
+            ViewBag.SpecId = id;
+            return View(vm);
+        }
+
+        var spec = await _db.Specs.FindAsync(id);
+        if (spec == null) return NotFound();
+
+        // Kiểm tra quyền sở hữu
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (spec.UserId.ToString() != currentUserId)
+            return Forbid();
+
+        // Tìm hoặc tạo Kit mới
+        var kitName = vm.KitName.Trim();
+        var kit = await _db.Kits
+            .FirstOrDefaultAsync(k => k.Name.ToLower() == kitName.ToLower());
+        if (kit == null)
+        {
+            kit = new Kit { Name = kitName };
+            _db.Kits.Add(kit);
+            await _db.SaveChangesAsync();
+        }
+
+        // Tìm hoặc tạo Switch mới
+        var switchName = vm.SwitchName.Trim();
+        var sw = await _db.Switches
+            .FirstOrDefaultAsync(s => s.Name.ToLower() == switchName.ToLower());
+        if (sw == null)
+        {
+            sw = new Switch { Name = switchName };
+            _db.Switches.Add(sw);
+            await _db.SaveChangesAsync();
+        }
+
+        // Tìm hoặc tạo Keycap mới (nếu có nhập)
+        int? keycapId = null;
+        if (!string.IsNullOrWhiteSpace(vm.KeycapName))
+        {
+            var keycapName = vm.KeycapName.Trim();
+            var keycap = await _db.Keycaps
+                .FirstOrDefaultAsync(k => k.Name.ToLower() == keycapName.ToLower());
+            if (keycap == null)
+            {
+                keycap = new Keycap { Name = keycapName };
+                _db.Keycaps.Add(keycap);
+                await _db.SaveChangesAsync();
+            }
+            keycapId = keycap.KeycapId;
+        }
+
+        // Cập nhật thông tin Spec
+        spec.BuildName     = vm.BuildName.Trim();
+        spec.KitId         = kit.KitId;
+        spec.SwitchId      = sw.SwitchId;
+        spec.KeycapId      = keycapId;
+        spec.PlateMaterial = vm.PlateMaterial?.Trim();
+        spec.FoamSetup     = vm.FoamSetup?.Trim();
+        spec.Mods          = vm.Mods?.Trim();
+
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = $"Build \"{spec.BuildName}\" đã được cập nhật!";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    // ── DELETE POST ───────────────────────────────────────────────────────────
+    // Owner được xóa build của mình, Admin được xóa bất kỳ build nào
+
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var spec = await _db.Specs
+            .Include(s => s.SoundTests)
+            .FirstOrDefaultAsync(s => s.SpecId == id);
+
+        if (spec == null) return NotFound();
+
+        // Kiểm tra quyền: owner HOẶC Admin
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isOwner = spec.UserId.ToString() == currentUserId;
+        var isAdmin = User.IsInRole("Admin");
+
+        if (!isOwner && !isAdmin)
+            return Forbid();
+
+        // Xóa file âm thanh vật lý khỏi wwwroot
+        foreach (var st in spec.SoundTests)
+        {
+            var relativePath = st.AudioUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+            var filePath = Path.Combine(_env.WebRootPath, relativePath);
+
+            if (System.IO.File.Exists(filePath))
+                System.IO.File.Delete(filePath);
+        }
+
+        // EF Cascade tự xóa SoundTests khi xóa Spec
+        _db.Specs.Remove(spec);
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = $"Đã xóa build \"{spec.BuildName}\" thành công.";
+        return RedirectToAction("Profile", "User");
     }
 
     // ── EXPLORE / SEARCH & FILTER ─────────────────────────────────────────────────
