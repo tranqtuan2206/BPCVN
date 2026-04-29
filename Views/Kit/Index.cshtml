@@ -113,9 +113,16 @@ else
                             }
                         </ul>
                     </div>
-                    <div class="px-3 pb-3 pt-1">
-                        <a href="#" class="btn-ghost btn-sm-lovable btn-block text-center">
+                    <div class="px-3 pb-3 pt-1 d-flex gap-2">
+                        <!-- Nút Xem chi tiết — điều hướng tới Kit/Details -->
+                        <a asp-controller="Kit" asp-action="Details" asp-route-id="@kit.KitId"
+                           class="btn-ghost btn-sm-lovable flex-grow-1 text-center">
                             <i class="bi bi-arrow-right-circle"></i><span data-i18n="kit.viewDetail">Xem chi tiết</span>
+                        </a>
+                        <!-- Nút Chỉnh sửa — điều hướng tới Kit/Edit -->
+                        <a asp-controller="Kit" asp-action="Edit" asp-route-id="@kit.KitId"
+                           class="btn-ghost btn-sm-lovable" title="Chỉnh sửa">
+                            <i class="bi bi-pencil-square"></i>
                         </a>
                     </div>
                 </div>

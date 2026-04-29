@@ -1,0 +1,81 @@
+@model BPCVN.Models.Entities.Switch
+@{
+    ViewData["Title"] = "Chỉnh sửa " + Model.Name;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+
+        <!-- Header -->
+        <div class="mb-4">
+            <h2 class="section-title">
+                <i class="bi bi-pencil-square me-2" style="opacity:0.5"></i>Chỉnh sửa Switch
+            </h2>
+            <p class="section-subtitle">Cập nhật thông tin cho <strong>@Model.Name</strong></p>
+        </div>
+
+        <!-- Form Card -->
+        <div class="card-lovable card-body-lovable">
+            <form asp-action="Edit" method="post">
+
+                <!-- Validation Summary — hiển thị lỗi tổng quan -->
+                <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
+
+                <!-- Hidden field: SwitchId (primary key) -->
+                <input type="hidden" asp-for="SwitchId" />
+
+                <!-- Tên Switch (bắt buộc) -->
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label-lovable">Tên Switch *</label>
+                    <input asp-for="Name" class="form-control" placeholder="VD: Boba U4T, Cherry MX Black..." />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <!-- Hãng + Loại trên cùng một hàng -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Brand" class="form-label-lovable">Hãng (Brand)</label>
+                        <input asp-for="Brand" class="form-control" placeholder="VD: Gateron, Cherry, JWK..." />
+                        <span asp-validation-for="Brand" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Type" class="form-label-lovable">Loại (Type)</label>
+                        <select asp-for="Type" class="form-select">
+                            <option value="">— Chọn loại —</option>
+                            <option value="Linear">Linear</option>
+                            <option value="Tactile">Tactile</option>
+                            <option value="Clicky">Clicky</option>
+                        </select>
+                        <span asp-validation-for="Type" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Lực nhấn (Actuation Force) -->
+                <div class="mb-4">
+                    <label asp-for="ActuationForce" class="form-label-lovable">ActuationForce</label>
+                    <input asp-for="ActuationForce" class="form-control" placeholder="VD: 45g, 62g, 67g..." />
+                    <span asp-validation-for="ActuationForce" class="text-danger small"></span>
+                    <p class="form-hint">Lực nhấn cần thiết để kích hoạt switch (tính bằng gram).</p>
+                </div>
+
+                <!-- Nút hành động -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn-dark-lovable px-4 py-2">
+                        <i class="bi bi-floppy"></i>Lưu thay đổi
+                    </button>
+                    <a asp-controller="Switch" asp-action="Details" asp-route-id="@Model.SwitchId"
+                        class="btn-ghost px-4 py-2">
+                        <i class="bi bi-x-lg"></i>Huỷ
+                    </a>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Client-side validation scripts (jQuery Unobtrusive Validation) -->
+    <partial name="_ValidationScriptsPartial" />
+}

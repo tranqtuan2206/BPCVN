@@ -1,0 +1,124 @@
+@model BPCVN.Models.Entities.Switch
+@{
+    ViewData["Title"] = Model.Name + " — Switch Details";
+
+
+
+
+
+
+
+    // Xác định icon dựa trên loại Switch
+
+
+
+    string iconClass;
+
+
+
+    if (Model.Type == "Linear") { iconClass = "bi-arrow-down"; }
+
+
+
+    else if (Model.Type == "Tactile") { iconClass = "bi-arrow-down-up"; }
+
+
+
+    else if (Model.Type == "Clicky") { iconClass = "bi-volume-up"; }
+
+
+
+    else { iconClass = "bi-question-circle"; }
+}
+
+<!-- Header: Tên Switch + nút hành động -->
+<div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+        <h2 class="section-title mb-1">
+            <i class="bi bi-toggles me-2" style="opacity:0.5"></i>@Model.Name
+        </h2>
+        <p class="text-caption mb-0">
+            <i class="bi bi-building me-1"></i>@(Model.Brand ?? "Unknown Brand")
+            @if (!string.IsNullOrEmpty(Model.Type))
+            {
+                <span>&nbsp;·&nbsp;</span>
+                <i class="bi @iconClass me-1"></i>
+
+                @Model.Type
+            }
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <!-- Nút Chỉnh sửa Switch -->
+        <a asp-controller="Switch" asp-action="Edit" asp-route-id="@Model.SwitchId" class="btn-dark-lovable">
+            <i class="bi bi-pencil-square"></i>Chỉnh sửa
+        </a>
+        <!-- Nút Quay lại danh sách -->
+        <a asp-controller="Switch" asp-action="Index" class="btn-ghost">
+            <i class="bi bi-arrow-left"></i>Danh sách
+        </a>
+    </div>
+</div>
+
+<!-- Icon minh hoạ loại Switch -->
+<div class="card-lovable mb-4 overflow-hidden">
+    <div class="img-placeholder" style="height:200px">
+        <i class="bi @iconClass" style="font-size:5rem"></i>
+    </div>
+</div>
+
+<!-- Thông số chi tiết Switch -->
+<div class="card-lovable card-body-lovable mb-4">
+    <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:16px">
+        <i class="bi bi-sliders me-2" style="opacity:0.5"></i>Thông số Switch
+    </h5>
+    <div class="row g-3">
+        <!-- Tên Switch -->
+        <div class="col-md-6">
+            <div class="info-block">
+                <div class="text-caption mb-1"><i class="bi bi-tag me-1"></i>Tên Switch</div>
+                <div style="font-weight:600;color:var(--color-charcoal)">@Model.Name</div>
+            </div>
+        </div>
+
+        <!-- Hãng sản xuất -->
+        <div class="col-md-6">
+            <div class="info-block">
+                <div class="text-caption mb-1"><i class="bi bi-building me-1"></i>Hãng (Brand)</div>
+                <div style="font-weight:600;color:var(--color-charcoal)">
+                    @(Model.Brand ?? "—")
+                </div>
+            </div>
+        </div>
+
+        <!-- Loại Switch (Linear / Tactile / Clicky) -->
+        <div class="col-md-6">
+            <div class="info-block">
+                <div class="text-caption mb-1"><i class="bi @iconClass me-1"></i>Loại (Type)</div>
+                <div style="font-weight:600;color:var(--color-charcoal)">
+                    @(Model.Type ?? "—")
+                </div>
+            </div>
+        </div>
+
+        <!-- Lực nhấn (Actuation Force) -->
+        <div class="col-md-6">
+            <div class="info-block">
+                <div class="text-caption mb-1"><i class="bi bi-speedometer2 me-1"></i>Lực nhấn</div>
+                <div style="font-weight:600;color:var(--color-charcoal)">
+                    @(Model.ActuationForce ?? "—")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Nút hành động dưới cùng -->
+<div class="d-flex gap-2">
+    <a asp-controller="Switch" asp-action="Edit" asp-route-id="@Model.SwitchId" class="btn-dark-lovable">
+        <i class="bi bi-pencil-square"></i>Chỉnh sửa
+    </a>
+    <a asp-controller="Switch" asp-action="Index" class="btn-ghost">
+        <i class="bi bi-arrow-left"></i>Quay lại danh sách
+    </a>
+</div>

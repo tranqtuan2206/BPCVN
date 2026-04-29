@@ -1,0 +1,119 @@
+@model BPCVN.Models.Entities.Kit
+@{
+    ViewData["Title"] = "Chỉnh sửa " + Model.Name;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+
+        <!-- Header -->
+        <div class="mb-4">
+            <h2 class="section-title">
+                <i class="bi bi-pencil-square me-2" style="opacity:0.5"></i>Chỉnh sửa Kit
+            </h2>
+            <p class="section-subtitle">Cập nhật thông tin cho <strong>@Model.Name</strong></p>
+        </div>
+
+        <!-- Form Card -->
+        <div class="card-lovable card-body-lovable">
+            <form asp-action="Edit" method="post">
+
+                <!-- Validation Summary — hiển thị lỗi tổng quan -->
+                <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
+
+                <!-- Hidden field: KitId (primary key) -->
+                <input type="hidden" asp-for="KitId" />
+
+                <!-- Tên Kit (bắt buộc) -->
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label-lovable">Tên Kit *</label>
+                    <input asp-for="Name" class="form-control" placeholder="VD: Neo65, QK75, Zoom65 V2..." />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <!-- Hãng + Layout trên cùng một hàng -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Brand" class="form-label-lovable">Hãng (Brand)</label>
+                        <input asp-for="Brand" class="form-control" placeholder="VD: Qwertykeys, Mode, KBDFans..." />
+                        <span asp-validation-for="Brand" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Layout" class="form-label-lovable">Layout</label>
+                        <select asp-for="Layout" class="form-select">
+                            <option value="">— Chọn layout —</option>
+                            <option value="40%">40%</option>
+                            <option value="60% - HHKB">60% - HHKB</option>
+                            <option value="60% - WKL">60% - WKL</option>
+                            <option value="60% - WK">60% - WK</option>
+                            <option value="65%">65%</option>
+                            <option value="70% - FRL">70% - FRL</option>
+                            <option value="75%">75%</option>
+                            <option value="TKL">TKL</option>
+                            <option value="98%">98%</option>
+                            <option value="Full-size">Full-size</option>
+                            <option value="Numpad">Numpad</option>
+                            <option value="Other">Khác</option>
+                        </select>
+                        <span asp-validation-for="Layout" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Mount Type + PCB Type -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="MountType" class="form-label-lovable">Mount Type</label>
+                        <select asp-for="MountType" class="form-select">
+                            <option value="">— Chọn mount —</option>
+                            <option value="Gasket Mount">Gasket Mount</option>
+                            <option value="Oring">Oring</option>
+                            <option value="Oringless">Oringless</option>
+                            <option value="Top Mount">Top Mount</option>
+                            <option value="Tray Mount">Tray Mount</option>
+                            <option value="Sandwich Mount">Sandwich Mount</option>
+                            <option value="Plateless">Plateless</option>
+                            <option value="Other">Khác</option>
+                        </select>
+                        <span asp-validation-for="MountType" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="PcbType" class="form-label-lovable">PCB Type</label>
+                        <select asp-for="PcbType" class="form-select">
+                            <option value="">— Chọn loại PCB —</option>
+                            <option value="Hotswap">Hotswap</option>
+                            <option value="Soldered">Soldered</option>
+                            <option value="Hotswap + Soldered">Hotswap + Soldered</option>
+                        </select>
+                        <span asp-validation-for="PcbType" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Image URL -->
+                <div class="mb-4">
+                    <label asp-for="ImageUrl" class="form-label-lovable">URL Hình ảnh</label>
+                    <input asp-for="ImageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
+                    <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                    <p class="form-hint">Dán link hình ảnh trực tiếp (JPG, PNG, WebP).</p>
+                </div>
+
+                <!-- Nút hành động -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn-dark-lovable px-4 py-2">
+                        <i class="bi bi-floppy"></i>Lưu thay đổi
+                    </button>
+                    <a asp-controller="Kit" asp-action="Details" asp-route-id="@Model.KitId"
+                        class="btn-ghost px-4 py-2">
+                        <i class="bi bi-x-lg"></i>Huỷ
+                    </a>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Client-side validation scripts (jQuery Unobtrusive Validation) -->
+    <partial name="_ValidationScriptsPartial" />
+}
