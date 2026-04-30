@@ -43,35 +43,72 @@
 
             <div class="collapse navbar-collapse" id="mainNav">
 
-                <!-- Menu trái — giữ nguyên toàn bộ asp-controller/asp-action -->
+                <!-- Menu trái — phân quyền theo Role -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-2 gap-1">
+                    <!-- Trang chủ — luôn hiển thị -->
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Home" asp-action="Index">
                             <i class="bi bi-house-door me-1"></i><span data-i18n="nav.home">Trang chủ</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Kit" asp-action="Index">
-                            <i class="bi bi-cpu me-1"></i>Kits
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Switch" asp-action="Index">
-                            <i class="bi bi-toggles me-1"></i>Switches
-                        </a>
-                    </li>
+
+                    <!-- Kits & Switches — chỉ hiện cho User thường / chưa đăng nhập (Admin đã có trong dropdown Quản lý) -->
+                    @if (!User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Kit" asp-action="Index">
+                                <i class="bi bi-cpu me-1"></i>Kits
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Switch" asp-action="Index">
+                                <i class="bi bi-toggles me-1"></i>Switches
+                            </a>
+                        </li>
+                    }
+
+                    <!-- Khám phá — luôn hiển thị -->
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Spec" asp-action="Explore">
                             <i class="bi bi-search me-1"></i><span data-i18n="nav.explore">Khám phá</span>
                         </a>
                     </li>
+
+                    <!-- Gõ Phím — luôn hiển thị -->
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="TypingTest" asp-action="Index">
                             <i class="bi bi-keyboard me-1"></i><span data-i18n="nav.typing">Gõ Phím</span>
                         </a>
                     </li>
-                    @if (User.Identity?.IsAuthenticated == true)
 
+                    <!-- Dropdown Quản lý — chỉ Admin thấy, nằm bên trái cạnh menu chính -->
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-gear me-1"></i>Quản lý
+                            </a>
+                            <ul class="dropdown-menu"
+                                style="background:var(--color-cream);border-color:var(--border-light)">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Kit" asp-action="Index"
+                                       style="color:var(--color-charcoal)">
+                                        <i class="bi bi-cpu me-2"></i>Quản lý Kits
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Switch" asp-action="Index"
+                                       style="color:var(--color-charcoal)">
+                                        <i class="bi bi-toggles me-2"></i>Quản lý Switches
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+
+                    <!-- Của tôi — chỉ hiện khi đã đăng nhập -->
+                    @if (User.Identity?.IsAuthenticated == true)
                     {
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="User" asp-action="Profile">
@@ -81,7 +118,7 @@
                     }
                 </ul>
 
-                <!-- Menu phải — thay đổi theo trạng thái đăng nhập -->
+                <!-- Menu phải — đảo vị trí: Tài khoản trước, Tạo Build ngoài cùng -->
                 <div class="d-flex align-items-center gap-2">
 
                     <!-- ── Language Switcher — nằm trong navbar, góc phải ────── -->
@@ -107,38 +144,7 @@
 
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        <!-- Nút tạo build — Primary Dark button -->
-                        <a class="btn-dark-lovable" asp-controller="Spec" asp-action="Create">
-                            <i class="bi bi-plus-circle"></i><span data-i18n="nav.createBuild">Tạo Build</span>
-                        </a>
-
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <!-- Menu Quản lý — chỉ Admin thấy -->
-                            <div class="dropdown">
-                                <button class="btn-ghost btn-sm-lovable dropdown-toggle" type="button"
-                                        data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-gear"></i>Quản lý
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end"
-                                    style="background:var(--color-cream);border-color:var(--border-light)">
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Kit" asp-action="Index"
-                                           style="color:var(--color-charcoal)">
-                                            <i class="bi bi-cpu me-2"></i>Quản lý Kits
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Switch" asp-action="Index"
-                                           style="color:var(--color-charcoal)">
-                                            <i class="bi bi-toggles me-2"></i>Quản lý Switches
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        }
-
-                        <!-- User dropdown — tên + hành động -->
+                        <!-- Dropdown Tài khoản — đặt trước nút Tạo Build -->
                         <div class="dropdown">
                             <button class="btn-ghost btn-sm-lovable dropdown-toggle" type="button"
                                     data-bs-toggle="dropdown" aria-expanded="false">
@@ -174,6 +180,11 @@
                                 </li>
                             </ul>
                         </div>
+
+                        <!-- Nút Tạo Build — ngoài cùng bên phải -->
+                        <a class="btn-dark-lovable" asp-controller="Spec" asp-action="Create">
+                            <i class="bi bi-plus-circle"></i><span data-i18n="nav.createBuild">Tạo Build</span>
+                        </a>
                     }
                     else
                     {

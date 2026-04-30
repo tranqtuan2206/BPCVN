@@ -15,7 +15,7 @@
     border: 1px solid var(--border-light);
     border-radius: var(--radius-container);
     padding: 32px;
-    position: relative;
+    position: relative; 
     overflow: hidden;
     font-family: 'Roboto Mono', 'Inter', ui-monospace, monospace;
     color: var(--color-muted);
