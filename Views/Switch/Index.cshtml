@@ -1,158 +1,152 @@
 @model IEnumerable<BPCVN.Models.Entities.Switch>
 @{
     ViewData["Title"] = "Switch Catalog";
+
+    // Danh sách unique type & brand từ Controller cho dropdown filter
+    var types = ViewBag.Types as List<string> ?? new();
+    var brands = ViewBag.Brands as List<string> ?? new();
 }
 
+<!-- ── Page header ─────────────────────────────────────────────────────── -->
 <div class="section-header">
     <div>
         <h2 class="section-title">
             <i class="bi bi-toggles me-2" style="opacity:0.5"></i>Switch Catalog
         </h2>
         <p class="section-subtitle">
-            @Model.Count() <span data-i18n="switch.countSuffix">switches trong cơ sở dữ liệu</span>
+            <span id="switchCount">@Model.Count()</span> <span data-i18n="switch.countSuffix">switches trong cơ sở dữ liệu</span>
         </p>
     </div>
-    <span class="badge-count" style="font-size:0.9375rem;padding:6px 16px">
+    <span class="badge-count" id="switchBadge" style="font-size:0.9375rem;padding:6px 16px">
         @Model.Count() Switches
     </span>
 </div>
 
-@if (!Model.Any())
+<!-- ── Bộ lọc & Live Search ────────────────────────────────────────────── -->
+<div class="card-lovable card-body-lovable mb-4">
+    <div class="row g-3 align-items-end">
+        <!-- Ô tìm kiếm -->
+        <div class="col-12 col-md-5">
+            <label class="form-label-lovable">
+                <i class="bi bi-search me-1"></i><span data-i18n="switch.searchLabel">Tìm kiếm</span>
+            </label>
+            <input type="text" id="searchInput" class="form-control"
+                placeholder="Nhập tên switch hoặc brand..." autocomplete="off" />
+        </div>
 
+        <!-- Dropdown Loại Switch -->
+        <div class="col-6 col-md-3">
+            <label class="form-label-lovable">
+                <i class="bi bi-toggles me-1"></i><span data-i18n="switch.typeLabel">Loại</span>
+            </label>
+            <select id="filterType" class="form-select">
+                <option value="">-- Tất cả --</option>
+                @foreach (var t in types)
+                {
+                    <option value="@t">@t</option>
+                }
+            </select>
+        </div>
 
+        <!-- Dropdown Brand -->
+        <div class="col-6 col-md-3">
+            <label class="form-label-lovable">
+                <i class="bi bi-building me-1"></i>Brand
+            </label>
+            <select id="filterBrand" class="form-select">
+                <option value="">-- Tất cả --</option>
+                @foreach (var b in brands)
+                {
+                    <option value="@b">@b</option>
+                }
+            </select>
+        </div>
 
-
-
-
-
-{
-    <div class="empty-state">
-        <i class="bi bi-inbox empty-icon"></i>
-        <p class="text-body-lg" data-i18n="switch.empty">Chưa có switch nào.</p>
+        <!-- Nút xóa bộ lọc -->
+        <div class="col-12 col-md-1 d-flex">
+            <button type="button" id="clearFilters" class="btn-ghost flex-grow-1" title="Xóa bộ lọc">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
     </div>
-}
-
-
-
-
-
-
-
-else
-
-
-
-
-
-
-
-{
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
-        @foreach (var sw in Model)
-
-
-
-
-
-
-
-        {
-
-
-
-
-
-
-
-            string iconClass;
-
-
-
-
-
-
-
-            if (sw.Type == "Linear") { iconClass = "bi-arrow-down"; }
-
-
-
-
-
-
-
-            else if (sw.Type == "Tactile") { iconClass = "bi-arrow-down-up"; }
-
-
-
-
-
-
-
-            else if (sw.Type == "Clicky") { iconClass = "bi-volume-up"; }
-
-
-
-
-
-
-
-            else { iconClass = "bi-question-circle"; }
-
-            <div class="col">
-                <div class="card-lovable h-100 d-flex flex-column">
-                    <div class="img-placeholder" style="height:140px">
-                        <i class="bi @iconClass" style="font-size:3.5rem"></i>
-                    </div>
-                    <div class="p-3 flex-grow-1">
-                        @if (!string.IsNullOrEmpty(sw.Type))
-
-
-
-
-
-
-
-                        {
-                            <span class="badge-warm mb-2" style="font-size:.75rem">@sw.Type</span>
-                        }
-                        <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:4px">@sw.Name</h5>
-                        <p class="text-caption mb-3">
-                            <i class="bi bi-building me-1"></i>@(sw.Brand ?? "Unknown Brand")
-                        </p>
-                        @if (!string.IsNullOrEmpty(sw.ActuationForce))
-
-
-
-
-
-
-
-                        {
-                            <ul class="list-unstyled text-caption mb-0">
-                                <li>
-                                    <i class="bi bi-speedometer2 me-2" style="color:var(--color-charcoal)"></i>
-                                    <span data-i18n="switch.actuationForce">Lực nhấn</span>: <strong>@sw.ActuationForce</strong>
-                                </li>
-                            </ul>
-                        }
-                    </div>
-                    <div class="px-3 pb-3 pt-1 d-flex gap-2">
-                        <!-- Nút Xem chi tiết — điều hướng tới Switch/Details -->
-                        <a asp-controller="Switch" asp-action="Details" asp-route-id="@sw.SwitchId"
-                            class="btn-ghost btn-sm-lovable flex-grow-1 text-center">
-                            <i class="bi bi-arrow-right-circle"></i><span data-i18n="switch.viewDetail">Xem chi tiết</span>
-                        </a>
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <!-- Nút Chỉnh sửa — chỉ Admin mới thấy -->
-                            <a asp-controller="Switch" asp-action="Edit" asp-route-id="@sw.SwitchId"
-                                class="btn-ghost btn-sm-lovable" title="Chỉnh sửa">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
-                        }
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
+</div>
+
+<!-- ── Container danh sách Switch — nội dung được thay bằng AJAX ───── -->
+<div id="switch-list-container">
+    <partial name="_SwitchListPartial" model="Model" />
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            'use strict';
+
+            // ── Debounce — trì hoãn gọi hàm cho đến khi user ngừng gõ ──
+            // delay: thời gian chờ (ms) kể từ lần nhấn phím cuối
+            function debounce(func, delay) {
+                let timerId;
+                return function (...args) {
+                    clearTimeout(timerId);
+                    timerId = setTimeout(() => func.apply(this, args), delay);
+                };
+            }
+
+            // ── Tham chiếu DOM ──
+            const searchInput = document.getElementById('searchInput');
+            const filterType = document.getElementById('filterType');
+            const filterBrand = document.getElementById('filterBrand');
+            const clearBtn = document.getElementById('clearFilters');
+            const container = document.getElementById('switch-list-container');
+            const switchCount = document.getElementById('switchCount');
+            const switchBadge = document.getElementById('switchBadge');
+
+            // ── Gọi API lấy danh sách Switch đã lọc ──
+            async function fetchSwitches() {
+                // Ghép tất cả filter thành query string
+                const params = new URLSearchParams();
+                const search = searchInput.value.trim();
+                const type = filterType.value;
+                const brand = filterBrand.value;
+
+                if (search) params.set('searchQuery', search);
+                if (type) params.set('type', type);
+                if (brand) params.set('brand', brand);
+
+                try {
+                    const res = await fetch(`/Switch/Index?${params.toString()}`, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                    // Gán HTML partial vào container
+                    const html = await res.text();
+                    container.innerHTML = html;
+
+                    // Cập nhật bộ đếm — đếm số card hiện tại
+                    const count = container.querySelectorAll('.col').length;
+                    switchCount.textContent = count;
+                    switchBadge.textContent = count + ' Switches';
+                } catch (err) {
+                    console.error('Fetch switches error:', err);
+                }
+            }
+
+            // ── Gắn sự kiện ──
+            // Live search — debounce 350ms để tránh spam request
+            searchInput.addEventListener('input', debounce(fetchSwitches, 350));
+
+            // Dropdown filter — gọi ngay khi thay đổi
+            filterType.addEventListener('change', fetchSwitches);
+            filterBrand.addEventListener('change', fetchSwitches);
+
+            // Nút xóa bộ lọc — reset tất cả input/select rồi fetch lại
+            clearBtn.addEventListener('click', function () {
+                searchInput.value = '';
+                filterType.value = '';
+                filterBrand.value = '';
+                fetchSwitches();
+            });
+        })();
+    </script>
 }

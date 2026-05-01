@@ -92,8 +92,8 @@ else
                     </div>
                     <div class="px-4 py-2 d-flex flex-wrap gap-2">
                         <span class="badge-warm badge-kit"><i class="bi bi-cpu"></i>@spec.Kit.Name</span>
-                        <span class="badge-warm badge-switch"><i class="bi bi-toggles"></i>@spec.Switch.Name</span>
-                        @if (!string.IsNullOrEmpty(spec.Switch.Type))
+                        <span class="badge-warm badge-switch"><i class="bi bi-toggles"></i>@(spec.Switch?.Name ?? spec.CustomSwitchName ?? "N/A")</span>
+                        @if (spec.Switch != null && !string.IsNullOrEmpty(spec.Switch.Type))
                         {
                             <span class="badge-warm badge-type">@spec.Switch.Type</span>
                         }

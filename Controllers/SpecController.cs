@@ -33,19 +33,20 @@ public class SpecController : Controller
             .AsNoTracking()
             .AsQueryable();
 
-        // Lọc theo tên build / kit / switch (không phân biệt hoa thường)
+        // Lọc theo tên build / kit / switch / customSwitchName (không phân biệt hoa thường)
         if (!string.IsNullOrWhiteSpace(searchString))
         {
             var keyword = searchString.Trim().ToLower();
             query = query.Where(s =>
                 s.BuildName.ToLower().Contains(keyword) ||
                 s.Kit.Name.ToLower().Contains(keyword)  ||
-                s.Switch.Name.ToLower().Contains(keyword));
+                (s.Switch != null && s.Switch.Name.ToLower().Contains(keyword)) ||
+                (s.CustomSwitchName != null && s.CustomSwitchName.ToLower().Contains(keyword)));
         }
 
-        // Lọc theo loại switch
+        // Lọc theo loại switch (chỉ áp dụng khi có SwitchId — custom switch không có Type)
         if (!string.IsNullOrWhiteSpace(switchType))
-            query = query.Where(s => s.Switch.Type == switchType);
+            query = query.Where(s => s.Switch != null && s.Switch.Type == switchType);
 
         var specs = await query
             .OrderByDescending(s => s.CreatedAt)
@@ -62,8 +63,14 @@ public class SpecController : Controller
 
     [Authorize]
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
+        // Truyền danh sách Switch có sẵn cho datalist trên View
+        ViewBag.Switches = await _db.Switches
+            .OrderBy(s => s.Name)
+            .AsNoTracking()
+            .ToListAsync();
+
         return View(new SpecCreateViewModel());
     }
 
@@ -75,7 +82,10 @@ public class SpecController : Controller
     public async Task<IActionResult> Create(SpecCreateViewModel vm)
     {
         if (!ModelState.IsValid)
+        {
+            ViewBag.Switches = await _db.Switches.OrderBy(s => s.Name).AsNoTracking().ToListAsync();
             return View(vm);
+        }
 
         // Lấy UserId từ cookie claims
         var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -93,15 +103,40 @@ public class SpecController : Controller
             await _db.SaveChangesAsync();
         }
 
-        // Tìm hoặc tạo mới Switch theo tên
-        var switchName = vm.SwitchName.Trim();
-        var sw = await _db.Switches
-            .FirstOrDefaultAsync(s => s.Name.ToLower() == switchName.ToLower());
-        if (sw == null)
+        // ── Xử lý Switch — KHÔNG tự tạo Switch mới vào Master Data ──
+        // Ưu tiên: SelectedSwitchId > tên trùng DB > CustomSwitchName
+        int? switchId = null;
+        string? customSwitchName = null;
+
+        if (vm.SelectedSwitchId.HasValue)
         {
-            sw = new Switch { Name = switchName };
-            _db.Switches.Add(sw);
-            await _db.SaveChangesAsync();
+            // User chọn Switch có sẵn từ datalist → dùng ID
+            switchId = vm.SelectedSwitchId.Value;
+        }
+        else if (!string.IsNullOrWhiteSpace(vm.SwitchName))
+        {
+            // User nhập text → kiểm tra xem có trùng tên Switch trong DB không
+            var inputName = vm.SwitchName.Trim();
+            var existingSwitch = await _db.Switches
+                .FirstOrDefaultAsync(s => s.Name.ToLower() == inputName.ToLower());
+
+            if (existingSwitch != null)
+            {
+                // Tên trùng với Switch có sẵn → tự động map SwitchId
+                switchId = existingSwitch.SwitchId;
+            }
+            else
+            {
+                // Tên mới hoàn toàn → lưu vào CustomSwitchName
+                customSwitchName = inputName;
+            }
+        }
+        else
+        {
+            // Không nhập gì → báo lỗi
+            ModelState.AddModelError("SwitchName", "Vui lòng chọn hoặc nhập tên switch.");
+            ViewBag.Switches = await _db.Switches.OrderBy(s => s.Name).AsNoTracking().ToListAsync();
+            return View(vm);
         }
 
         // Tìm hoặc tạo mới Keycap theo tên (nếu có nhập)
@@ -122,15 +157,16 @@ public class SpecController : Controller
 
         var spec = new Spec
         {
-            UserId        = userId,
-            BuildName     = vm.BuildName.Trim(),
-            KitId         = kit.KitId,
-            SwitchId      = sw.SwitchId,
-            KeycapId      = keycapId,
-            PlateMaterial = vm.PlateMaterial?.Trim(),
-            FoamSetup     = vm.FoamSetup?.Trim(),
-            Mods          = vm.Mods?.Trim(),
-            CreatedAt     = DateTime.UtcNow
+            UserId           = userId,
+            BuildName        = vm.BuildName.Trim(),
+            KitId            = kit.KitId,
+            SwitchId         = switchId,
+            CustomSwitchName = customSwitchName,
+            KeycapId         = keycapId,
+            PlateMaterial    = vm.PlateMaterial?.Trim(),
+            FoamSetup        = vm.FoamSetup?.Trim(),
+            Mods             = vm.Mods?.Trim(),
+            CreatedAt        = DateTime.UtcNow
         };
 
         _db.Specs.Add(spec);
@@ -181,15 +217,19 @@ public class SpecController : Controller
         // Map sang ViewModel để hiển thị trên form
         var vm = new SpecCreateViewModel
         {
-            BuildName     = spec.BuildName,
-            KitName       = spec.Kit.Name,
-            SwitchName    = spec.Switch.Name,
-            KeycapName    = spec.Keycap?.Name,
-            PlateMaterial = spec.PlateMaterial,
-            FoamSetup     = spec.FoamSetup,
-            Mods          = spec.Mods
+            BuildName        = spec.BuildName,
+            KitName          = spec.Kit.Name,
+            // Nếu có Switch từ DB → hiển thị tên + ID; nếu custom → hiển thị CustomSwitchName
+            SelectedSwitchId = spec.SwitchId,
+            SwitchName       = spec.Switch?.Name ?? spec.CustomSwitchName,
+            KeycapName       = spec.Keycap?.Name,
+            PlateMaterial    = spec.PlateMaterial,
+            FoamSetup        = spec.FoamSetup,
+            Mods             = spec.Mods
         };
 
+        // Truyền danh sách Switch có sẵn cho datalist
+        ViewBag.Switches = await _db.Switches.OrderBy(s => s.Name).AsNoTracking().ToListAsync();
         ViewBag.SpecId = spec.SpecId;
         return View(vm);
     }
@@ -203,6 +243,7 @@ public class SpecController : Controller
     {
         if (!ModelState.IsValid)
         {
+            ViewBag.Switches = await _db.Switches.OrderBy(s => s.Name).AsNoTracking().ToListAsync();
             ViewBag.SpecId = id;
             return View(vm);
         }
@@ -226,15 +267,39 @@ public class SpecController : Controller
             await _db.SaveChangesAsync();
         }
 
-        // Tìm hoặc tạo Switch mới
-        var switchName = vm.SwitchName.Trim();
-        var sw = await _db.Switches
-            .FirstOrDefaultAsync(s => s.Name.ToLower() == switchName.ToLower());
-        if (sw == null)
+        // ── Xử lý Switch — KHÔNG tự tạo Switch mới vào Master Data ──
+        int? switchId = null;
+        string? customSwitchName = null;
+
+        if (vm.SelectedSwitchId.HasValue)
         {
-            sw = new Switch { Name = switchName };
-            _db.Switches.Add(sw);
-            await _db.SaveChangesAsync();
+            // User chọn Switch có sẵn từ datalist → dùng ID
+            switchId = vm.SelectedSwitchId.Value;
+        }
+        else if (!string.IsNullOrWhiteSpace(vm.SwitchName))
+        {
+            // User nhập text → kiểm tra tên trùng DB
+            var inputName = vm.SwitchName.Trim();
+            var existingSwitch = await _db.Switches
+                .FirstOrDefaultAsync(s => s.Name.ToLower() == inputName.ToLower());
+
+            if (existingSwitch != null)
+            {
+                // Tên trùng → tự động map SwitchId
+                switchId = existingSwitch.SwitchId;
+            }
+            else
+            {
+                // Tên mới → lưu CustomSwitchName
+                customSwitchName = inputName;
+            }
+        }
+        else
+        {
+            ModelState.AddModelError("SwitchName", "Vui lòng chọn hoặc nhập tên switch.");
+            ViewBag.Switches = await _db.Switches.OrderBy(s => s.Name).AsNoTracking().ToListAsync();
+            ViewBag.SpecId = id;
+            return View(vm);
         }
 
         // Tìm hoặc tạo Keycap mới (nếu có nhập)
@@ -254,13 +319,14 @@ public class SpecController : Controller
         }
 
         // Cập nhật thông tin Spec
-        spec.BuildName     = vm.BuildName.Trim();
-        spec.KitId         = kit.KitId;
-        spec.SwitchId      = sw.SwitchId;
-        spec.KeycapId      = keycapId;
-        spec.PlateMaterial = vm.PlateMaterial?.Trim();
-        spec.FoamSetup     = vm.FoamSetup?.Trim();
-        spec.Mods          = vm.Mods?.Trim();
+        spec.BuildName        = vm.BuildName.Trim();
+        spec.KitId            = kit.KitId;
+        spec.SwitchId         = switchId;
+        spec.CustomSwitchName = customSwitchName;
+        spec.KeycapId         = keycapId;
+        spec.PlateMaterial    = vm.PlateMaterial?.Trim();
+        spec.FoamSetup        = vm.FoamSetup?.Trim();
+        spec.Mods             = vm.Mods?.Trim();
 
         await _db.SaveChangesAsync();
 
@@ -323,19 +389,20 @@ public class SpecController : Controller
             .AsNoTracking()
             .AsQueryable();
 
-        // Lọc theo tên build / kit / switch (case-insensitive)
+        // Lọc theo tên build / kit / switch / customSwitchName (case-insensitive)
         if (!string.IsNullOrWhiteSpace(searchString))
         {
             var kw = searchString.Trim().ToLower();
             query = query.Where(s =>
                 s.BuildName.ToLower().Contains(kw) ||
                 s.Kit.Name.ToLower().Contains(kw)  ||
-                s.Switch.Name.ToLower().Contains(kw));
+                (s.Switch != null && s.Switch.Name.ToLower().Contains(kw)) ||
+                (s.CustomSwitchName != null && s.CustomSwitchName.ToLower().Contains(kw)));
         }
 
-        // Lọc theo loại switch
+        // Lọc theo loại switch (chỉ áp dụng với Switch có trong DB)
         if (!string.IsNullOrWhiteSpace(switchType))
-            query = query.Where(s => s.Switch.Type == switchType);
+            query = query.Where(s => s.Switch != null && s.Switch.Type == switchType);
 
         var specs = await query
             .OrderByDescending(s => s.CreatedAt)

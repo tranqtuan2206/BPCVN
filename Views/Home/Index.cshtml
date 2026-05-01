@@ -101,7 +101,7 @@ else
                             <i class="bi bi-cpu"></i>@spec.Kit.Name
                         </span>
                         <span class="badge-warm badge-switch">
-                            <i class="bi bi-toggles"></i>@spec.Switch.Name
+                            <i class="bi bi-toggles"></i>@(spec.Switch?.Name ?? spec.CustomSwitchName ?? "N/A")
                         </span>
                         @if (!string.IsNullOrEmpty(spec.PlateMaterial))
                         {

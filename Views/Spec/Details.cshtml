@@ -2,8 +2,11 @@
 @using System.Security.Claims
 @{
     ViewData["Title"] = Model.BuildName;
+
     var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
     var isOwner = currentUserId == Model.UserId.ToString();
+
     var isAdmin = User.IsInRole("Admin");
 }
 
@@ -17,6 +20,7 @@
     </div>
     <div class="d-flex gap-2 flex-wrap">
         @if (isOwner)
+
         {
             <!-- Upload Sound Test — chỉ owner -->
             <a asp-controller="SoundTest" asp-action="Upload" asp-route-specId="@Model.SpecId" class="btn-dark-lovable">
@@ -28,12 +32,13 @@
             </a>
         }
         @if (isOwner || isAdmin)
+
         {
             <!-- Xóa Build — owner hoặc Admin -->
             <form asp-controller="Spec" asp-action="Delete" asp-route-id="@Model.SpecId" method="post"
-                  onsubmit="return confirm('Xóa build \'@Model.BuildName\'?\nHành động này không thể hoàn tác.')">
+                onsubmit="return confirm('Xóa build \'@Model.BuildName\'?\nHành động này không thể hoàn tác.')">
                 <button type="submit" class="btn-ghost btn-sm-lovable"
-                        style="color:#b91c1c;border-color:rgba(185,28,28,0.3)">
+                    style="color:#b91c1c;border-color:rgba(185,28,28,0.3)">
                     <i class="bi bi-trash"></i>Xóa
                 </button>
             </form>
@@ -44,7 +49,8 @@
 <!-- Thông số build -->
 <div class="card-lovable card-body-lovable mb-4">
     <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:16px">
-        <i class="bi bi-sliders me-2" style="opacity:0.5"></i><span data-i18n="details.specTitle">Thông số cấu hình</span>
+        <i class="bi bi-sliders me-2" style="opacity:0.5"></i><span data-i18n="details.specTitle">Thông số cấu
+            hình</span>
     </h5>
     <div class="row g-3">
         <div class="col-md-4">
@@ -57,25 +63,48 @@
         <div class="col-md-4">
             <div class="info-block">
                 <div class="text-caption mb-1"><i class="bi bi-toggles me-1"></i>Switch</div>
-                <div style="font-weight:600;color:var(--color-charcoal)">@Model.Switch.Name</div>
-                <div class="text-caption">@Model.Switch.Brand · @Model.Switch.Type</div>
+                @if (Model.Switch != null)
+
+                {
+                    @* Switch từ Master Data — hiển thị đầy đủ thông tin *@
+                    <div style="font-weight:600;color:var(--color-charcoal)">@Model.Switch.Name</div>
+                    <div class="text-caption">@Model.Switch.Brand · @Model.Switch.Type</div>
+                }
+
+                else if (!string.IsNullOrEmpty(Model.CustomSwitchName))
+
+                {
+                    @* Custom switch do user tự nhập — chỉ hiển thị tên *@
+                    <div style="font-weight:600;color:var(--color-charcoal)">@Model.CustomSwitchName</div>
+                    <div class="text-caption" style="font-style:italic">Custom switch</div>
+                }
+
+                else
+
+                {
+                    <div class="text-caption" style="font-style:italic">Không rõ</div>
+                }
             </div>
         </div>
         <div class="col-md-4">
             <div class="info-block">
                 <div class="text-caption mb-1"><i class="bi bi-grid me-1"></i>Keycap</div>
                 @if (Model.Keycap != null)
+
                 {
                     <div style="font-weight:600;color:var(--color-charcoal)">@Model.Keycap.Name</div>
                     <div class="text-caption">@Model.Keycap.Brand · @Model.Keycap.Profile</div>
                 }
+
                 else
+
                 {
                     <div class="text-caption" style="font-style:italic" data-i18n="details.none">Không có</div>
                 }
             </div>
         </div>
         @if (!string.IsNullOrEmpty(Model.PlateMaterial))
+
         {
             <div class="col-md-4">
                 <div class="info-block">
@@ -85,6 +114,7 @@
             </div>
         }
         @if (!string.IsNullOrEmpty(Model.FoamSetup))
+
         {
             <div class="col-md-4">
                 <div class="info-block">
@@ -94,6 +124,7 @@
             </div>
         }
         @if (!string.IsNullOrEmpty(Model.Mods))
+
         {
             <div class="col-12">
                 <div class="info-block">
@@ -114,21 +145,26 @@
         </h5>
     </div>
     @if (!Model.SoundTests.Any())
+
     {
         <div class="empty-state" style="padding:32px 16px">
             <i class="bi bi-mic-mute empty-icon" style="font-size:2.5rem"></i>
             <p class="mb-0" data-i18n="details.noSoundTest">Chưa có sound test nào.</p>
             @if (isOwner)
+
             {
                 <a asp-controller="SoundTest" asp-action="Upload" asp-route-specId="@Model.SpecId"
                     class="btn-dark-lovable btn-sm-lovable mt-3" data-i18n="details.uploadNow">Upload ngay</a>
             }
         </div>
     }
+
     else
+
     {
         <div class="d-flex flex-column gap-3">
             @foreach (var st in Model.SoundTests)
+
             {
                 <div class="audio-container" style="padding:16px">
                     <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
@@ -147,11 +183,11 @@
                             {
                                 <!-- Nút xóa Sound Test — owner hoặc Admin -->
                                 <form asp-controller="SoundTest" asp-action="Delete" method="post"
-                                      onsubmit="return confirm('Xóa sound test này?')">
+                                    onsubmit="return confirm('Xóa sound test này?')">
                                     <input type="hidden" name="testId" value="@st.TestId" />
                                     <button type="submit" class="btn-ghost btn-sm-lovable"
-                                            style="color:#b91c1c;border-color:rgba(185,28,28,0.3);padding:4px 8px"
-                                            title="Xóa sound test">
+                                        style="color:#b91c1c;border-color:rgba(185,28,28,0.3);padding:4px 8px"
+                                        title="Xóa sound test">
                                         <i class="bi bi-trash" style="font-size:0.8rem"></i>
                                     </button>
                                 </form>

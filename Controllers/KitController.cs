@@ -12,14 +12,52 @@ public class KitController : Controller
 
     public KitController(AppDbContext db) => _db = db;
 
-    // GET /Kit — Danh sách tất cả Kit (public)
-    public async Task<IActionResult> Index()
+    // GET /Kit — Danh sách Kit, hỗ trợ AJAX filter + live search
+    public async Task<IActionResult> Index(string? searchQuery, string? brand, string? layout)
     {
-        var kits = await _db.Kits
-                            .AsNoTracking()
-                            .OrderBy(k => k.Brand)
-                            .ThenBy(k => k.Name)
-                            .ToListAsync();
+        var query = _db.Kits.AsNoTracking().AsQueryable();
+
+        // Lọc theo từ khóa tìm kiếm (tên hoặc brand)
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            var kw = searchQuery.Trim().ToLower();
+            query = query.Where(k =>
+                k.Name.ToLower().Contains(kw) ||
+                (k.Brand != null && k.Brand.ToLower().Contains(kw)));
+        }
+
+        // Lọc theo brand
+        if (!string.IsNullOrWhiteSpace(brand))
+            query = query.Where(k => k.Brand == brand);
+
+        // Lọc theo layout
+        if (!string.IsNullOrWhiteSpace(layout))
+            query = query.Where(k => k.Layout == layout);
+
+        var kits = await query
+            .OrderBy(k => k.Brand)
+            .ThenBy(k => k.Name)
+            .ToListAsync();
+
+        // Nếu là AJAX request → trả về Partial View (chỉ HTML danh sách)
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            return PartialView("_KitListPartial", kits);
+
+        // Load danh sách brand & layout để đổ vào dropdown filter
+        ViewBag.Brands = await _db.Kits
+            .Where(k => k.Brand != null)
+            .Select(k => k.Brand!)
+            .Distinct()
+            .OrderBy(b => b)
+            .ToListAsync();
+
+        ViewBag.Layouts = await _db.Kits
+            .Where(k => k.Layout != null)
+            .Select(k => k.Layout!)
+            .Distinct()
+            .OrderBy(l => l)
+            .ToListAsync();
+
         return View(kits);
     }
 

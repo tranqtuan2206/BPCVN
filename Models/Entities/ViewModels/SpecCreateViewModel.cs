@@ -14,10 +14,14 @@ public class SpecCreateViewModel
     [Display(Name = "Kit")]
     public string KitName { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Vui lòng nhập tên switch")]
+    // ID khi user chọn Switch có sẵn từ datalist, null khi nhập tên mới
+    [Display(Name = "Switch")]
+    public int? SelectedSwitchId { get; set; }
+
+    // Tên switch — dùng khi user gõ tên (cả có sẵn lẫn tự nhập)
     [StringLength(100)]
     [Display(Name = "Switch")]
-    public string SwitchName { get; set; } = string.Empty;
+    public string? SwitchName { get; set; }
 
     [StringLength(100)]
     [Display(Name = "Keycap (tuỳ chọn)")]

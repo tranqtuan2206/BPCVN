@@ -1,0 +1,73 @@
+@model IEnumerable<BPCVN.Models.Entities.Kit>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <i class="bi bi-inbox empty-icon"></i>
+        <p class="text-body-lg" data-i18n="kit.empty">Không tìm thấy kit nào phù hợp.</p>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+        @foreach (var kit in Model)
+        {
+            <div class="col">
+                <div class="card-lovable h-100 d-flex flex-column">
+                    @if (!string.IsNullOrEmpty(kit.ImageUrl))
+                    {
+                        <img src="@kit.ImageUrl" class="img-lovable"
+                            style="height:190px;object-fit:cover;border-radius:0;border-top-left-radius:var(--radius-card);border-top-right-radius:var(--radius-card);border-left:0;border-right:0;border-top:0"
+                            alt="@kit.Name" />
+                    }
+                    else
+                    {
+                        <div class="img-placeholder" style="height:190px">
+                            <i class="bi bi-keyboard" style="font-size:4rem"></i>
+                        </div>
+                    }
+                    <div class="p-3 flex-grow-1">
+                        @if (!string.IsNullOrEmpty(kit.Layout))
+                        {
+                            <span class="badge-warm badge-kit mb-2" style="font-size:.75rem">@kit.Layout</span>
+                        }
+                        <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:4px">@kit.Name</h5>
+                        <p class="text-caption mb-3">
+                            <i class="bi bi-building me-1"></i>@(kit.Brand ?? "Unknown Brand")
+                        </p>
+                        <ul class="list-unstyled text-caption mb-0">
+                            @if (!string.IsNullOrEmpty(kit.MountType))
+                            {
+                                <li class="mb-1">
+                                    <i class="bi bi-layers me-2" style="color:var(--color-charcoal)"></i>@kit.MountType
+                                </li>
+                            }
+                            @if (!string.IsNullOrEmpty(kit.PcbType))
+                            {
+                                <li>
+                                    <i class="bi bi-motherboard me-2"
+                                        style="color:var(--color-charcoal)"></i>@kit.PcbType
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                    <div class="px-3 pb-3 pt-1 d-flex gap-2">
+                        <!-- Nút Xem chi tiết -->
+                        <a asp-controller="Kit" asp-action="Details" asp-route-id="@kit.KitId"
+                            class="btn-ghost btn-sm-lovable flex-grow-1 text-center">
+                            <i class="bi bi-arrow-right-circle"></i><span data-i18n="kit.viewDetail">Xem chi tiết</span>
+                        </a>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <!-- Nút Chỉnh sửa — chỉ Admin mới thấy -->
+                            <a asp-controller="Kit" asp-action="Edit" asp-route-id="@kit.KitId"
+                                class="btn-ghost btn-sm-lovable" title="Chỉnh sửa">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

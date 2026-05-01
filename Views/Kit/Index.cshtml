@@ -1,135 +1,152 @@
 @model IEnumerable<BPCVN.Models.Entities.Kit>
 @{
     ViewData["Title"] = "Kit Catalog";
+
+    // Danh sách unique brand & layout từ Controller cho dropdown filter
+    var brands = ViewBag.Brands as List<string> ?? new();
+    var layouts = ViewBag.Layouts as List<string> ?? new();
 }
 
+<!-- ── Page header ─────────────────────────────────────────────────────── -->
 <div class="section-header">
     <div>
         <h2 class="section-title">
             <i class="bi bi-cpu me-2" style="opacity:0.5"></i>Kit Catalog
         </h2>
         <p class="section-subtitle">
-            @Model.Count() <span data-i18n="kit.countSuffix">kits trong cơ sở dữ liệu</span>
+            <span id="kitCount">@Model.Count()</span> <span data-i18n="kit.countSuffix">kits trong cơ sở dữ liệu</span>
         </p>
     </div>
-    <span class="badge-count" style="font-size:0.9375rem;padding:6px 16px">
+    <span class="badge-count" id="kitBadge" style="font-size:0.9375rem;padding:6px 16px">
         @Model.Count() Kits
     </span>
 </div>
 
-@if (!Model.Any())
+<!-- ── Bộ lọc & Live Search ────────────────────────────────────────────── -->
+<div class="card-lovable card-body-lovable mb-4">
+    <div class="row g-3 align-items-end">
+        <!-- Ô tìm kiếm -->
+        <div class="col-12 col-md-5">
+            <label class="form-label-lovable">
+                <i class="bi bi-search me-1"></i><span data-i18n="kit.searchLabel">Tìm kiếm</span>
+            </label>
+            <input type="text" id="searchInput" class="form-control"
+                placeholder="Nhập tên kit hoặc brand..." autocomplete="off" />
+        </div>
 
+        <!-- Dropdown Brand -->
+        <div class="col-6 col-md-3">
+            <label class="form-label-lovable">
+                <i class="bi bi-building me-1"></i>Brand
+            </label>
+            <select id="filterBrand" class="form-select">
+                <option value="">-- Tất cả --</option>
+                @foreach (var b in brands)
+                {
+                    <option value="@b">@b</option>
+                }
+            </select>
+        </div>
 
+        <!-- Dropdown Layout -->
+        <div class="col-6 col-md-3">
+            <label class="form-label-lovable">
+                <i class="bi bi-grid me-1"></i>Layout
+            </label>
+            <select id="filterLayout" class="form-select">
+                <option value="">-- Tất cả --</option>
+                @foreach (var l in layouts)
+                {
+                    <option value="@l">@l</option>
+                }
+            </select>
+        </div>
 
-
-
-
-
-{
-    <div class="empty-state">
-        <i class="bi bi-inbox empty-icon"></i>
-        <p class="text-body-lg" data-i18n="kit.empty">Chưa có kit nào. Hãy chạy seeder!</p>
+        <!-- Nút xóa bộ lọc -->
+        <div class="col-12 col-md-1 d-flex">
+            <button type="button" id="clearFilters" class="btn-ghost flex-grow-1" title="Xóa bộ lọc">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
     </div>
-}
+</div>
 
+<!-- ── Container danh sách Kit — nội dung được thay bằng AJAX ──────── -->
+<div id="kit-list-container">
+    <partial name="_KitListPartial" model="Model" />
+</div>
 
+@section Scripts {
+    <script>
+        (function () {
+            'use strict';
 
+            // ── Debounce — trì hoãn gọi hàm cho đến khi user ngừng gõ ──
+            // delay: thời gian chờ (ms) kể từ lần nhấn phím cuối
+            function debounce(func, delay) {
+                let timerId;
+                return function (...args) {
+                    clearTimeout(timerId);
+                    timerId = setTimeout(() => func.apply(this, args), delay);
+                };
+            }
 
+            // ── Tham chiếu DOM ──
+            const searchInput = document.getElementById('searchInput');
+            const filterBrand = document.getElementById('filterBrand');
+            const filterLayout = document.getElementById('filterLayout');
+            const clearBtn = document.getElementById('clearFilters');
+            const container = document.getElementById('kit-list-container');
+            const kitCount = document.getElementById('kitCount');
+            const kitBadge = document.getElementById('kitBadge');
 
+            // ── Gọi API lấy danh sách Kit đã lọc ──
+            async function fetchKits() {
+                // Ghép tất cả filter thành query string
+                const params = new URLSearchParams();
+                const search = searchInput.value.trim();
+                const brand = filterBrand.value;
+                const layout = filterLayout.value;
 
+                if (search) params.set('searchQuery', search);
+                if (brand) params.set('brand', brand);
+                if (layout) params.set('layout', layout);
 
-else
+                try {
+                    const res = await fetch(`/Kit/Index?${params.toString()}`, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
 
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
+                    // Gán HTML partial vào container
+                    const html = await res.text();
+                    container.innerHTML = html;
 
+                    // Cập nhật bộ đếm — đếm số card hiện tại
+                    const count = container.querySelectorAll('.col').length;
+                    kitCount.textContent = count;
+                    kitBadge.textContent = count + ' Kits';
+                } catch (err) {
+                    console.error('Fetch kits error:', err);
+                }
+            }
 
+            // ── Gắn sự kiện ──
+            // Live search — debounce 350ms để tránh spam request
+            searchInput.addEventListener('input', debounce(fetchKits, 350));
 
+            // Dropdown filter — gọi ngay khi thay đổi
+            filterBrand.addEventListener('change', fetchKits);
+            filterLayout.addEventListener('change', fetchKits);
 
-
-{
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
-        @foreach (var kit in Model)
-
-
-
-
-
-
-
-        {
-            <div class="col">
-                <div class="card-lovable h-100 d-flex flex-column">
-                    @if (!string.IsNullOrEmpty(kit.ImageUrl))
-
-
-
-                    {
-                        <img src="@kit.ImageUrl" class="img-lovable"
-                            style="height:190px;object-fit:cover;border-radius:0;border-top-left-radius:var(--radius-card);border-top-right-radius:var(--radius-card);border-left:0;border-right:0;border-top:0"
-                            alt="@kit.Name" />
-                    }
-
-
-
-                    else
-
-
-
-                    {
-                        <div class="img-placeholder" style="height:190px">
-                            <i class="bi bi-keyboard" style="font-size:4rem"></i>
-                        </div>
-                    }
-                    <div class="p-3 flex-grow-1">
-                        @if (!string.IsNullOrEmpty(kit.Layout))
-
-
-
-
-
-
-
-                        {
-                            <span class="badge-warm badge-kit mb-2" style="font-size:.75rem">@kit.Layout</span>
-                        }
-                        <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:4px">@kit.Name</h5>
-                        <p class="text-caption mb-3">
-                            <i class="bi bi-building me-1"></i>@(kit.Brand ?? "Unknown Brand")
-                        </p>
-                        <ul class="list-unstyled text-caption mb-0">
-                            @if (!string.IsNullOrEmpty(kit.MountType))
-
-                            {
-                                <li class="mb-1">
-                                    <i class="bi bi-layers me-2" style="color:var(--color-charcoal)"></i>@kit.MountType
-                                </li>
-                            }
-                            @if (!string.IsNullOrEmpty(kit.PcbType))
-
-                            {
-                                <li>
-                                    <i class="bi bi-motherboard me-2" style="color:var(--color-charcoal)"></i>@kit.PcbType
-                                </li>
-                            }
-                        </ul>
-                    </div>
-                    <div class="px-3 pb-3 pt-1 d-flex gap-2">
-                        <!-- Nút Xem chi tiết — điều hướng tới Kit/Details -->
-                        <a asp-controller="Kit" asp-action="Details" asp-route-id="@kit.KitId"
-                           class="btn-ghost btn-sm-lovable flex-grow-1 text-center">
-                            <i class="bi bi-arrow-right-circle"></i><span data-i18n="kit.viewDetail">Xem chi tiết</span>
-                        </a>
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <!-- Nút Chỉnh sửa — chỉ Admin mới thấy -->
-                            <a asp-controller="Kit" asp-action="Edit" asp-route-id="@kit.KitId"
-                               class="btn-ghost btn-sm-lovable" title="Chỉnh sửa">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
-                        }
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
+            // Nút xóa bộ lọc — reset tất cả input/select rồi fetch lại
+            clearBtn.addEventListener('click', function () {
+                searchInput.value = '';
+                filterBrand.value = '';
+                filterLayout.value = '';
+                fetchKits();
+            });
+        })();
+    </script>
 }

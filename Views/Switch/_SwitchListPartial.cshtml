@@ -1,0 +1,67 @@
+@model IEnumerable<BPCVN.Models.Entities.Switch>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <i class="bi bi-inbox empty-icon"></i>
+        <p class="text-body-lg" data-i18n="switch.empty">Không tìm thấy switch nào phù hợp.</p>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+        @foreach (var sw in Model)
+        {
+            @* Chọn icon theo loại switch *@
+            string iconClass;
+            if (sw.Type == "Linear") { iconClass = "bi-arrow-down"; }
+            else if (sw.Type == "Tactile") { iconClass = "bi-arrow-down-up"; }
+            else if (sw.Type == "Clicky") { iconClass = "bi-volume-up"; }
+            else { iconClass = "bi-question-circle"; }
+
+            <div class="col">
+                <div class="card-lovable h-100 d-flex flex-column">
+                    <div class="img-placeholder" style="height:140px">
+                        <i class="bi @iconClass" style="font-size:3.5rem"></i>
+                    </div>
+                    <div class="p-3 flex-grow-1">
+                        @if (!string.IsNullOrEmpty(sw.Type))
+                        {
+                            <span class="badge-warm mb-2" style="font-size:.75rem">@sw.Type</span>
+                        }
+                        <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:4px">@sw.Name</h5>
+                        <p class="text-caption mb-3">
+                            <i class="bi bi-building me-1"></i>@(sw.Brand ?? "Unknown Brand")
+                        </p>
+                        @if (!string.IsNullOrEmpty(sw.ActuationForce))
+                        {
+                            <ul class="list-unstyled text-caption mb-0">
+                                <li>
+                                    <i class="bi bi-speedometer2 me-2" style="color:var(--color-charcoal)"></i>
+                                    <span data-i18n="switch.actuationForce">Lực nhấn</span>:
+                                    <strong>@sw.ActuationForce</strong>
+                                </li>
+                            </ul>
+                        }
+                    </div>
+                    <div class="px-3 pb-3 pt-1 d-flex gap-2">
+                        <!-- Nút Xem chi tiết -->
+                        <a asp-controller="Switch" asp-action="Details" asp-route-id="@sw.SwitchId"
+                            class="btn-ghost btn-sm-lovable flex-grow-1 text-center">
+                            <i class="bi bi-arrow-right-circle"></i><span data-i18n="switch.viewDetail">Xem chi
+                                tiết</span>
+                        </a>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <!-- Nút Chỉnh sửa — chỉ Admin mới thấy -->
+                            <a asp-controller="Switch" asp-action="Edit" asp-route-id="@sw.SwitchId"
+                                class="btn-ghost btn-sm-lovable" title="Chỉnh sửa">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

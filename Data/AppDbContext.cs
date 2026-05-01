@@ -68,10 +68,12 @@ public class AppDbContext : DbContext
                   .HasForeignKey(s => s.KitId)
                   .OnDelete(DeleteBehavior.Restrict);
 
+            // FK Switch — optional: null khi user dùng CustomSwitchName
             entity.HasOne(s => s.Switch)
                   .WithMany(sw => sw.Specs)
                   .HasForeignKey(s => s.SwitchId)
-                  .OnDelete(DeleteBehavior.Restrict);
+                  .IsRequired(false)
+                  .OnDelete(DeleteBehavior.SetNull);
 
             entity.HasOne(s => s.Keycap)
                   .WithMany(kc => kc.Specs)

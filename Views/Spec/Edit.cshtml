@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "Chỉnh sửa Build";
     var specId = (Guid)ViewBag.SpecId;
+    // Danh sách Switch có sẵn từ Controller
+    var switches = ViewBag.Switches as List<BPCVN.Models.Entities.Switch> ?? new();
 }
 
 <div class="row justify-content-center">
@@ -31,8 +33,19 @@
                         <span asp-validation-for="KitName" class="text-danger small"></span>
                     </div>
                     <div class="col-md-6">
-                        <label asp-for="SwitchName" class="form-label-lovable"></label>
-                        <input asp-for="SwitchName" class="form-control" placeholder="VD: Boba U4T, Cherry MX Black..." />
+                        <label class="form-label-lovable">Switch</label>
+                        @* Input + Datalist — user vừa chọn có sẵn vừa gõ tên mới *@
+                        <input type="text" id="switchInput" name="SwitchName" value="@Model.SwitchName"
+                               class="form-control" list="switchDatalist"
+                               placeholder="Chọn hoặc nhập tên switch..." autocomplete="off" />
+                        <datalist id="switchDatalist">
+                            @foreach (var sw in switches)
+                            {
+                                <option value="@sw.Name" data-switch-id="@sw.SwitchId"></option>
+                            }
+                        </datalist>
+                        @* Hidden field gửi SwitchId khi user chọn switch có sẵn *@
+                        <input type="hidden" id="selectedSwitchId" name="SelectedSwitchId" value="@Model.SelectedSwitchId" />
                         <span asp-validation-for="SwitchName" class="text-danger small"></span>
                     </div>
                 </div>
@@ -79,4 +92,38 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Map tên switch → ID để tự động set hidden field khi user chọn từ datalist
+        (function () {
+            const switchInput = document.getElementById('switchInput');
+            const hiddenId = document.getElementById('selectedSwitchId');
+            const datalist = document.getElementById('switchDatalist');
+
+            // Tạo map: tên (lowercase) → switchId
+            const switchMap = {};
+            datalist.querySelectorAll('option').forEach(opt => {
+                switchMap[opt.value.toLowerCase()] = opt.dataset.switchId;
+            });
+
+            switchInput.addEventListener('input', function () {
+                const val = this.value.trim().toLowerCase();
+                if (switchMap[val]) {
+                    // User chọn/nhập tên trùng switch có sẵn → set ID
+                    hiddenId.value = switchMap[val];
+                } else {
+                    // User nhập tên mới → xóa ID
+                    hiddenId.value = '';
+                }
+            });
+
+            switchInput.addEventListener('change', function () {
+                const val = this.value.trim().toLowerCase();
+                if (switchMap[val]) {
+                    hiddenId.value = switchMap[val];
+                } else {
+                    hiddenId.value = '';
+                }
+            });
+        })();
+    </script>
 }

@@ -14,10 +14,14 @@ public class Spec
     [Required]
     public int KitId { get; set; }
 
-    [Required]
-    public int SwitchId { get; set; }
+    // Nullable — null khi user nhập custom switch name
+    public int? SwitchId { get; set; }
 
     public int? KeycapId { get; set; }
+
+    /// <summary>Tên switch tự nhập (không có trong DB). Null khi dùng SwitchId.</summary>
+    [StringLength(100)]
+    public string? CustomSwitchName { get; set; }
 
     [Required(ErrorMessage = "Tên build là bắt buộc.")]
     [StringLength(150)]
@@ -44,8 +48,9 @@ public class Spec
     [ForeignKey(nameof(KitId))]
     public Kit Kit { get; set; } = null!;
 
+    // Nullable — null khi user dùng CustomSwitchName thay vì chọn Switch có sẵn
     [ForeignKey(nameof(SwitchId))]
-    public Switch Switch { get; set; } = null!;
+    public Switch? Switch { get; set; }
 
     [ForeignKey(nameof(KeycapId))]
     public Keycap? Keycap { get; set; }
