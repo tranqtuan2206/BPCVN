@@ -43,8 +43,9 @@
 
             <div class="collapse navbar-collapse" id="mainNav">
 
-                <!-- Menu trái — phân quyền theo Role -->
+                <!-- ── Menu trái — phân quyền theo Role ── -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-2 gap-1">
+
                     <!-- Trang chủ — luôn hiển thị -->
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Home" asp-action="Index">
@@ -52,38 +53,10 @@
                         </a>
                     </li>
 
-                    <!-- Kits & Switches — chỉ hiện cho User thường / chưa đăng nhập (Admin đã có trong dropdown Quản lý) -->
-                    @if (!User.IsInRole("Admin"))
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Kit" asp-action="Index">
-                                <i class="bi bi-cpu me-1"></i>Kits
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Switch" asp-action="Index">
-                                <i class="bi bi-toggles me-1"></i>Switches
-                            </a>
-                        </li>
-                    }
-
-                    <!-- Khám phá — luôn hiển thị -->
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Spec" asp-action="Explore">
-                            <i class="bi bi-search me-1"></i><span data-i18n="nav.explore">Khám phá</span>
-                        </a>
-                    </li>
-
-                    <!-- Gõ Phím — luôn hiển thị -->
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="TypingTest" asp-action="Index">
-                            <i class="bi bi-keyboard me-1"></i><span data-i18n="nav.typing">Gõ Phím</span>
-                        </a>
-                    </li>
-
-                    <!-- Dropdown Quản lý — chỉ Admin thấy, nằm bên trái cạnh menu chính -->
+                    <!-- ── Menu dành cho Admin ── -->
                     @if (User.IsInRole("Admin"))
                     {
+                        <!-- Dropdown Quản lý — chứa Kits, Switches, Keycaps -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button"
                                data-bs-toggle="dropdown" aria-expanded="false">
@@ -103,49 +76,87 @@
                                         <i class="bi bi-toggles me-2"></i>Quản lý Switches
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Keycap" asp-action="Index"
+                                       style="color:var(--color-charcoal)">
+                                        <i class="bi bi-grid-3x3-gap me-2"></i>Quản lý Keycaps
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     }
 
-                    <!-- Của tôi — chỉ hiện khi đã đăng nhập -->
-                    @if (User.Identity?.IsAuthenticated == true)
+                    <!-- ── Menu dành cho User thường / chưa đăng nhập ── -->
+                    @if (!User.IsInRole("Admin"))
                     {
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="User" asp-action="Profile">
-                                <i class="bi bi-person-circle me-1"></i><span data-i18n="nav.mypage">Của tôi</span>
+                            <a class="nav-link" asp-controller="Kit" asp-action="Index">
+                                <i class="bi bi-cpu me-1"></i>Kits
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Switch" asp-action="Index">
+                                <i class="bi bi-toggles me-1"></i>Switches
+                            </a>
+                        </li>
+                        <!-- Keycaps — mục mới cho User -->
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Keycap" asp-action="Index">
+                                <i class="bi bi-grid-3x3-gap me-1"></i>Keycaps
                             </a>
                         </li>
                     }
+
+                    <!-- Gõ Phím — luôn hiển thị -->
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="TypingTest" asp-action="Index">
+                            <i class="bi bi-keyboard me-1"></i><span data-i18n="nav.typing">Gõ Phím</span>
+                        </a>
+                    </li>
+
+                    <!-- Khám phá — luôn hiển thị -->
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Spec" asp-action="Explore">
+                            <i class="bi bi-search me-1"></i><span data-i18n="nav.explore">Khám phá</span>
+                        </a>
+                    </li>
+
                 </ul>
 
-                <!-- Menu phải — đảo vị trí: Tài khoản trước, Tạo Build ngoài cùng -->
+                <!-- ── Menu phải — Ngôn ngữ, Tài khoản, Tạo Build ── -->
                 <div class="d-flex align-items-center gap-2">
 
-                    <!-- ── Language Switcher — nằm trong navbar, góc phải ────── -->
-                    <div class="lang-switcher" id="langSwitcher">
-                        <button class="lang-toggle" onclick="toggleLangMenu()" title="Chuyển ngôn ngữ">
+                    <!-- Dropdown Ngôn ngữ — .nav-item.dropdown chuẩn Bootstrap 5, hỗ trợ hover CSS -->
+                    <div class="nav-item dropdown lang-switcher" id="langSwitcher">
+                        <button class="lang-toggle dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false"
+                                title="Chuyển ngôn ngữ">
                             <span class="lang-flag" id="langFlag">VN</span>
                             <span class="lang-label" id="langLabel">VN</span>
-                            <i class="bi bi-chevron-down" style="font-size:0.6rem;opacity:0.5"></i>
                         </button>
-                        <div class="lang-dropdown" id="langDropdown">
-                            <button class="lang-option" data-lang="en" onclick="setLang('en')">
-                                <span class="lang-flag">GB</span>
-                                <span>English</span>
-                                <i class="bi bi-check2 lang-check" id="checkEn"></i>
-                            </button>
-                            <button class="lang-option" data-lang="vi" onclick="setLang('vi')">
-                                <span class="lang-flag">VN</span>
-                                <span>Tiếng Việt</span>
-                                <i class="bi bi-check2 lang-check" id="checkVi"></i>
-                            </button>
-                        </div>
+                        <ul class="dropdown-menu dropdown-menu-end"
+                            style="background:var(--color-cream);border-color:var(--border-light);min-width:180px">
+                            <li>
+                                <button class="dropdown-item lang-option" data-lang="en" onclick="setLang('en')"
+                                        style="color:var(--color-charcoal)">
+                                    <span class="lang-flag me-2">GB</span>English
+                                    <i class="bi bi-check2 lang-check ms-auto" id="checkEn"></i>
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item lang-option" data-lang="vi" onclick="setLang('vi')"
+                                        style="color:var(--color-charcoal)">
+                                    <span class="lang-flag me-2">VN</span>Tiếng Việt
+                                    <i class="bi bi-check2 lang-check ms-auto" id="checkVi"></i>
+                                </button>
+                            </li>
+                        </ul>
                     </div>
 
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        <!-- Dropdown Tài khoản — đặt trước nút Tạo Build -->
-                        <div class="dropdown">
+                        <!-- Dropdown Tài khoản — .nav-item.dropdown chuẩn Bootstrap 5, hỗ trợ hover CSS -->
+                        <div class="nav-item dropdown">
                             <button class="btn-ghost btn-sm-lovable dropdown-toggle" type="button"
                                     data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-person-circle"></i>
@@ -530,30 +541,17 @@
             document.documentElement.setAttribute('lang', lang);
         }
 
-        /* Đặt ngôn ngữ + lưu localStorage */
+        /* Đặt ngôn ngữ + lưu localStorage, đóng dropdown bằng Bootstrap API */
         function setLang(lang) {
             localStorage.setItem('bpcvn-lang', lang);
             applyLang(lang);
-            closeLangMenu();
-        }
-
-        /* Toggle dropdown menu */
-        function toggleLangMenu() {
-            const dd = document.getElementById('langDropdown');
-            dd.classList.toggle('show');
-        }
-
-        /* Đóng dropdown */
-        function closeLangMenu() {
-            document.getElementById('langDropdown').classList.remove('show');
-        }
-
-        /* Đóng dropdown khi click ra ngoài */
-        document.addEventListener('click', function (e) {
-            if (!document.getElementById('langSwitcher').contains(e.target)) {
-                closeLangMenu();
+            // Đóng dropdown ngôn ngữ qua Bootstrap 5 API
+            const toggler = document.querySelector('#langSwitcher .dropdown-toggle');
+            if (toggler) {
+                const bsDropdown = bootstrap.Dropdown.getOrCreateInstance(toggler);
+                bsDropdown.hide();
             }
-        });
+        }
 
         /* Khôi phục ngôn ngữ khi load trang */
         (function () {

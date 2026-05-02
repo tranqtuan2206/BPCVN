@@ -439,6 +439,60 @@ body {
     padding: 6px 10px;
 }
 
+/*
+ * ── Hover Dropdown trên Desktop (≥992px) ──────────────────────────────────
+ * Dùng visibility + opacity + pointer-events thay vì display:none/block
+ * Lý do: Bootstrap JS dùng class .show để toggle display, nếu ta dùng
+ * display:none thì sẽ bị Bootstrap JS override sau khi user click lần đầu.
+ * Dùng visibility/opacity tránh xung đột với cơ chế .show của Bootstrap.
+ */
+@media all and (min-width: 992px) {
+    /* Mặc định: ẩn dropdown bằng visibility (không xung đột Bootstrap JS) */
+    .navbar .dropdown > .dropdown-menu {
+        display: block !important;      /* Luôn giữ display:block để hover CSS hoạt động */
+        visibility: hidden;             /* Ẩn về mặt thị giác */
+        opacity: 0;                     /* Mờ dần khi ẩn */
+        pointer-events: none;           /* Không cho click khi đang ẩn */
+        transform: translateY(4px);     /* Dịch xuống nhẹ để tạo hiệu ứng trượt */
+        transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+        margin-top: 0 !important;
+    }
+
+    /* Hover vào .dropdown => hiện menu con với animation */
+    .navbar .dropdown:hover > .dropdown-menu {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+
+    /* Trường hợp Bootstrap JS đã add class .show (do user click) — vẫn hiển thị bình thường */
+    .navbar .dropdown > .dropdown-menu.show {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+}
+
+/* Dropdown menu styling — đồng bộ với Design System */
+.navbar-lovable .dropdown-menu {
+    border-radius: var(--radius-comfortable);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    padding: 6px;
+}
+
+.navbar-lovable .dropdown-item {
+    border-radius: var(--radius-standard);
+    padding: 8px 14px;
+    font-size: 0.9375rem;
+    transition: background-color 0.12s ease;
+}
+
+.navbar-lovable .dropdown-item:hover {
+    background-color: var(--color-charcoal-04);
+}
+
 
 /* ── 8. Badges ───────────────────────────────────────────────────────────── */
 .badge-warm {
