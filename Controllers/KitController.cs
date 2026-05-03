@@ -121,4 +121,36 @@ public class KitController : Controller
 
         return RedirectToAction(nameof(Details), new { id });
     }
+
+    // ── GET /Kit/Delete/5 — Trang xác nhận xóa Kit (chỉ Admin) ──
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id == null) return NotFound();
+
+        var kit = await _db.Kits
+                           .AsNoTracking()
+                           .FirstOrDefaultAsync(k => k.KitId == id);
+
+        if (kit == null) return NotFound();
+
+        return View(kit);
+    }
+
+    // ── POST /Kit/Delete/5 — Xử lý xóa Kit (chỉ Admin) ──
+    [Authorize(Roles = "Admin")]
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var kit = await _db.Kits.FindAsync(id);
+
+        if (kit == null) return NotFound();
+
+        _db.Kits.Remove(kit);
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = "Đã xóa Kit thành công!";
+        return RedirectToAction(nameof(Index));
+    }
 }

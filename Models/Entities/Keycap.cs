@@ -25,6 +25,10 @@ public class Keycap
     [StringLength(500)]
     public string? ImageUrl { get; set; }
 
+    /// <summary>Mô tả keycap — có thể null</summary>
+    [StringLength(500)]
+    public string? Description { get; set; }
+
     // Navigation
     public ICollection<Spec> Specs { get; set; } = new List<Spec>();
 }

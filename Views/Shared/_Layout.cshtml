@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=vietnamese"
-          rel="stylesheet" />
+        rel="stylesheet" />
 
     <!-- Bootstrap CSS + Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -27,8 +27,7 @@
         <div class="container">
 
             <!-- Logo / Brand — viền hồng #fb7aec, giữ nguyên asp-* -->
-            <a class="navbar-brand d-flex align-items-center gap-2"
-               asp-controller="Home" asp-action="Index">
+            <a class="navbar-brand d-flex align-items-center gap-2" asp-controller="Home" asp-action="Index">
                 <span class="brand-logo">
                     <i class="bi bi-keyboard"></i>
                 </span>
@@ -36,8 +35,7 @@
             </a>
 
             <!-- Mobile toggle — radius 6px theo Design System -->
-            <button class="navbar-toggler" type="button"
-                    data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -55,31 +53,34 @@
 
                     <!-- ── Menu dành cho Admin ── -->
                     @if (User.IsInRole("Admin"))
+
+
+
                     {
                         <!-- Dropdown Quản lý — chứa Kits, Switches, Keycaps -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button"
-                               data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
                                 <i class="bi bi-gear me-1"></i>Quản lý
                             </a>
                             <ul class="dropdown-menu"
                                 style="background:var(--color-cream);border-color:var(--border-light)">
                                 <li>
                                     <a class="dropdown-item" asp-controller="Kit" asp-action="Index"
-                                       style="color:var(--color-charcoal)">
-                                        <i class="bi bi-cpu me-2"></i>Quản lý Kits
+                                        style="color:var(--color-charcoal)">
+                                        <i class="bi bi-cpu me-2"></i>Kits
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" asp-controller="Switch" asp-action="Index"
-                                       style="color:var(--color-charcoal)">
-                                        <i class="bi bi-toggles me-2"></i>Quản lý Switches
+                                        style="color:var(--color-charcoal)">
+                                        <i class="bi bi-toggles me-2"></i>Switches
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" asp-controller="Keycap" asp-action="Index"
-                                       style="color:var(--color-charcoal)">
-                                        <i class="bi bi-grid-3x3-gap me-2"></i>Quản lý Keycaps
+                                        style="color:var(--color-charcoal)">
+                                        <i class="bi bi-grid-3x3-gap me-2"></i>Keycaps
                                     </a>
                                 </li>
                             </ul>
@@ -88,6 +89,9 @@
 
                     <!-- ── Menu dành cho User thường / chưa đăng nhập ── -->
                     @if (!User.IsInRole("Admin"))
+
+
+
                     {
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Kit" asp-action="Index">
@@ -128,9 +132,8 @@
 
                     <!-- Dropdown Ngôn ngữ — .nav-item.dropdown chuẩn Bootstrap 5, hỗ trợ hover CSS -->
                     <div class="nav-item dropdown lang-switcher" id="langSwitcher">
-                        <button class="lang-toggle dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown" aria-expanded="false"
-                                title="Chuyển ngôn ngữ">
+                        <button class="lang-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false" title="Chuyển ngôn ngữ">
                             <span class="lang-flag" id="langFlag">VN</span>
                             <span class="lang-label" id="langLabel">VN</span>
                         </button>
@@ -138,14 +141,14 @@
                             style="background:var(--color-cream);border-color:var(--border-light);min-width:180px">
                             <li>
                                 <button class="dropdown-item lang-option" data-lang="en" onclick="setLang('en')"
-                                        style="color:var(--color-charcoal)">
+                                    style="color:var(--color-charcoal)">
                                     <span class="lang-flag me-2">GB</span>English
                                     <i class="bi bi-check2 lang-check ms-auto" id="checkEn"></i>
                                 </button>
                             </li>
                             <li>
                                 <button class="dropdown-item lang-option" data-lang="vi" onclick="setLang('vi')"
-                                        style="color:var(--color-charcoal)">
+                                    style="color:var(--color-charcoal)">
                                     <span class="lang-flag me-2">VN</span>Tiếng Việt
                                     <i class="bi bi-check2 lang-check ms-auto" id="checkVi"></i>
                                 </button>
@@ -154,37 +157,45 @@
                     </div>
 
                     @if (User.Identity?.IsAuthenticated == true)
+
+
+
                     {
                         <!-- Dropdown Tài khoản — .nav-item.dropdown chuẩn Bootstrap 5, hỗ trợ hover CSS -->
                         <div class="nav-item dropdown">
-                            <button class="btn-ghost btn-sm-lovable dropdown-toggle" type="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn-ghost btn-sm-lovable dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
                                 <i class="bi bi-person-circle"></i>
                                 @User.Identity.Name
                                 @if (User.IsInRole("Admin"))
+
+
+
                                 {
-                                    <span class="badge-warm" style="font-size:0.65rem;padding:2px 6px;margin-left:4px">Admin</span>
+                                    <span class="badge-warm"
+                                        style="font-size:0.65rem;padding:2px 6px;margin-left:4px">Admin</span>
                                 }
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end"
                                 style="background:var(--color-cream);border-color:var(--border-light)">
                                 <li>
                                     <a class="dropdown-item" asp-controller="User" asp-action="Profile"
-                                       style="color:var(--color-charcoal)">
+                                        style="color:var(--color-charcoal)">
                                         <i class="bi bi-person me-2"></i>Trang cá nhân
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" asp-controller="Auth" asp-action="ChangePassword"
-                                       style="color:var(--color-charcoal)">
+                                        style="color:var(--color-charcoal)">
                                         <i class="bi bi-shield-lock me-2"></i>Đổi mật khẩu
                                     </a>
                                 </li>
-                                <li><hr class="dropdown-divider" style="border-color:var(--border-light)"></li>
+                                <li>
+                                    <hr class="dropdown-divider" style="border-color:var(--border-light)">
+                                </li>
                                 <li>
                                     <form asp-controller="Auth" asp-action="Logout" method="post" class="mb-0">
-                                        <button type="submit" class="dropdown-item"
-                                                style="color:#b91c1c">
+                                        <button type="submit" class="dropdown-item" style="color:#b91c1c">
                                             <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
                                         </button>
                                     </form>
@@ -197,7 +208,13 @@
                             <i class="bi bi-plus-circle"></i><span data-i18n="nav.createBuild">Tạo Build</span>
                         </a>
                     }
+
+
+
                     else
+
+
+
                     {
                         <!-- Đăng nhập — Ghost button -->
                         <a class="btn-ghost" asp-controller="Auth" asp-action="Login">
@@ -221,13 +238,18 @@
     <!-- Toast thông báo Success -->
     @if (TempData["Success"] != null)
 
+
+
+
+
+
+
     {
         <div class="toast-fixed">
             <div class="toast-lovable toast-success" id="successToast">
                 <i class="bi bi-check-circle-fill toast-icon"></i>
                 <span>@TempData["Success"]</span>
-                <button type="button" class="toast-close"
-                        onclick="document.getElementById('successToast').remove()">
+                <button type="button" class="toast-close" onclick="document.getElementById('successToast').remove()">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
@@ -237,13 +259,18 @@
     <!-- Toast thông báo Error -->
     @if (TempData["Error"] != null)
 
+
+
+
+
+
+
     {
         <div class="toast-fixed">
             <div class="toast-lovable toast-error" id="errorToast">
                 <i class="bi bi-exclamation-circle-fill toast-icon"></i>
                 <span>@TempData["Error"]</span>
-                <button type="button" class="toast-close"
-                        onclick="document.getElementById('errorToast').remove()">
+                <button type="button" class="toast-close" onclick="document.getElementById('errorToast').remove()">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
@@ -257,8 +284,7 @@
 
 
     <!-- ── Dark/Light Mode Toggle — góc dưới bên phải ────────────────────── -->
-    <button id="themeToggle" class="theme-toggle" title="Chuyển chế độ sáng/tối"
-            onclick="toggleTheme()">
+    <button id="themeToggle" class="theme-toggle" title="Chuyển chế độ sáng/tối" onclick="toggleTheme()">
         <i class="bi bi-moon-fill theme-icon-dark"></i>
         <i class="bi bi-sun-fill theme-icon-light"></i>
     </button>

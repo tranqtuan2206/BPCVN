@@ -1,0 +1,106 @@
+@model BPCVN.Models.Entities.Keycap
+@{
+    ViewData["Title"] = "Thêm Keycap mới";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+
+        <!-- Header -->
+        <div class="mb-4">
+            <h2 class="section-title">
+                <i class="bi bi-plus-circle me-2" style="opacity:0.5"></i>Thêm Keycap mới
+            </h2>
+            <p class="section-subtitle">Thêm keycap mới vào cơ sở dữ liệu</p>
+        </div>
+
+        <!-- Form Card -->
+        <div class="card-lovable card-body-lovable">
+            <form asp-action="Create" method="post">
+
+                <!-- Validation Summary — hiển thị lỗi tổng quan -->
+                <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
+
+                <!-- Tên Keycap (bắt buộc) -->
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label-lovable">Tên Keycap *</label>
+                    <input asp-for="Name" class="form-control" placeholder="VD: GMK Olivia, ePBT Cool Kids..." />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <!-- Hãng + Profile trên cùng một hàng -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Brand" class="form-label-lovable">Hãng (Brand)</label>
+                        <input asp-for="Brand" class="form-control" placeholder="VD: GMK, ePBT, JTK, Akko..." />
+                        <span asp-validation-for="Brand" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Profile" class="form-label-lovable">Profile</label>
+                        <select asp-for="Profile" class="form-select">
+                            <option value="">— Chọn profile —</option>
+                            <option value="Cherry">Cherry</option>
+                            <option value="SA">SA</option>
+                            <option value="OEM">OEM</option>
+                            <option value="DSA">DSA</option>
+                            <option value="KAT">KAT</option>
+                            <option value="MT3">MT3</option>
+                            <option value="XDA">XDA</option>
+                            <option value="ASA">ASA</option>
+                            <option value="Other">Khác</option>
+                        </select>
+                        <span asp-validation-for="Profile" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Chất liệu -->
+                <div class="mb-3">
+                    <label asp-for="Material" class="form-label-lovable">Chất liệu</label>
+                    <select asp-for="Material" class="form-select">
+                        <option value="">— Chọn chất liệu —</option>
+                        <option value="PBT">PBT</option>
+                        <option value="ABS">ABS</option>
+                        <option value="POM">POM</option>
+                        <option value="PC">PC (Polycarbonate)</option>
+                        <option value="Other">Khác</option>
+                    </select>
+                    <span asp-validation-for="Material" class="text-danger small"></span>
+                </div>
+
+                <!-- Image URL -->
+                <div class="mb-3">
+                    <label asp-for="ImageUrl" class="form-label-lovable">URL Hình ảnh</label>
+                    <input asp-for="ImageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
+                    <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                    <p class="form-hint">Dán link hình ảnh trực tiếp (JPG, PNG, WebP).</p>
+                </div>
+
+                <!-- Mô tả -->
+                <div class="mb-4">
+                    <label asp-for="Description" class="form-label-lovable">Mô tả</label>
+                    <textarea asp-for="Description" class="form-control" rows="3"
+                        placeholder="Mô tả ngắn gọn về keycap..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+
+                <!-- Nút hành động -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn-dark-lovable px-4 py-2">
+                        <i class="bi bi-plus-circle"></i>Thêm Keycap
+                    </button>
+                    <a asp-controller="Keycap" asp-action="Index"
+                        class="btn-ghost px-4 py-2">
+                        <i class="bi bi-x-lg"></i>Huỷ
+                    </a>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Client-side validation scripts (jQuery Unobtrusive Validation) -->
+    <partial name="_ValidationScriptsPartial" />
+}

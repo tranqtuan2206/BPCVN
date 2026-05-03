@@ -1,45 +1,50 @@
-@model BPCVN.Models.Entities.Kit
+@model BPCVN.Models.Entities.Keycap
 @{
-    ViewData["Title"] = Model.Name + " — Kit Details";
+    ViewData["Title"] = Model.Name + " — Keycap Details";
 }
 
-<!-- Header: Tên Kit + nút hành động -->
+<!-- Header: Tên Keycap + nút hành động -->
 <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
     <div>
         <h2 class="section-title mb-1">
-            <i class="bi bi-cpu me-2" style="opacity:0.5"></i>@Model.Name
+            <i class="bi bi-grid-3x3-gap me-2" style="opacity:0.5"></i>@Model.Name
         </h2>
         <p class="text-caption mb-0">
             <i class="bi bi-building me-1"></i>@(Model.Brand ?? "Unknown Brand")
-            @if (!string.IsNullOrEmpty(Model.Layout))
+            @if (!string.IsNullOrEmpty(Model.Profile))
             {
                 <span>&nbsp;·&nbsp;</span>
-                <i class="bi bi-grid-3x3 me-1"></i>@Model.Layout
+                <i class="bi bi-layers me-1"></i>@Model.Profile
+            }
+            @if (!string.IsNullOrEmpty(Model.Material))
+            {
+                <span>&nbsp;·&nbsp;</span>
+                <i class="bi bi-gem me-1"></i>@Model.Material
             }
         </p>
     </div>
     <div class="d-flex gap-2">
         @if (User.IsInRole("Admin"))
         {
-            <!-- Nút Chỉnh sửa Kit — chỉ Admin -->
-            <a asp-controller="Kit" asp-action="Edit" asp-route-id="@Model.KitId"
+            <!-- Nút Chỉnh sửa — chỉ Admin -->
+            <a asp-controller="Keycap" asp-action="Edit" asp-route-id="@Model.KeycapId"
                class="btn-dark-lovable">
                 <i class="bi bi-pencil-square"></i>Chỉnh sửa
             </a>
-            <!-- Nút Xóa Kit — chỉ Admin -->
-            <a asp-controller="Kit" asp-action="Delete" asp-route-id="@Model.KitId"
+            <!-- Nút Xóa — chỉ Admin -->
+            <a asp-controller="Keycap" asp-action="Delete" asp-route-id="@Model.KeycapId"
                class="btn-ghost" style="color:#b91c1c">
                 <i class="bi bi-trash"></i>Xóa
             </a>
         }
         <!-- Nút Quay lại danh sách -->
-        <a asp-controller="Kit" asp-action="Index" class="btn-ghost">
+        <a asp-controller="Keycap" asp-action="Index" class="btn-ghost">
             <i class="bi bi-arrow-left"></i>Danh sách
         </a>
     </div>
 </div>
 
-<!-- Ảnh Kit (nếu có) -->
+<!-- Ảnh Keycap (nếu có) -->
 @if (!string.IsNullOrEmpty(Model.ImageUrl))
 {
     <div class="card-lovable mb-4 overflow-hidden">
@@ -48,16 +53,16 @@
     </div>
 }
 
-<!-- Thông số chi tiết Kit -->
+<!-- Thông số chi tiết Keycap -->
 <div class="card-lovable card-body-lovable mb-4">
     <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:16px">
-        <i class="bi bi-sliders me-2" style="opacity:0.5"></i>Thông số Kit
+        <i class="bi bi-sliders me-2" style="opacity:0.5"></i>Thông số Keycap
     </h5>
     <div class="row g-3">
-        <!-- Tên Kit -->
+        <!-- Tên Keycap -->
         <div class="col-md-6">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-tag me-1"></i>Tên Kit</div>
+                <div class="text-caption mb-1"><i class="bi bi-tag me-1"></i>Tên Keycap</div>
                 <div style="font-weight:600;color:var(--color-charcoal)">@Model.Name</div>
             </div>
         </div>
@@ -72,35 +77,46 @@
             </div>
         </div>
 
-        <!-- Layout -->
+        <!-- Profile -->
         <div class="col-md-4">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-grid-3x3 me-1"></i>Layout</div>
+                <div class="text-caption mb-1"><i class="bi bi-layers me-1"></i>Profile</div>
                 <div style="font-weight:600;color:var(--color-charcoal)">
-                    @(Model.Layout ?? "—")
+                    @(Model.Profile ?? "—")
                 </div>
             </div>
         </div>
 
-        <!-- Mount Type -->
+        <!-- Material -->
         <div class="col-md-4">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-layers me-1"></i>Mount Type</div>
+                <div class="text-caption mb-1"><i class="bi bi-gem me-1"></i>Chất liệu</div>
                 <div style="font-weight:600;color:var(--color-charcoal)">
-                    @(Model.MountType ?? "—")
+                    @(Model.Material ?? "—")
                 </div>
             </div>
         </div>
 
-        <!-- PCB Type -->
+        <!-- Image URL -->
         <div class="col-md-4">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-motherboard me-1"></i>PCB Type</div>
+                <div class="text-caption mb-1"><i class="bi bi-image me-1"></i>Hình ảnh</div>
                 <div style="font-weight:600;color:var(--color-charcoal)">
-                    @(Model.PcbType ?? "—")
+                    @(string.IsNullOrEmpty(Model.ImageUrl) ? "—" : "Có")
                 </div>
             </div>
         </div>
+
+        <!-- Mô tả -->
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <div class="col-12">
+                <div class="info-block">
+                    <div class="text-caption mb-1"><i class="bi bi-chat-left-text me-1"></i>Mô tả</div>
+                    <div style="color:var(--color-charcoal)">@Model.Description</div>
+                </div>
+            </div>
+        }
     </div>
 </div>
 
@@ -108,16 +124,12 @@
 <div class="d-flex gap-2">
     @if (User.IsInRole("Admin"))
     {
-        <a asp-controller="Kit" asp-action="Edit" asp-route-id="@Model.KitId"
+        <a asp-controller="Keycap" asp-action="Edit" asp-route-id="@Model.KeycapId"
            class="btn-dark-lovable">
             <i class="bi bi-pencil-square"></i>Chỉnh sửa
         </a>
-        <a asp-controller="Kit" asp-action="Delete" asp-route-id="@Model.KitId"
-           class="btn-ghost" style="color:#b91c1c">
-            <i class="bi bi-trash"></i>Xóa
-        </a>
     }
-    <a asp-controller="Kit" asp-action="Index" class="btn-ghost">
+    <a asp-controller="Keycap" asp-action="Index" class="btn-ghost">
         <i class="bi bi-arrow-left"></i>Quay lại danh sách
     </a>
 </div>

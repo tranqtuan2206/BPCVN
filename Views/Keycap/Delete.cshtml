@@ -1,0 +1,68 @@
+@model BPCVN.Models.Entities.Keycap
+@{
+    ViewData["Title"] = "Xóa " + Model.Name;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+
+        <!-- Header cảnh báo -->
+        <div class="mb-4">
+            <h2 class="section-title" style="color:#b91c1c">
+                <i class="bi bi-exclamation-triangle me-2"></i>Xác nhận xóa Keycap
+            </h2>
+            <p class="section-subtitle">Hành động này không thể hoàn tác.</p>
+        </div>
+
+        <!-- Thông tin Keycap sẽ bị xóa -->
+        <div class="card-lovable card-body-lovable mb-4">
+            <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:16px">
+                <i class="bi bi-grid-3x3-gap me-2" style="opacity:0.5"></i>@Model.Name
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="info-block">
+                        <div class="text-caption mb-1"><i class="bi bi-building me-1"></i>Hãng</div>
+                        <div style="font-weight:600;color:var(--color-charcoal)">
+                            @(Model.Brand ?? "—")
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-block">
+                        <div class="text-caption mb-1"><i class="bi bi-layers me-1"></i>Profile</div>
+                        <div style="font-weight:600;color:var(--color-charcoal)">
+                            @(Model.Profile ?? "—")
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-block">
+                        <div class="text-caption mb-1"><i class="bi bi-gem me-1"></i>Chất liệu</div>
+                        <div style="font-weight:600;color:var(--color-charcoal)">
+                            @(Model.Material ?? "—")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form xác nhận xóa -->
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="KeycapId" />
+            <div class="d-flex gap-2">
+                <!-- Nút Xóa — màu đỏ cảnh báo -->
+                <button type="submit" class="btn-dark-lovable px-4 py-2"
+                        style="background-color:#b91c1c">
+                    <i class="bi bi-trash"></i>Xóa vĩnh viễn
+                </button>
+                <!-- Nút Huỷ — quay về Details -->
+                <a asp-controller="Keycap" asp-action="Details" asp-route-id="@Model.KeycapId"
+                    class="btn-ghost px-4 py-2">
+                    <i class="bi bi-x-lg"></i>Huỷ
+                </a>
+            </div>
+        </form>
+
+    </div>
+</div>

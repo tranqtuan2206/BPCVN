@@ -1,0 +1,75 @@
+@model BPCVN.Models.Entities.Switch
+@{
+    ViewData["Title"] = "Xóa " + Model.Name;
+
+    // Xác định icon dựa trên loại Switch
+    string iconClass;
+    if (Model.Type == "Linear") { iconClass = "bi-arrow-down"; }
+    else if (Model.Type == "Tactile") { iconClass = "bi-arrow-down-up"; }
+    else if (Model.Type == "Clicky") { iconClass = "bi-volume-up"; }
+    else { iconClass = "bi-question-circle"; }
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+
+        <!-- Header cảnh báo -->
+        <div class="mb-4">
+            <h2 class="section-title" style="color:#b91c1c">
+                <i class="bi bi-exclamation-triangle me-2"></i>Xác nhận xóa Switch
+            </h2>
+            <p class="section-subtitle">Hành động này không thể hoàn tác.</p>
+        </div>
+
+        <!-- Thông tin Switch sẽ bị xóa -->
+        <div class="card-lovable card-body-lovable mb-4">
+            <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:16px">
+                <i class="bi bi-toggles me-2" style="opacity:0.5"></i>@Model.Name
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="info-block">
+                        <div class="text-caption mb-1"><i class="bi bi-building me-1"></i>Hãng</div>
+                        <div style="font-weight:600;color:var(--color-charcoal)">
+                            @(Model.Brand ?? "—")
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-block">
+                        <div class="text-caption mb-1"><i class="bi @iconClass me-1"></i>Loại</div>
+                        <div style="font-weight:600;color:var(--color-charcoal)">
+                            @(Model.Type ?? "—")
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-block">
+                        <div class="text-caption mb-1"><i class="bi bi-speedometer2 me-1"></i>Lực nhấn</div>
+                        <div style="font-weight:600;color:var(--color-charcoal)">
+                            @(Model.ActuationForce ?? "—")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form xác nhận xóa -->
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="SwitchId" />
+            <div class="d-flex gap-2">
+                <!-- Nút Xóa — màu đỏ cảnh báo -->
+                <button type="submit" class="btn-dark-lovable px-4 py-2"
+                        style="background-color:#b91c1c">
+                    <i class="bi bi-trash"></i>Xóa vĩnh viễn
+                </button>
+                <!-- Nút Huỷ — quay về Details -->
+                <a asp-controller="Switch" asp-action="Details" asp-route-id="@Model.SwitchId"
+                    class="btn-ghost px-4 py-2">
+                    <i class="bi bi-x-lg"></i>Huỷ
+                </a>
+            </div>
+        </form>
+
+    </div>
+</div>

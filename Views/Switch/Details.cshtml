@@ -33,6 +33,11 @@
                class="btn-dark-lovable">
                 <i class="bi bi-pencil-square"></i>Chỉnh sửa
             </a>
+            <!-- Nút Xóa Switch — chỉ Admin -->
+            <a asp-controller="Switch" asp-action="Delete" asp-route-id="@Model.SwitchId"
+               class="btn-ghost" style="color:#b91c1c">
+                <i class="bi bi-trash"></i>Xóa
+            </a>
         }
         <!-- Nút Quay lại danh sách -->
         <a asp-controller="Switch" asp-action="Index" class="btn-ghost">
@@ -101,6 +106,10 @@
         <a asp-controller="Switch" asp-action="Edit" asp-route-id="@Model.SwitchId"
            class="btn-dark-lovable">
             <i class="bi bi-pencil-square"></i>Chỉnh sửa
+        </a>
+        <a asp-controller="Switch" asp-action="Delete" asp-route-id="@Model.SwitchId"
+           class="btn-ghost" style="color:#b91c1c">
+            <i class="bi bi-trash"></i>Xóa
         </a>
     }
     <a asp-controller="Switch" asp-action="Index" class="btn-ghost">

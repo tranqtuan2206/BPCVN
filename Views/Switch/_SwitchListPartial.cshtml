@@ -58,6 +58,12 @@ else
                                 class="btn-ghost btn-sm-lovable" title="Chỉnh sửa">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
+                            <!-- Nút Xóa — chỉ Admin mới thấy -->
+                            <a asp-controller="Switch" asp-action="Delete" asp-route-id="@sw.SwitchId"
+                                class="btn-ghost btn-sm-lovable" title="Xóa"
+                                style="color:#b91c1c">
+                                <i class="bi bi-trash"></i>
+                            </a>
                         }
                     </div>
                 </div>

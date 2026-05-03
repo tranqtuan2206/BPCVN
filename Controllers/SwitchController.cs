@@ -121,4 +121,36 @@ public class SwitchController : Controller
 
         return RedirectToAction(nameof(Details), new { id });
     }
+
+    // ── GET /Switch/Delete/5 — Trang xác nhận xóa Switch (chỉ Admin) ──
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id == null) return NotFound();
+
+        var sw = await _db.Switches
+                          .AsNoTracking()
+                          .FirstOrDefaultAsync(s => s.SwitchId == id);
+
+        if (sw == null) return NotFound();
+
+        return View(sw);
+    }
+
+    // ── POST /Switch/Delete/5 — Xử lý xóa Switch (chỉ Admin) ──
+    [Authorize(Roles = "Admin")]
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var sw = await _db.Switches.FindAsync(id);
+
+        if (sw == null) return NotFound();
+
+        _db.Switches.Remove(sw);
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = "Đã xóa Switch thành công!";
+        return RedirectToAction(nameof(Index));
+    }
 }

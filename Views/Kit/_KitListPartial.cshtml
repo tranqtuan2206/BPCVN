@@ -16,8 +16,7 @@ else
                 <div class="card-lovable h-100 d-flex flex-column">
                     @if (!string.IsNullOrEmpty(kit.ImageUrl))
                     {
-                        <img src="@kit.ImageUrl" class="img-lovable"
-                            style="height:190px;object-fit:cover;border-radius:0;border-top-left-radius:var(--radius-card);border-top-right-radius:var(--radius-card);border-left:0;border-right:0;border-top:0"
+                        <img src="@kit.ImageUrl" class="img-lovable img-card-cover"
                             alt="@kit.Name" />
                     }
                     else
@@ -63,6 +62,12 @@ else
                             <a asp-controller="Kit" asp-action="Edit" asp-route-id="@kit.KitId"
                                 class="btn-ghost btn-sm-lovable" title="Chỉnh sửa">
                                 <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <!-- Nút Xóa — chỉ Admin mới thấy -->
+                            <a asp-controller="Kit" asp-action="Delete" asp-route-id="@kit.KitId"
+                                class="btn-ghost btn-sm-lovable" title="Xóa"
+                                style="color:#b91c1c">
+                                <i class="bi bi-trash"></i>
                             </a>
                         }
                     </div>

@@ -1,0 +1,160 @@
+@model IEnumerable<BPCVN.Models.Entities.Keycap>
+@{
+    ViewData["Title"] = "Keycap Catalog";
+
+    // Danh sách unique profile & material từ Controller cho dropdown filter
+    var profiles = ViewBag.Profiles as List<string> ?? new();
+    var materials = ViewBag.Materials as List<string> ?? new();
+}
+
+<!-- ── Page header ─────────────────────────────────────────────────────── -->
+<div class="section-header">
+    <div>
+        <h2 class="section-title">
+            <i class="bi bi-grid-3x3-gap me-2" style="opacity:0.5"></i>Keycap Catalog
+        </h2>
+        <p class="section-subtitle">
+            <span id="keycapCount">@Model.Count()</span> keycaps trong cơ sở dữ liệu
+        </p>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+        <!-- Nút Thêm mới — chỉ Admin thấy -->
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-controller="Keycap" asp-action="Create" class="btn-dark-lovable">
+                <i class="bi bi-plus-circle"></i>Thêm Keycap
+            </a>
+        }
+        <span class="badge-count" id="keycapBadge" style="font-size:0.9375rem;padding:6px 16px">
+            @Model.Count() Keycaps
+        </span>
+    </div>
+</div>
+
+<!-- ── Bộ lọc & Live Search ────────────────────────────────────────────── -->
+<div class="card-lovable card-body-lovable mb-4">
+    <div class="row g-3 align-items-end">
+        <!-- Ô tìm kiếm -->
+        <div class="col-12 col-md-5">
+            <label class="form-label-lovable">
+                <i class="bi bi-search me-1"></i>Tìm kiếm
+            </label>
+            <input type="text" id="searchInput" class="form-control"
+                placeholder="Nhập tên keycap hoặc brand..." autocomplete="off" />
+        </div>
+
+        <!-- Dropdown Profile -->
+        <div class="col-6 col-md-3">
+            <label class="form-label-lovable">
+                <i class="bi bi-layers me-1"></i>Profile
+            </label>
+            <select id="filterProfile" class="form-select">
+                <option value="">-- Tất cả --</option>
+                @foreach (var p in profiles)
+                {
+                    <option value="@p">@p</option>
+                }
+            </select>
+        </div>
+
+        <!-- Dropdown Material -->
+        <div class="col-6 col-md-3">
+            <label class="form-label-lovable">
+                <i class="bi bi-gem me-1"></i>Chất liệu
+            </label>
+            <select id="filterMaterial" class="form-select">
+                <option value="">-- Tất cả --</option>
+                @foreach (var m in materials)
+                {
+                    <option value="@m">@m</option>
+                }
+            </select>
+        </div>
+
+        <!-- Nút xóa bộ lọc -->
+        <div class="col-12 col-md-1 d-flex">
+            <button type="button" id="clearFilters" class="btn-ghost flex-grow-1" title="Xóa bộ lọc">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Container danh sách Keycap — nội dung được thay bằng AJAX ────── -->
+<div id="keycap-list-container">
+    <partial name="_KeycapListPartial" model="Model" />
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            'use strict';
+
+            // ── Debounce — trì hoãn gọi hàm cho đến khi user ngừng gõ ──
+            function debounce(func, delay) {
+                let timerId;
+                return function (...args) {
+                    clearTimeout(timerId);
+                    timerId = setTimeout(() => func.apply(this, args), delay);
+                };
+            }
+
+            // ── Tham chiếu DOM ──
+            const searchInput = document.getElementById('searchInput');
+            const filterProfile = document.getElementById('filterProfile');
+            const filterMaterial = document.getElementById('filterMaterial');
+            const clearBtn = document.getElementById('clearFilters');
+            const container = document.getElementById('keycap-list-container');
+            const keycapCount = document.getElementById('keycapCount');
+            const keycapBadge = document.getElementById('keycapBadge');
+
+            // ── Gọi API lấy danh sách Keycap đã lọc ──
+            async function fetchKeycaps() {
+                // Ghép tất cả filter thành query string
+                const params = new URLSearchParams();
+                const search = searchInput.value.trim();
+                const profile = filterProfile.value;
+                const material = filterMaterial.value;
+
+                if (search) params.set('searchQuery', search);
+                if (profile) params.set('profile', profile);
+                if (material) params.set('material', material);
+
+                try {
+                    const res = await fetch(`/Keycap/Index?${params.toString()}`, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                    // Gán HTML partial vào container
+                    const html = await res.text();
+                    container.innerHTML = html;
+
+                    // Cập nhật bộ đếm — đếm số card hiện tại
+                    const count = container.querySelectorAll('.col').length;
+                    keycapCount.textContent = count;
+                    keycapBadge.textContent = count + ' Keycaps';
+                } catch (err) {
+                    console.error('Fetch keycaps error:', err);
+                }
+            }
+
+            // ── Gắn sự kiện ──
+            // Live search — debounce 350ms để tránh spam request
+            searchInput.addEventListener('input', debounce(fetchKeycaps, 350));
+
+            // Dropdown filter — gọi ngay khi thay đổi
+            filterProfile.addEventListener('change', fetchKeycaps);
+            filterMaterial.addEventListener('change', fetchKeycaps);
+
+            // Nút xóa bộ lọc — reset tất cả input/select rồi fetch lại
+            clearBtn.addEventListener('click', function () {
+                searchInput.value = '';
+                filterProfile.value = '';
+                filterMaterial.value = '';
+                fetchKeycaps();
+            });
+        })();
+    </script>
+}
