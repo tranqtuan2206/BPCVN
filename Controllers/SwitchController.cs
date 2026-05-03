@@ -75,6 +75,32 @@ public class SwitchController : Controller
         return View(sw);
     }
 
+    // ── GET /Switch/Create — Form tạo mới Switch (chỉ Admin) ──
+    [Authorize(Roles = "Admin")]
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+    // ── POST /Switch/Create — Xử lý tạo mới Switch (chỉ Admin) ──
+    [Authorize(Roles = "Admin")]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(Switch switchObj)
+    {
+        if (!ModelState.IsValid)
+        {
+            // Trả lại form với lỗi validation
+            return View(switchObj);
+        }
+
+        _db.Switches.Add(switchObj);
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = "Thêm Switch thành công!";
+        return RedirectToAction(nameof(Details), new { id = switchObj.SwitchId });
+    }
+
     // GET /Switch/Edit/5 — Chỉ Admin được chỉnh sửa Switch
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(int? id)
@@ -137,7 +163,7 @@ public class SwitchController : Controller
         return View(sw);
     }
 
-    // ── POST /Switch/Delete/5 — Xử lý xóa Switch (chỉ Admin) ──
+    // ── POST /Switch/Delete/5 — Xử lý xóa mềm Switch (chỉ Admin) ──
     [Authorize(Roles = "Admin")]
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
@@ -147,7 +173,9 @@ public class SwitchController : Controller
 
         if (sw == null) return NotFound();
 
-        _db.Switches.Remove(sw);
+        // Xóa mềm: đánh dấu IsDeleted thay vì xóa vật lý
+        sw.IsDeleted = true;
+        _db.Update(sw);
         await _db.SaveChangesAsync();
 
         TempData["Success"] = "Đã xóa Switch thành công!";

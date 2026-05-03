@@ -22,6 +22,13 @@ public class Switch
     [StringLength(20)]
     public string? ActuationForce { get; set; }
 
+    /// <summary>Link hình ảnh minh họa cho switch</summary>
+    [StringLength(500)]
+    public string? ImageUrl { get; set; }
+
+    /// <summary>Cờ xóa mềm — true = đã bị ẩn khỏi hệ thống</summary>
+    public bool IsDeleted { get; set; } = false;
+
     // Navigation
     public ICollection<Spec> Specs { get; set; } = new List<Spec>();
 }

@@ -46,12 +46,22 @@
     </div>
 </div>
 
-<!-- Icon minh hoạ loại Switch -->
-<div class="card-lovable mb-4 overflow-hidden">
-    <div class="img-placeholder" style="height:200px">
-        <i class="bi @iconClass" style="font-size:5rem"></i>
+<!-- Ảnh minh hoạ Switch (hoặc icon nếu không có ảnh) -->
+@if (!string.IsNullOrEmpty(Model.ImageUrl))
+{
+    <div class="card-lovable mb-4 overflow-hidden">
+        <img src="@Model.ImageUrl" class="w-100 img-detail-contain"
+             alt="@Model.Name" />
     </div>
-</div>
+}
+else
+{
+    <div class="card-lovable mb-4 overflow-hidden">
+        <div class="img-placeholder" style="height:200px">
+            <i class="bi @iconClass" style="font-size:5rem"></i>
+        </div>
+    </div>
+}
 
 <!-- Thông số chi tiết Switch -->
 <div class="card-lovable card-body-lovable mb-4">

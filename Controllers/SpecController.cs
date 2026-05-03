@@ -26,6 +26,7 @@ public class SpecController : Controller
     {
         // Dùng IQueryable để LINQ tổng hợp điều kiện rồi mới gọi SQL 1 lần
         var query = _db.Specs
+            .IgnoreQueryFilters()
             .Include(s => s.User)
             .Include(s => s.Kit)
             .Include(s => s.Switch)
@@ -103,8 +104,7 @@ public class SpecController : Controller
             await _db.SaveChangesAsync();
         }
 
-        // ── Xử lý Switch — KHÔNG tự tạo Switch mới vào Master Data ──
-        // Ưu tiên: SelectedSwitchId > tên trùng DB > CustomSwitchName
+        // ── Xử lý Switch — Tự động tạo Switch mới nếu tên chưa có trong DB ──
         int? switchId = null;
         string? customSwitchName = null;
 
@@ -127,8 +127,17 @@ public class SpecController : Controller
             }
             else
             {
-                // Tên mới hoàn toàn → lưu vào CustomSwitchName
-                customSwitchName = inputName;
+                // Tên mới → tự động tạo Switch mới vào Master Data
+                var newSwitch = new Switch
+                {
+                    Name = inputName,
+                    IsDeleted = false
+                };
+                _db.Switches.Add(newSwitch);
+                await _db.SaveChangesAsync();
+
+                // Gán SwitchId vừa tạo cho Build
+                switchId = newSwitch.SwitchId;
             }
         }
         else
@@ -182,6 +191,7 @@ public class SpecController : Controller
     public async Task<IActionResult> Details(Guid id)
     {
         var spec = await _db.Specs
+            .IgnoreQueryFilters()
             .Include(s => s.User)
             .Include(s => s.Kit)
             .Include(s => s.Switch)
@@ -202,6 +212,7 @@ public class SpecController : Controller
     public async Task<IActionResult> Edit(Guid id)
     {
         var spec = await _db.Specs
+            .IgnoreQueryFilters()
             .Include(s => s.Kit)
             .Include(s => s.Switch)
             .Include(s => s.Keycap)
@@ -267,7 +278,7 @@ public class SpecController : Controller
             await _db.SaveChangesAsync();
         }
 
-        // ── Xử lý Switch — KHÔNG tự tạo Switch mới vào Master Data ──
+        // ── Xử lý Switch — Tự động tạo Switch mới nếu tên chưa có trong DB ──
         int? switchId = null;
         string? customSwitchName = null;
 
@@ -290,8 +301,17 @@ public class SpecController : Controller
             }
             else
             {
-                // Tên mới → lưu CustomSwitchName
-                customSwitchName = inputName;
+                // Tên mới → tự động tạo Switch mới vào Master Data
+                var newSwitch = new Switch
+                {
+                    Name = inputName,
+                    IsDeleted = false
+                };
+                _db.Switches.Add(newSwitch);
+                await _db.SaveChangesAsync();
+
+                // Gán SwitchId vừa tạo cho Build
+                switchId = newSwitch.SwitchId;
             }
         }
         else
@@ -382,6 +402,7 @@ public class SpecController : Controller
     {
         // IQueryable — tổng hợp điều kiện trước, chỉ gọi DB 1 lần
         var query = _db.Specs
+            .IgnoreQueryFilters()
             .Include(s => s.User)
             .Include(s => s.Kit)
             .Include(s => s.Switch)

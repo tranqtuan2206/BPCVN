@@ -1,6 +1,6 @@
 @model BPCVN.Models.Entities.Switch
 @{
-    ViewData["Title"] = "Chỉnh sửa " + Model.Name;
+    ViewData["Title"] = "Thêm Switch mới";
 }
 
 <div class="row justify-content-center">
@@ -9,20 +9,17 @@
         <!-- Header -->
         <div class="mb-4">
             <h2 class="section-title">
-                <i class="bi bi-pencil-square me-2" style="opacity:0.5"></i>Chỉnh sửa Switch
+                <i class="bi bi-plus-circle me-2" style="opacity:0.5"></i>Thêm Switch mới
             </h2>
-            <p class="section-subtitle">Cập nhật thông tin cho <strong>@Model.Name</strong></p>
+            <p class="section-subtitle">Thêm switch mới vào cơ sở dữ liệu</p>
         </div>
 
         <!-- Form Card -->
         <div class="card-lovable card-body-lovable">
-            <form asp-action="Edit" method="post">
+            <form asp-action="Create" method="post">
 
                 <!-- Validation Summary — hiển thị lỗi tổng quan -->
                 <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
-
-                <!-- Hidden field: SwitchId (primary key) -->
-                <input type="hidden" asp-for="SwitchId" />
 
                 <!-- Tên Switch (bắt buộc) -->
                 <div class="mb-3">
@@ -69,9 +66,9 @@
                 <!-- Nút hành động -->
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn-dark-lovable px-4 py-2">
-                        <i class="bi bi-floppy"></i>Lưu thay đổi
+                        <i class="bi bi-plus-circle"></i>Thêm Switch
                     </button>
-                    <a asp-controller="Switch" asp-action="Details" asp-route-id="@Model.SwitchId"
+                    <a asp-controller="Switch" asp-action="Index"
                         class="btn-ghost px-4 py-2">
                         <i class="bi bi-x-lg"></i>Huỷ
                     </a>

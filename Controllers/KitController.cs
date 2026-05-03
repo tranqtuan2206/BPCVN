@@ -137,7 +137,7 @@ public class KitController : Controller
         return View(kit);
     }
 
-    // ── POST /Kit/Delete/5 — Xử lý xóa Kit (chỉ Admin) ──
+    // ── POST /Kit/Delete/5 — Xử lý xóa mềm Kit (chỉ Admin) ──
     [Authorize(Roles = "Admin")]
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
@@ -147,7 +147,9 @@ public class KitController : Controller
 
         if (kit == null) return NotFound();
 
-        _db.Kits.Remove(kit);
+        // Xóa mềm: đánh dấu IsDeleted thay vì xóa vật lý
+        kit.IsDeleted = true;
+        _db.Update(kit);
         await _db.SaveChangesAsync();
 
         TempData["Success"] = "Đã xóa Kit thành công!";

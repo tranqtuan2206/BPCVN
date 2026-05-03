@@ -290,8 +290,8 @@
 
         const key = e.key;
 
-        // Bỏ qua modifier keys và phím chức năng
-        if (e.ctrlKey || e.altKey || e.metaKey) return;
+        // Bỏ qua modifier keys và phím chức năng (ngoại trừ Ctrl + Backspace để xóa nhanh)
+        if ((e.ctrlKey && key !== 'Backspace') || e.altKey || e.metaKey) return;
         if (['Shift','CapsLock','Tab','Escape','Enter',
              'ArrowUp','ArrowDown','ArrowLeft','ArrowRight',
              'Home','End','PageUp','PageDown','Insert','Delete',
@@ -345,23 +345,36 @@
             return;
         }
 
-        // ── BACKSPACE: quay lại ký tự trước ─────────────────────────────
+        // ── BACKSPACE: quay lại ký tự trước hoặc xóa cả từ (Ctrl + Backspace) ──
         if (key === 'Backspace') {
-            if (charIndex > 0) {
-                charIndex--;
-                const prevChar = chars[charIndex];
+            const deleteChar = () => {
+                if (charIndex > 0) {
+                    charIndex--;
+                    const prevChar = chars[charIndex];
 
-                if (prevChar && prevChar.classList.contains('extra')) {
-                    if (prevChar.classList.contains('incorrect')) incorrectChars--;
-                    totalChars--;
-                    prevChar.remove();
-                } else if (prevChar) {
-                    if (prevChar.classList.contains('correct')) correctChars--;
-                    if (prevChar.classList.contains('incorrect')) incorrectChars--;
-                    totalChars--;
-                    prevChar.classList.remove('correct', 'incorrect');
+                    if (prevChar && prevChar.classList.contains('extra')) {
+                        if (prevChar.classList.contains('incorrect')) incorrectChars--;
+                        totalChars--;
+                        prevChar.remove();
+                    } else if (prevChar) {
+                        if (prevChar.classList.contains('correct')) correctChars--;
+                        if (prevChar.classList.contains('incorrect')) incorrectChars--;
+                        totalChars--;
+                        prevChar.classList.remove('correct', 'incorrect');
+                    }
                 }
+            };
+
+            if (e.ctrlKey) {
+                // Ctrl + Backspace: Xóa toàn bộ ký tự đã gõ của từ hiện tại
+                while (charIndex > 0) {
+                    deleteChar();
+                }
+            } else {
+                // Backspace bình thường: Xóa 1 ký tự
+                deleteChar();
             }
+
             updateCaret();
             return;
         }

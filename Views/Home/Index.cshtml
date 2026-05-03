@@ -9,7 +9,7 @@
     <h1 class="text-display mb-2" data-i18n="home.title">
         Cộng đồng Bàn Phím Cơ Việt Nam
     </h1>
-    <p class="text-body-lg mb-4" data-i18n="home.subtitle">Khám phá, nghe thử và chia sẻ trải nghiệm của bạn.</p>
+    <p class="text-body-lg mb-4" data-i18n="home.subtitle">Khám phá, lắng nghe và chia sẻ trải nghiệm của bạn.</p>
     <div class="d-flex justify-content-center gap-3 flex-wrap">
         <a asp-controller="Kit" asp-action="Index" class="btn-dark-lovable px-4 py-2">
             <i class="bi bi-cpu"></i><span data-i18n="home.btnKit">Kit Catalog</span>
@@ -53,11 +53,13 @@
 </div>
 
 @if (!Model.Any())
+
 {
     <div class="empty-state">
         <i class="bi bi-inbox empty-icon"></i>
         <p data-i18n="home.emptyState">Chưa có build nào. Hãy là người đầu tiên chia sẻ!</p>
         @if (User.Identity?.IsAuthenticated == true)
+
         {
             <a asp-controller="Spec" asp-action="Create" class="btn-dark-lovable px-4">
                 <span data-i18n="home.createFirst">Tạo Build ngay</span>
@@ -65,10 +67,13 @@
         }
     </div>
 }
+
 else
+
 {
     <div class="row g-4">
         @foreach (var spec in Model)
+
         {
             <div class="col-12 col-lg-6">
                 <div class="card-lovable h-100 d-flex flex-column">
@@ -104,6 +109,7 @@ else
                             <i class="bi bi-toggles"></i>@(spec.Switch?.Name ?? spec.CustomSwitchName ?? "N/A")
                         </span>
                         @if (!string.IsNullOrEmpty(spec.PlateMaterial))
+
                         {
                             <span class="badge-warm badge-type">
                                 <i class="bi bi-layers"></i>@spec.PlateMaterial
@@ -113,7 +119,9 @@ else
 
                     <!-- Audio player + Upvote -->
                     @if (spec.SoundTests.Any())
+
                     {
+
                         var topAudio = spec.SoundTests.OrderByDescending(st => st.Upvotes).First();
                         <div class="px-4 pb-3">
                             <div class="audio-container">
@@ -121,8 +129,8 @@ else
                                     <span class="audio-label">
                                         <i class="bi bi-soundwave me-1"></i>Sound Test
                                     </span>
-                                    <button class="upvote-btn-lovable upvote-btn"
-                                        data-test-id="@topAudio.TestId" onclick="handleUpvote(this)">
+                                    <button class="upvote-btn-lovable upvote-btn" data-test-id="@topAudio.TestId"
+                                        onclick="handleUpvote(this)">
                                         <i class="bi bi-heart"></i>
                                         <span class="upvote-count">@topAudio.Upvotes</span>
                                     </button>
@@ -141,7 +149,9 @@ else
                             </div>
                         </div>
                     }
+
                     else
+
                     {
                         <div class="px-4 pb-3">
                             <div class="audio-container text-center" style="border-style:dashed">

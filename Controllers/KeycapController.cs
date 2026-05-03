@@ -163,7 +163,7 @@ public class KeycapController : Controller
         return View(keycap);
     }
 
-    // ── POST /Keycap/Delete/5 — Xử lý xóa Keycap (chỉ Admin) ──
+    // ── POST /Keycap/Delete/5 — Xử lý xóa mềm Keycap (chỉ Admin) ──
     [Authorize(Roles = "Admin")]
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
@@ -173,7 +173,9 @@ public class KeycapController : Controller
 
         if (keycap == null) return NotFound();
 
-        _db.Keycaps.Remove(keycap);
+        // Xóa mềm: đánh dấu IsDeleted thay vì xóa vật lý
+        keycap.IsDeleted = true;
+        _db.Update(keycap);
         await _db.SaveChangesAsync();
 
         TempData["Success"] = "Đã xóa Keycap thành công!";

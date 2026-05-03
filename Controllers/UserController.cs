@@ -30,6 +30,7 @@ public class UserController : Controller
 
         // ThenInclude để load nested — tránh N+1 query
         var user = await _db.Users
+            .IgnoreQueryFilters()
             .Include(u => u.Specs)
                 .ThenInclude(s => s.Kit)
             .Include(u => u.Specs)

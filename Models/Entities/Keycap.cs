@@ -29,6 +29,9 @@ public class Keycap
     [StringLength(500)]
     public string? Description { get; set; }
 
+    /// <summary>Cờ xóa mềm — true = đã bị ẩn khỏi hệ thống</summary>
+    public bool IsDeleted { get; set; } = false;
+
     // Navigation
     public ICollection<Spec> Specs { get; set; } = new List<Spec>();
 }

@@ -39,18 +39,24 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Kit>(entity =>
         {
             entity.ToTable("Kits");
+            // Global Query Filter: tự động ẩn Kit đã bị xóa mềm
+            entity.HasQueryFilter(e => !e.IsDeleted);
         });
 
         // ── Switch ───────────────────────────────────────────────────────────
         modelBuilder.Entity<Switch>(entity =>
         {
             entity.ToTable("Switches");
+            // Global Query Filter: tự động ẩn Switch đã bị xóa mềm
+            entity.HasQueryFilter(e => !e.IsDeleted);
         });
 
         // ── Keycap ───────────────────────────────────────────────────────────
         modelBuilder.Entity<Keycap>(entity =>
         {
             entity.ToTable("Keycaps");
+            // Global Query Filter: tự động ẩn Keycap đã bị xóa mềm
+            entity.HasQueryFilter(e => !e.IsDeleted);
         });
 
         // ── Spec ─────────────────────────────────────────────────────────────

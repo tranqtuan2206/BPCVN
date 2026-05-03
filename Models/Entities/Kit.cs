@@ -29,6 +29,9 @@ public class Kit
     [StringLength(500)]
     public string? ImageUrl { get; set; }
 
+    /// <summary>Cờ xóa mềm — true = đã bị ẩn khỏi hệ thống</summary>
+    public bool IsDeleted { get; set; } = false;
+
     // Navigation
     public ICollection<Spec> Specs { get; set; } = new List<Spec>();
 }

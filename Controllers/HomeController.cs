@@ -14,6 +14,7 @@ public class HomeController : Controller
     {
         // Include đầy đủ quan hệ trong 1 query — tránh N+1
         var specs = await _db.Specs
+            .IgnoreQueryFilters()
             .Include(s => s.User)
             .Include(s => s.Kit)
             .Include(s => s.Switch)

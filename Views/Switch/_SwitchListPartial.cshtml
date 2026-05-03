@@ -21,9 +21,17 @@ else
 
             <div class="col">
                 <div class="card-lovable h-100 d-flex flex-column">
-                    <div class="img-placeholder" style="height:140px">
-                        <i class="bi @iconClass" style="font-size:3.5rem"></i>
-                    </div>
+                    @if (!string.IsNullOrEmpty(sw.ImageUrl))
+                    {
+                        <img src="@sw.ImageUrl" class="img-lovable img-card-cover"
+                            alt="@sw.Name" style="height:140px; object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <div class="img-placeholder" style="height:140px">
+                            <i class="bi @iconClass" style="font-size:3.5rem"></i>
+                        </div>
+                    }
                     <div class="p-3 flex-grow-1">
                         @if (!string.IsNullOrEmpty(sw.Type))
                         {
