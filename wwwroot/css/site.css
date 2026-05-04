@@ -475,6 +475,17 @@ body {
     }
 }
 
+/* Áp dụng riêng cho dropdown Linh Kiện để tự xổ khi di chuột vào (desktop) */
+@media all and (min-width: 992px) {
+    .hover-dropdown:hover .dropdown-menu {
+        display: block;
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        margin-top: 0;
+    }
+}
+
 /* Dropdown menu styling — đồng bộ với Design System */
 .navbar-lovable .dropdown-menu {
     border-radius: var(--radius-comfortable);

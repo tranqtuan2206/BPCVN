@@ -89,25 +89,17 @@
 
                     <!-- ── Menu dành cho User thường / chưa đăng nhập ── -->
                     @if (!User.IsInRole("Admin"))
-
-
-
                     {
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Kit" asp-action="Index">
-                                <i class="bi bi-cpu me-1"></i>Kits
+                        <!-- Gom nhóm Kits, Switches, Keycaps thành Dropdown Linh Kiện -->
+                        <li class="nav-item dropdown hover-dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownLinhKien" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-layers me-1"></i> Đồ Chơi
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Switch" asp-action="Index">
-                                <i class="bi bi-toggles me-1"></i>Switches
-                            </a>
-                        </li>
-                        <!-- Keycaps — mục mới cho User -->
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Keycap" asp-action="Index">
-                                <i class="bi bi-grid-3x3-gap me-1"></i>Keycaps
-                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDropdownLinhKien">
+                                <li><a class="dropdown-item" asp-controller="Kit" asp-action="Index"><i class="bi bi-cpu me-2"></i> Kits</a></li>
+                                <li><a class="dropdown-item" asp-controller="Switch" asp-action="Index"><i class="bi bi-toggles me-2"></i> Switches</a></li>
+                                <li><a class="dropdown-item" asp-controller="Keycap" asp-action="Index"><i class="bi bi-keyboard me-2"></i> Keycaps</a></li>
+                            </ul>
                         </li>
                     }
 
@@ -464,7 +456,7 @@
 
                 /* ── Home ─── */
                 'home.title': 'Cộng đồng Bàn Phím Cơ Việt Nam',
-                'home.subtitle': 'Khám phá, nghe thử và chia sẻ trải nghiệm của bạn.',
+                'home.subtitle': 'Khám phá, lắng nghe và chia sẻ trải nghiệm của bạn.',
                 'home.btnKit': 'Kit Catalog',
                 'home.btnExplore': 'Khám phá Build',
                 'home.feedTitle': 'Mới nhất từ cộng đồng',
