@@ -86,7 +86,7 @@ public class KeycapController : Controller
     [Authorize(Roles = "Admin")]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Keycap keycap)
+    public async Task<IActionResult> Create([Bind("KeycapId,Name,Brand,Profile,Material,ImageUrl,Description")] Keycap keycap)
     {
         if (!ModelState.IsValid)
         {
@@ -118,7 +118,7 @@ public class KeycapController : Controller
     [Authorize(Roles = "Admin")]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Keycap keycap)
+    public async Task<IActionResult> Edit(int id, [Bind("KeycapId,Name,Brand,Profile,Material,ImageUrl,Description")] Keycap keycap)
     {
         // Đảm bảo id trên URL khớp với KeycapId trong form
         if (id != keycap.KeycapId) return NotFound();

@@ -92,7 +92,7 @@ public class KitController : Controller
     [Authorize(Roles = "Admin")]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Kit kit)
+    public async Task<IActionResult> Edit(int id, [Bind("KitId,Name,Brand,Layout,MountType,PcbType,ImageUrl")] Kit kit)
     {
         // Đảm bảo id trên URL khớp với KitId trong form
         if (id != kit.KitId) return NotFound();

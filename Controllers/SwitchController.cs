@@ -86,7 +86,7 @@ public class SwitchController : Controller
     [Authorize(Roles = "Admin")]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Switch switchObj)
+    public async Task<IActionResult> Create([Bind("SwitchId,Name,Brand,Type,ActuationForce,ImageUrl")] Switch switchObj)
     {
         if (!ModelState.IsValid)
         {
@@ -118,7 +118,7 @@ public class SwitchController : Controller
     [Authorize(Roles = "Admin")]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Switch switchObj)
+    public async Task<IActionResult> Edit(int id, [Bind("SwitchId,Name,Brand,Type,ActuationForce,ImageUrl")] Switch switchObj)
     {
         // Đảm bảo id trên URL khớp với SwitchId trong form
         if (id != switchObj.SwitchId) return NotFound();
