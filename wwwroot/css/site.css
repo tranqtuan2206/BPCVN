@@ -1110,22 +1110,20 @@ html.dark .waveform-play-btn.playing:hover {
 }
 
 
-/* ── 23. Brand Logo — Viền hồng #fb7aec ──────────────────────────────────── */
-.brand-logo {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: var(--radius-comfortable);
-    border: 2px solid #fb7aec;
-    color: #fb7aec;
-    font-size: 1.1rem;
-    transition: background-color 0.15s ease;
+/* ── 23. Navbar Logo Switch — nhấn chuột đổi ảnh mô phỏng switch cơ ────── */
+
+/* Trạng thái bình thường — ảnh hiển thị qua src, CSS chỉ quản lý kích thước */
+.navbar-logo-switch {
+    height: 34px;       /* Cùng kích thước với icon bàn phím viền hồng cũ (34px) */
+    width: auto;
+    cursor: pointer;
+    transition: transform 0.08s ease;
 }
 
-.brand-logo:hover {
-    background-color: rgba(251, 122, 236, 0.08);
+/* Trạng thái nhấn chuột — áp dụng khi bấm vào cả khu vực chứa logo và chữ BPCVN */
+.navbar-brand:active .navbar-logo-switch {
+    content: url('/icons/Logo-BPCVN-pressed-removebg.png');
+    transform: scale(0.96);  /* Thu nhẹ mô phỏng cảm giác nhấn */
 }
 
 
@@ -1321,11 +1319,7 @@ html.dark .avatar {
     color: #1a1a1e;
 }
 
-/* Brand logo dark */
-html.dark .brand-logo {
-    border-color: #fb7aec;
-    color: #fb7aec;
-}
+/* Logo switch dark — không cần đổi màu vì dùng ảnh PNG */
 
 /* Toast dark */
 html.dark .toast-lovable {
