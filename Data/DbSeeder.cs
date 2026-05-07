@@ -1,11 +1,30 @@
 using BPCVN.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace BPCVN.Data;
 
-public static class DbSeeder
+/// <summary>
+/// Lớp chịu trách nhiệm khởi tạo dữ liệu mẫu (Seed Data) cho database.
+/// Sử dụng IConfiguration để đọc cấu hình thay vì hardcode giá trị nhạy cảm.
+/// </summary>
+public class DbSeeder
 {
-    public static async Task SeedAsync(AppDbContext db)
+    // Dependency: đối tượng cấu hình để đọc appsettings
+    private readonly IConfiguration _config;
+
+    /// <summary>
+    /// Constructor — nhận IConfiguration thông qua Dependency Injection.
+    /// </summary>
+    public DbSeeder(IConfiguration config)
+    {
+        _config = config;
+    }
+
+    /// <summary>
+    /// Thực hiện seed dữ liệu mẫu vào database.
+    /// </summary>
+    public async Task SeedAsync(AppDbContext db)
     {
         await db.Database.MigrateAsync();
 
@@ -137,11 +156,22 @@ public static class DbSeeder
         // Tạo tài khoản Admin mặc định nếu chưa tồn tại
         if (!await db.Users.AnyAsync(u => u.Email == "admin@twsnwithunikey"))
         {
+            // Đọc mật khẩu Admin từ cấu hình (appsettings.json) thay vì hardcode
+            var adminPassword = _config["AdminSettings:DefaultPassword"];
+
+            // Kiểm tra null/empty — tránh lỗi khi cấu hình thiếu hoặc sai
+            if (string.IsNullOrWhiteSpace(adminPassword))
+            {
+                throw new InvalidOperationException(
+                    "Thiếu cấu hình 'AdminSettings:DefaultPassword' trong appsettings.json. " +
+                    "Vui lòng thêm section AdminSettings với key DefaultPassword.");
+            }
+
             db.Users.Add(new User
             {
                 Username     = "Admin",
                 Email        = "admin@twsnwithunikey",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456"),
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
                 Role         = "Admin",
                 CreatedAt    = DateTime.UtcNow
             });

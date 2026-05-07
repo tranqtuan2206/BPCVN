@@ -29,11 +29,17 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 var app = builder.Build();
 
 // ── Seed Database ─────────────────────────────────────────────────────────────
+// Tạo scope để resolve các service cần thiết cho việc seed dữ liệu
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await DbSeeder.SeedAsync(db);
+    var db     = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+
+    // Khởi tạo DbSeeder với IConfiguration (không còn hardcode mật khẩu)
+    var seeder = new DbSeeder(config);
+    await seeder.SeedAsync(db);
 }
+
 
 // ── Middleware Pipeline ───────────────────────────────────────────────────────
 if (!app.Environment.IsDevelopment())
