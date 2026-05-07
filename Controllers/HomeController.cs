@@ -30,4 +30,12 @@ public class HomeController : Controller
 
         return View(specs);
     }
+
+    // ── Action xử lý trang lỗi chung (Exception Handler) ────────────────
+    // Khớp với cấu hình app.UseExceptionHandler("/Home/Error") trong Program.cs
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        return View();
+    }
 }

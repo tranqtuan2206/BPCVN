@@ -9,6 +9,22 @@
  * ============================================================================
  */
 
+/* ── 0. Font Pixel cục bộ ────────────────────────────────────────────── */
+/* Khai báo font Determination từ file .otf trong thư mục fonts */
+@font-face {
+    font-family: 'Determination';
+    src: url('../fonts/SVN-DeterminationSans.otf') format('opentype');
+    font-display: swap;
+}
+
+/* Utility class dùng font pixel — tắt anti-aliasing để giữ nét sắc, gai góc */
+.text-pixel {
+    font-family: 'Determination', sans-serif;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: grayscale;
+    font-smooth: never;
+}
+
 /* ── 1. CSS Custom Properties (Design Tokens) ───────────────────────────── */
 :root {
     /* Primary */
