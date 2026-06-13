@@ -1,4 +1,5 @@
 using BPCVN.Data;
+using BPCVN.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 );
 
 builder.Services.AddControllersWithViews();
+
+// Đăng ký dịch vụ gửi email (xác thực tài khoản)
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

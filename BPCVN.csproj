@@ -1,10 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>BPCVN</RootNamespace>
+    <UserSecretsId>29ea2269-3b8d-4195-8f6b-f213dfaa927b</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

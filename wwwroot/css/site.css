@@ -86,6 +86,15 @@ body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Sticky footer — đẩy footer xuống đáy khi nội dung ít */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Main content chiếm hết không gian còn lại → footer luôn dính đáy */
+main {
+    flex: 1 0 auto;
 }
 
 
@@ -463,19 +472,25 @@ body {
  * Dùng visibility/opacity tránh xung đột với cơ chế .show của Bootstrap.
  */
 @media all and (min-width: 992px) {
+
     /* Mặc định: ẩn dropdown bằng visibility (không xung đột Bootstrap JS) */
-    .navbar .dropdown > .dropdown-menu {
-        display: block !important;      /* Luôn giữ display:block để hover CSS hoạt động */
-        visibility: hidden;             /* Ẩn về mặt thị giác */
-        opacity: 0;                     /* Mờ dần khi ẩn */
-        pointer-events: none;           /* Không cho click khi đang ẩn */
-        transform: translateY(4px);     /* Dịch xuống nhẹ để tạo hiệu ứng trượt */
+    .navbar .dropdown>.dropdown-menu {
+        display: block !important;
+        /* Luôn giữ display:block để hover CSS hoạt động */
+        visibility: hidden;
+        /* Ẩn về mặt thị giác */
+        opacity: 0;
+        /* Mờ dần khi ẩn */
+        pointer-events: none;
+        /* Không cho click khi đang ẩn */
+        transform: translateY(4px);
+        /* Dịch xuống nhẹ để tạo hiệu ứng trượt */
         transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
         margin-top: 0 !important;
     }
 
     /* Hover vào .dropdown => hiện menu con với animation */
-    .navbar .dropdown:hover > .dropdown-menu {
+    .navbar .dropdown:hover>.dropdown-menu {
         visibility: visible;
         opacity: 1;
         pointer-events: auto;
@@ -483,7 +498,7 @@ body {
     }
 
     /* Trường hợp Bootstrap JS đã add class .show (do user click) — vẫn hiển thị bình thường */
-    .navbar .dropdown > .dropdown-menu.show {
+    .navbar .dropdown>.dropdown-menu.show {
         visibility: visible;
         opacity: 1;
         pointer-events: auto;
@@ -631,6 +646,8 @@ body {
     text-align: center;
     color: var(--color-muted);
     font-size: 0.875rem;
+    flex-shrink: 0;
+    /* Không cho footer bị co lại */
 }
 
 .footer-lovable strong {
@@ -722,8 +739,13 @@ body {
 }
 
 @keyframes waveform-spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Vùng chứa sóng âm — chiếm hết không gian còn lại */
@@ -1130,7 +1152,8 @@ html.dark .waveform-play-btn.playing:hover {
 
 /* Trạng thái bình thường — ảnh hiển thị qua src, CSS chỉ quản lý kích thước */
 .navbar-logo-switch {
-    height: 34px;       /* Cùng kích thước với icon bàn phím viền hồng cũ (34px) */
+    height: 34px;
+    /* Cùng kích thước với icon bàn phím viền hồng cũ (34px) */
     width: auto;
     cursor: pointer;
     transition: transform 0.08s ease;
@@ -1139,7 +1162,8 @@ html.dark .waveform-play-btn.playing:hover {
 /* Trạng thái nhấn chuột — áp dụng khi bấm vào cả khu vực chứa logo và chữ BPCVN */
 .navbar-brand:active .navbar-logo-switch {
     content: url('/icons/Logo-BPCVN-pressed-removebg.png');
-    transform: scale(0.96);  /* Thu nhẹ mô phỏng cảm giác nhấn */
+    transform: scale(0.96);
+    /* Thu nhẹ mô phỏng cảm giác nhấn */
 }
 
 
@@ -1565,4 +1589,207 @@ html.dark .lang-label {
     vertical-align: middle;
     margin-right: 6px;
     margin-bottom: 2px;
+}
+
+/* ── 27. Brand Aura Tràn Viền (Độc quyền BPCVN Fix Cuối Cùng) ────────── */
+
+/* Tuyệt kỹ phá vỡ mọi giới hạn của Bootstrap Container */
+.brand-aura-wrapper {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    /* Ép rộng bằng 100% màn hình browser */
+    height: 1000px;
+    /* Bao phủ khu vực hero ở trên */
+    overflow: hidden;
+    /* Cắt vệt sáng tràn ra ngoài window, ko gây scroll ngang */
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Cục switch phát sáng */
+.brand-aura-img {
+    position: absolute;
+    top: 470px;
+    /* Đẩy xuống ngang khu vực Hero */
+    left: 50%;
+    transform: translate(-50%, -50%) scale(3.5);
+    filter: blur(10px);
+    opacity: 0.6;
+}
+
+/* Tẩy trắng cái lồng Hero cũ của template */
+.hero-section {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+html.dark .hero-section {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+.hero-section::before {
+    display: none !important;
+}
+
+/* Tôn Subtitle lên để không bị chìm vào nền kính mờ */
+.hero-section .text-body-lg {
+    color: var(--color-charcoal) !important;
+    opacity: 0.85 !important;
+    font-weight: 500 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    letter-spacing: 0.2px;
+}
+
+/* Đảm bảo khi bật Dark Mode chữ vẫn sáng bừng lên */
+html.dark .hero-section .text-body-lg {
+    color: #f0ede6 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* ── 28. Custom Scrollbar — Tàng hình bình thường, hiện khi hover ──────── */
+
+/* Kích thước rãnh scrollbar (track) — trong suốt hoàn toàn khi nghỉ */
+::-webkit-scrollbar {
+    width: 8px;
+    background-color: transparent;
+}
+
+/* Phần tay cầm scrollbar — cũng trong suốt khi nghỉ */
+::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 10px;
+    /* Transition để hiệu ứng mượt khi hiện/ẩn */
+    transition: background-color 0.3s ease;
+}
+
+/* Khi hover vào vùng cuộn (mép phải trang) — tay cầm hiện ra màu xám */
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(150, 150, 150, 0.8);
+}
+
+/* Track cũng nhẹ nhàng hiện nền khi hover để user biết vùng tương tác */
+::-webkit-scrollbar-track:hover {
+    background-color: rgba(150, 150, 150, 0.08);
+}
+
+/* ── 29. Game FAB & Modal ─────────────────────────────────────────────────── */
+
+/* ─── Nút FAB (Floating Action Button) mở game ─────────────────────────── */
+.game-fab {
+    position: fixed;
+    bottom: 82px;           /* Nằm ngay trên nút theme-toggle (24px + 48px + 10px gap) */
+    right: 24px;
+    z-index: 9998;          /* Ngay dưới theme-toggle (9999) */
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    /* Màu hồng brand — đồng bộ với progressColor waveform */
+    background: linear-gradient(135deg, #fb7aec, #d946c8);
+    color: #fff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(251, 122, 236, 0.45);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Hover: phóng to nhẹ và tăng glow hồng */
+.game-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 24px rgba(251, 122, 236, 0.7);
+}
+
+.game-fab:active {
+    transform: scale(0.95);
+}
+
+/* ─── Overlay nền tối ────────────────────────────────────────────────────── */
+.game-overlay {
+    display: none;          /* Ẩn mặc định */
+    position: fixed;
+    inset: 0;               /* Phủ toàn màn hình */
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.82);
+    /* Backdrop blur để nền mờ đẹp */
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+    /* Animation fade-in */
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+/* Class .active được JS thêm khi mở */
+.game-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+/* ─── Container chứa game (glassmorphism) ────────────────────────────────── */
+.game-container {
+    position: relative;
+    width: min(960px, 92vw);  /* Tối đa 960px, co lại trên màn nhỏ */
+    aspect-ratio: 16 / 9;     /* Tỉ lệ chuẩn 16:9 cho game */
+    border-radius: 16px;
+    overflow: hidden;
+    /* Kính mờ */
+    background: rgba(20, 20, 25, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 24px 64px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(251, 122, 236, 0.15); /* Viền hồng nhẹ theo brand */
+    /* Animation scale-in khi xuất hiện */
+    animation: gameContainerIn 0.25s ease forwards;
+}
+
+@keyframes gameContainerIn {
+    from { transform: scale(0.93); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+}
+
+/* ─── Nút X đóng modal ────────────────────────────────────────────────────── */
+.game-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10001;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.game-close-btn:hover {
+    background: rgba(220, 50, 50, 0.75);
+    transform: scale(1.1);
+}
+
+/* ─── Iframe game chiếm toàn bộ container ────────────────────────────────── */
+.game-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+/* ─── Dark mode: FAB giữ nguyên màu hồng (không cần override) ───────────── */
+html.dark .game-fab {
+    box-shadow: 0 4px 20px rgba(251, 122, 236, 0.6);
 }

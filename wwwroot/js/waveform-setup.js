@@ -77,6 +77,8 @@ function initWaveformPlayers() {
     const players = document.querySelectorAll('.waveform-player');
 
     players.forEach((playerEl) => {
+        // Bỏ qua player đã được khởi tạo rồi — tránh tạo duplicate instance sau AJAX
+        if (playerEl.dataset.initialized === 'true') return;
         const waveformDiv = playerEl.querySelector('.waveform');
         const playBtn = playerEl.querySelector('.waveform-play-btn');
 
@@ -105,6 +107,9 @@ function initWaveformPlayers() {
             normalize: true,                  // Chuẩn hóa biên độ sóng
             hideScrollbar: true,              // Ẩn scrollbar ngang
         });
+
+        // Đánh dấu player này đã được khởi tạo — ngăn khởi tạo lại sau AJAX
+        playerEl.dataset.initialized = 'true';
 
         // Lưu instance vào mảng global để quản lý cross-instance
         wavesurferInstances.push({ wavesurfer, playBtn });
@@ -272,3 +277,6 @@ if (document.readyState === 'loading') {
     // DOM đã sẵn sàng (trường hợp script được load defer/async)
     initWaveformPlayers();
 }
+
+// Export ra window để các trang có thể gọi lại sau khi AJAX inject HTML mới
+window.initWaveformPlayers = initWaveformPlayers;

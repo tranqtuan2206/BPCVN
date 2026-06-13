@@ -173,7 +173,8 @@ public class DbSeeder
                 Email        = "admin@twsnwithunikey",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
                 Role         = "Admin",
-                CreatedAt    = DateTime.UtcNow
+                CreatedAt    = DateTime.UtcNow,
+                IsEmailConfirmed = true // Admin luôn được kích hoạt sẵn
             });
         }
 

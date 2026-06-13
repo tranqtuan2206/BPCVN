@@ -1,0 +1,90 @@
+@*
+    ── _ExploreResults.cshtml ──
+    PartialView chứa danh sách Build cards cho trang Explore.
+    Được trả về qua AJAX khi user search/filter, tránh reload toàn trang.
+*@
+@model IEnumerable<BPCVN.Models.Entities.Spec>
+
+@if (!Model.Any())
+{
+    <div class="card-lovable empty-state">
+        <i class="bi bi-search empty-icon"></i>
+        <p class="mb-1 text-body-lg" data-i18n="explore.noResult">Không tìm thấy build nào phù hợp.</p>
+        <p class="text-caption" data-i18n="explore.tryAgain">Thử tìm với từ khóa khác hoặc bỏ bộ lọc.</p>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+        @foreach (var spec in Model)
+        {
+            <div class="col">
+                <div class="card-lovable h-100 d-flex flex-column">
+                    <div class="px-4 pt-4 pb-3">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <div class="avatar avatar-sm">@spec.User.Username[0].ToString().ToUpper()</div>
+                            <span class="text-caption" style="font-weight:500;color:var(--color-charcoal)">@spec.User.Username</span>
+                            <span class="text-caption ms-auto" style="font-size:.73rem">@spec.CreatedAt.ToString("dd/MM/yy")</span>
+                        </div>
+                        <h6 style="font-weight:600;color:var(--color-charcoal);margin:0">
+                            <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId"
+                                class="text-decoration-none" style="color:inherit">@spec.BuildName</a>
+                        </h6>
+                    </div>
+                    <div class="px-4 py-2 d-flex flex-wrap gap-2">
+                        <span class="badge-warm badge-kit"><i class="bi bi-cpu"></i>@spec.Kit.Name</span>
+                        <span class="badge-warm badge-switch"><i class="bi bi-toggles"></i>@(spec.Switch?.Name ?? spec.CustomSwitchName ?? "N/A")</span>
+                        @if (spec.Switch != null && !string.IsNullOrEmpty(spec.Switch.Type))
+                        {
+                            <span class="badge-warm badge-type">@spec.Switch.Type</span>
+                        }
+                    </div>
+                    @if (spec.SoundTests.Any())
+                    {
+                        var top = spec.SoundTests.OrderByDescending(st => st.Upvotes).First();
+                        <div class="px-4 pb-3">
+                            <div class="audio-container">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="audio-label"><i class="bi bi-soundwave me-1"></i>Sound Test</span>
+                                    <button class="upvote-btn-lovable upvote-btn"
+                                        data-test-id="@top.TestId" onclick="handleUpvote(this)">
+                                        <i class="bi bi-heart"></i>
+                                        <span class="upvote-count">@top.Upvotes</span>
+                                    </button>
+                                </div>
+                                <div class="waveform-player">
+                                    <button type="button" class="waveform-play-btn" title="Play" disabled>
+                                        <i class="bi bi-hourglass-split waveform-icon-loading"></i>
+                                    </button>
+                                    <div class="waveform" data-audio-url="@top.AudioUrl"></div>
+                                    <div class="waveform-time">
+                                        <span class="waveform-current-time">0:00</span>
+                                        <span class="waveform-time-separator">/</span>
+                                        <span class="waveform-duration">0:00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="px-4 pb-3">
+                            <div class="audio-container text-center" style="border-style:dashed">
+                                <span class="text-caption" data-i18n="home.noSoundTest">
+                                    <i class="bi bi-mic-mute me-1"></i>Chưa có sound test
+                                </span>
+                            </div>
+                        </div>
+                    }
+                    <div class="px-4 pb-4 mt-auto d-flex gap-2 align-items-center">
+                        <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId"
+                            class="btn-ghost btn-sm-lovable flex-grow-1 text-center">
+                            <i class="bi bi-arrow-right-circle"></i><span data-i18n="home.viewDetail">Chi tiết</span>
+                        </a>
+                        <span class="text-caption flex-shrink-0"><i class="bi bi-soundwave me-1"></i>@spec.SoundTests.Count</span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

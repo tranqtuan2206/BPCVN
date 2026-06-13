@@ -26,6 +26,13 @@ public class User
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    // ── Xác thực Email ───────────────────────────────────────────────────
+    /// <summary>Trạng thái xác thực email — false = chưa kích hoạt.</summary>
+    public bool IsEmailConfirmed { get; set; } = false;
+
+    /// <summary>Token dùng để xác thực email (Guid), null sau khi đã kích hoạt.</summary>
+    public string? VerificationToken { get; set; }
+
     // Navigation
     public ICollection<Spec> Specs { get; set; } = new List<Spec>();
 }

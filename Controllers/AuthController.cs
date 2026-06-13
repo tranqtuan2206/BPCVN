@@ -2,6 +2,7 @@ using System.Security.Claims;
 using BPCVN.Data;
 using BPCVN.Models.Entities;
 using BPCVN.Models.ViewModels;
+using BPCVN.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -13,8 +14,14 @@ namespace BPCVN.Controllers;
 public class AuthController : Controller
 {
     private readonly AppDbContext _db;
+    private readonly IEmailService _emailService;
 
-    public AuthController(AppDbContext db) => _db = db;
+    // Inject thêm IEmailService để gửi mail xác thực
+    public AuthController(AppDbContext db, IEmailService emailService)
+    {
+        _db = db;
+        _emailService = emailService;
+    }
 
     // ── REGISTER ──────────────────────────────────────────────────────────────
 
@@ -41,24 +48,94 @@ public class AuthController : Controller
             return View(vm);
         }
 
-        // Tạo user mới — Role mặc định "User" (từ model default)
+        // Tạo token xác thực email (Guid ngẫu nhiên)
+        var verificationToken = Guid.NewGuid().ToString();
+
+        // Tạo user mới — chưa kích hoạt email (IsEmailConfirmed = false)
         var user = new User
         {
             Username = vm.Username.Trim(),
             Email = vm.Email.Trim().ToLower(),
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(vm.Password),
-            Role = "User", // Luôn gán Role User cho đăng ký thường
-            CreatedAt = DateTime.UtcNow
+            Role = "User",
+            CreatedAt = DateTime.UtcNow,
+            IsEmailConfirmed = false,         // Chưa xác thực
+            VerificationToken = verificationToken // Token để verify
         };
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
 
-        // Tự động đăng nhập sau khi đăng ký
-        await SignInUser(user, isPersistent: false);
+        // ── Gửi email xác thực ──────────────────────────────────────────────
+        // Sinh link kích hoạt trỏ tới action VerifyEmail
+        var verifyLink = Url.Action(
+            action: "VerifyEmail",
+            controller: "Auth",
+            values: new { email = user.Email, token = verificationToken },
+            protocol: Request.Scheme // https hoặc http tùy môi trường
+        );
 
-        TempData["Success"] = $"Chào mừng {user.Username}! Tài khoản đã được tạo.";
-        return RedirectToAction("Index", "Home");
+        // Nội dung email HTML
+        var emailBody = $@"
+            <h2>Chào mừng bạn đến với BPCVN!</h2>
+            <p>Xin chào <strong>{user.Username}</strong>,</p>
+            <p>Vui lòng nhấn vào link bên dưới để kích hoạt tài khoản của bạn:</p>
+            <p><a href='{verifyLink}' style='display:inline-block;padding:10px 20px;background:#333;color:#fff;text-decoration:none;border-radius:5px;'>
+                ✅ Kích hoạt tài khoản
+            </a></p>
+            <p>Hoặc copy link này vào trình duyệt:</p>
+            <p>{verifyLink}</p>
+            <hr/>
+            <p style='color:#888;font-size:12px;'>Nếu bạn không đăng ký tài khoản này, vui lòng bỏ qua email này.</p>
+        ";
+
+        try
+        {
+            await _emailService.SendEmailAsync(user.Email, "BPCVN - Xác thực tài khoản", emailBody);
+        }
+        catch (Exception)
+        {
+            // Nếu gửi mail lỗi, vẫn tạo tài khoản thành công
+            // User có thể yêu cầu gửi lại sau
+        }
+
+        // KHÔNG tự động đăng nhập — yêu cầu xác thực email trước
+        TempData["Success"] = "Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản trước khi đăng nhập.";
+        return RedirectToAction("Login");
+    }
+
+    // ── VERIFY EMAIL ─────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Action xác thực email — user click link trong email sẽ gọi tới đây.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> VerifyEmail(string email, string token)
+    {
+        // Validate tham số đầu vào
+        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
+        {
+            TempData["Error"] = "Link xác thực không hợp lệ.";
+            return RedirectToAction("Login");
+        }
+
+        // Tìm user theo email và token
+        var user = await _db.Users.FirstOrDefaultAsync(
+            u => u.Email == email.Trim().ToLower() && u.VerificationToken == token);
+
+        if (user == null)
+        {
+            TempData["Error"] = "Link xác thực không hợp lệ hoặc đã hết hạn.";
+            return RedirectToAction("Login");
+        }
+
+        // Đã tìm thấy → kích hoạt tài khoản
+        user.IsEmailConfirmed = true;
+        user.VerificationToken = null; // Xóa token sau khi xác thực
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = "Xác thực thành công! Bạn có thể đăng nhập ngay bây giờ.";
+        return RedirectToAction("Login");
     }
 
     // ── LOGIN ─────────────────────────────────────────────────────────────────
@@ -87,6 +164,15 @@ public class AuthController : Controller
         if (user == null || !BCrypt.Net.BCrypt.Verify(vm.Password, user.PasswordHash))
         {
             ModelState.AddModelError(string.Empty, "Email hoặc mật khẩu không đúng.");
+            return View(vm);
+        }
+
+        // ── Kiểm tra xác thực email ─────────────────────────────────────────
+        // Bỏ qua kiểm tra cho tài khoản có Role = "Admin"
+        if (!user.IsEmailConfirmed && user.Role != "Admin")
+        {
+            ModelState.AddModelError(string.Empty,
+                "Tài khoản chưa được kích hoạt, vui lòng kiểm tra email.");
             return View(vm);
         }
 

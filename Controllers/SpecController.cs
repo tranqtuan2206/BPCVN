@@ -434,6 +434,12 @@ public class SpecController : Controller
         ViewBag.SwitchType   = switchType;
         ViewBag.TotalResults = specs.Count;
 
+        // Nếu là AJAX request → chỉ trả PartialView (list cards), không load lại layout
+        // Dùng .ToString() vì Request.Headers[] trả về StringValues, không phải string
+        var isAjax = Request.Headers["X-Requested-With"].ToString() == "XMLHttpRequest";
+        if (isAjax)
+            return PartialView("_ExploreResults", specs);
+
         return View(specs);
     }
 }

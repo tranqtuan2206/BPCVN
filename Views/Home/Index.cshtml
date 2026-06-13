@@ -3,177 +3,177 @@
     ViewData["Title"] = "Trang chủ";
 }
 
-<!-- ── Hero Section ──────────────────────────────────────────────────────── -->
-<div class="hero-section mb-5">
-    <i class="bi bi-keyboard d-block mb-3" style="font-size:3rem;color:var(--color-charcoal);opacity:0.7"></i>
-    <h1 class="text-display mb-2" data-i18n="home.title">
-        Cộng đồng Bàn Phím Cơ Việt Nam
-    </h1>
-    <p class="text-body-lg mb-4" data-i18n="home.subtitle">Khám phá, lắng và chia sẻ trải nghiệm của bạn.</p>
-    <div class="d-flex justify-content-center gap-3 flex-wrap">
-        <a asp-controller="Kit" asp-action="Index" class="btn-dark-lovable px-4 py-2">
-            <i class="bi bi-cpu"></i><span data-i18n="home.btnKit">Kit Catalog</span>
-        </a>
-        <a asp-controller="Spec" asp-action="Explore" class="btn-ghost px-4 py-2">
-            <i class="bi bi-compass"></i><span data-i18n="home.btnExplore">Khám phá Build</span>
-        </a>
-    </div>
+<!-- 1. HÀO QUANG VÔ CỰC (PHÁ CONTAINER BẰNG CSS MỚI) -->
+<div class="brand-aura-wrapper">
+    <img src="~/icons/Logo-BPCVN-removebg.png" class="brand-aura-img" alt="Brand Aura" />
 </div>
 
-<!-- ── Stats Bar ─────────────────────────────────────────────────────────── -->
-<div class="row g-3 mb-5 text-center">
-    <div class="col-4">
-        <div class="stat-card">
-            <div class="stat-value">@ViewBag.KitCount</div>
-            <div class="stat-label">Kits</div>
-        </div>
-    </div>
-    <div class="col-4">
-        <div class="stat-card">
-            <div class="stat-value">@ViewBag.SwitchCount</div>
-            <div class="stat-label">Switches</div>
-        </div>
-    </div>
-    <div class="col-4">
-        <div class="stat-card">
-            <div class="stat-value">@ViewBag.SpecCount</div>
-            <div class="stat-label">Builds</div>
-        </div>
-    </div>
-</div>
+<!-- 2. NỘI DUNG CHÍNH NỔI LÊN TRÊN -->
+<div class="position-relative" style="z-index: 1;">
 
-<!-- ── Feed header ───────────────────────────────────────────────────────── -->
-<div class="section-header">
-    <h4 class="section-title">
-        <i class="bi bi-rss me-2" style="opacity:0.5"></i><span data-i18n="home.feedTitle">Mới nhất từ cộng đồng</span>
-    </h4>
-    <a asp-controller="Spec" asp-action="Explore" class="link-muted">
-        <span data-i18n="home.viewAll">Xem tất cả</span> <i class="bi bi-arrow-right"></i>
-    </a>
-</div>
-
-@if (!Model.Any())
-
-{
-    <div class="empty-state">
-        <i class="bi bi-inbox empty-icon"></i>
-        <p data-i18n="home.emptyState">Chưa có build nào. Hãy là người đầu tiên chia sẻ!</p>
-        @if (User.Identity?.IsAuthenticated == true)
-
-        {
-            <a asp-controller="Spec" asp-action="Create" class="btn-dark-lovable px-4">
-                <span data-i18n="home.createFirst">Tạo Build ngay</span>
+    <!-- ── Hero Section ──────────────────────────────────────────────────────── -->
+    <div class="hero-section mb-5 text-center" style="padding: 80px 0;">
+        <i class="bi bi-keyboard d-block mb-3" style="font-size:3rem;color:var(--color-charcoal);opacity:0.7"></i>
+        <h1 class="text-display mb-2" data-i18n="home.title">
+            Cộng đồng Bàn Phím Cơ Việt Nam
+        </h1>
+        <p class="text-body-lg mb-4" data-i18n="home.subtitle">Khám phá, lắng nghe và chia sẻ trải nghiệm của bạn.</p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a asp-controller="Kit" asp-action="Index" class="btn-dark-lovable px-4 py-2">
+                <i class="bi bi-cpu"></i><span data-i18n="home.btnKit">Kit Catalog</span>
             </a>
-        }
+            <a asp-controller="Spec" asp-action="Explore" class="btn-ghost px-4 py-2">
+                <i class="bi bi-compass"></i><span data-i18n="home.btnExplore">Khám phá Build</span>
+            </a>
+        </div>
     </div>
-}
 
-else 
+    <!-- ── Stats Bar ─────────────────────────────────────────────────────────── -->
+    <div class="row g-3 mb-5 text-center">
+        <div class="col-4">
+            <div class="stat-card">
+                <div class="stat-value">@ViewBag.KitCount</div>
+                <div class="stat-label">Kits</div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="stat-card">
+                <div class="stat-value">@ViewBag.SwitchCount</div>
+                <div class="stat-label">Switches</div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="stat-card">
+                <div class="stat-value">@ViewBag.SpecCount</div>
+                <div class="stat-label">Builds</div>
+            </div>
+        </div>
+    </div>
 
-{
-    <div class="row g-4">
-        @foreach (var spec in Model)
+    <!-- ── Feed header ───────────────────────────────────────────────────────── -->
+    <div class="section-header">
+        <h4 class="section-title">
+            <i class="bi bi-rss me-2" style="opacity:0.5"></i><span data-i18n="home.feedTitle">Mới nhất từ cộng đồng</span>
+        </h4>
+        <a asp-controller="Spec" asp-action="Explore" class="link-muted">
+            <span data-i18n="home.viewAll">Xem tất cả</span> <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
 
-        {
-            <div class="col-12 col-lg-6">
-                <div class="card-lovable h-100 d-flex flex-column">
-                    <!-- Card header -->
-                    <div class="px-4 pt-4 pb-3">
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <div class="avatar avatar-md">
-                                @spec.User.Username[0].ToString().ToUpper()
-                            </div>
-                            <div>
-                                <div class="small" style="font-weight:600;color:var(--color-charcoal)">
-                                    @spec.User.Username
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-inbox empty-icon"></i>
+            <p data-i18n="home.emptyState">Chưa có build nào. Hãy là người đầu tiên chia sẻ!</p>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a asp-controller="Spec" asp-action="Create" class="btn-dark-lovable px-4">
+                    <span data-i18n="home.createFirst">Tạo Build ngay</span>
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var spec in Model)
+            {
+                <div class="col-12 col-lg-6">
+                    <div class="card-lovable h-100 d-flex flex-column">
+                        <!-- Card header -->
+                        <div class="px-4 pt-4 pb-3">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <div class="avatar avatar-md">
+                                    @spec.User.Username[0].ToString().ToUpper()
                                 </div>
-                                <div class="text-caption" style="font-size:.75rem">
-                                    @spec.CreatedAt.ToString("dd/MM/yyyy")
-                                </div>
-                            </div>
-                        </div>
-                        <h5 style="font-weight:600;color:var(--color-charcoal);margin:0">
-                            <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId"
-                                class="text-decoration-none" style="color:inherit">
-                                @spec.BuildName
-                            </a>
-                        </h5>
-                    </div>
-
-                    <!-- Badges -->
-                    <div class="px-4 py-2 d-flex flex-wrap gap-2">
-                        <span class="badge-warm badge-kit">
-                            <i class="bi bi-cpu"></i>@spec.Kit.Name
-                        </span>
-                        <span class="badge-warm badge-switch">
-                            <i class="bi bi-toggles"></i>@(spec.Switch?.Name ?? spec.CustomSwitchName ?? "N/A")
-                        </span>
-                        @if (!string.IsNullOrEmpty(spec.PlateMaterial))
-
-                        {
-                            <span class="badge-warm badge-type">
-                                <i class="bi bi-layers"></i>@spec.PlateMaterial
-                            </span>
-                        }
-                    </div>
-
-                    <!-- Audio player + Upvote -->
-                    @if (spec.SoundTests.Any())
-
-                    {
-
-                        var topAudio = spec.SoundTests.OrderByDescending(st => st.Upvotes).First();
-                        <div class="px-4 pb-3">
-                            <div class="audio-container">
-                                <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <span class="audio-label">
-                                        <i class="bi bi-soundwave me-1"></i>Sound Test
-                                    </span>
-                                    <button class="upvote-btn-lovable upvote-btn" data-test-id="@topAudio.TestId"
-                                        onclick="handleUpvote(this)">
-                                        <i class="bi bi-heart"></i>
-                                        <span class="upvote-count">@topAudio.Upvotes</span>
-                                    </button>
-                                </div>
-                                <div class="waveform-player">
-                                    <button type="button" class="waveform-play-btn" title="Play" disabled>
-                                        <i class="bi bi-hourglass-split waveform-icon-loading"></i>
-                                    </button>
-                                    <div class="waveform" data-audio-url="@topAudio.AudioUrl"></div>
-                                    <div class="waveform-time">
-                                        <span class="waveform-current-time">0:00</span>
-                                        <span class="waveform-time-separator">/</span>
-                                        <span class="waveform-duration">0:00</span>
+                                <div>
+                                    <div class="small" style="font-weight:600;color:var(--color-charcoal)">
+                                        @spec.User.Username
+                                    </div>
+                                    <div class="text-caption" style="font-size:.75rem">
+                                        @spec.CreatedAt.ToString("dd/MM/yyyy")
                                     </div>
                                 </div>
                             </div>
+                            <h5 style="font-weight:600;color:var(--color-charcoal);margin:0">
+                                <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId"
+                                    class="text-decoration-none" style="color:inherit">
+                                    @spec.BuildName
+                                </a>
+                            </h5>
                         </div>
-                    }
 
-                    else
-
-                    {
-                        <div class="px-4 pb-3">
-                            <div class="audio-container text-center" style="border-style:dashed">
-                                <span class="text-caption" data-i18n="home.noSoundTest">
-                                    <i class="bi bi-mic-mute me-1"></i>Chưa có sound test
+                        <!-- Badges -->
+                        <div class="px-4 py-2 d-flex flex-wrap gap-2">
+                            <span class="badge-warm badge-kit">
+                                <i class="bi bi-cpu"></i>@spec.Kit.Name
+                            </span>
+                            <span class="badge-warm badge-switch">
+                                <i class="bi bi-toggles"></i>@(spec.Switch?.Name ?? spec.CustomSwitchName ?? "N/A")
+                            </span>
+                            @if (!string.IsNullOrEmpty(spec.PlateMaterial))
+                            {
+                                <span class="badge-warm badge-type">
+                                    <i class="bi bi-layers"></i>@spec.PlateMaterial
                                 </span>
-                            </div>
+                            }
                         </div>
-                    }
 
-                    <!-- Footer -->
-                    <div class="px-4 pb-4 mt-auto">
-                        <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId"
-                            class="btn-ghost btn-sm-lovable btn-block text-center">
-                            <i class="bi bi-arrow-right-circle"></i><span data-i18n="home.viewDetail">Xem chi tiết</span>
-                        </a>
+                        <!-- Audio player + Upvote -->
+                        @if (spec.SoundTests.Any())
+                        {
+                            var topAudio = spec.SoundTests.OrderByDescending(st => st.Upvotes).First();
+                            <div class="px-4 pb-3">
+                                <div class="audio-container">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <span class="audio-label">
+                                            <i class="bi bi-soundwave me-1"></i>Sound Test
+                                        </span>
+                                        <button class="upvote-btn-lovable upvote-btn" data-test-id="@topAudio.TestId"
+                                            onclick="handleUpvote(this)">
+                                            <i class="bi bi-heart"></i>
+                                            <span class="upvote-count">@topAudio.Upvotes</span>
+                                        </button>
+                                    </div>
+                                    <div class="waveform-player">
+                                        <button type="button" class="waveform-play-btn" title="Play" disabled>
+                                            <i class="bi bi-hourglass-split waveform-icon-loading"></i>
+                                        </button>
+                                        <div class="waveform" data-audio-url="@topAudio.AudioUrl"></div>
+                                        <div class="waveform-time">
+                                            <span class="waveform-current-time">0:00</span>
+                                            <span class="waveform-time-separator">/</span>
+                                            <span class="waveform-duration">0:00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="px-4 pb-3">
+                                <div class="audio-container text-center" style="border-style:dashed">
+                                    <span class="text-caption" data-i18n="home.noSoundTest">
+                                        <i class="bi bi-mic-mute me-1"></i>Chưa có sound test
+                                    </span>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Footer -->
+                        <div class="px-4 pb-4 mt-auto">
+                            <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId"
+                                class="btn-ghost btn-sm-lovable btn-block text-center">
+                                <i class="bi bi-arrow-right-circle"></i><span data-i18n="home.viewDetail">Xem chi tiết</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
-}
+            }
+        </div>
+    }
+
+</div> <!-- Kết thúc lớp nội dung nổi -->
 
 @section Scripts {
     <script>
