@@ -93,19 +93,26 @@ function initWaveformPlayers() {
 
         // --- Khởi tạo instance WaveSurfer ---
         const wavesurfer = WaveSurfer.create({
-            container: waveformDiv,          // DOM element để render sóng âm
-            url: audioUrl,                    // URL file audio cần load
-            waveColor: colors.waveColor,      // Màu sóng chưa phát
-            progressColor: colors.progressColor, // Màu sóng đã phát
-            cursorColor: colors.cursorColor,  // Màu đường cursor
-            cursorWidth: 2,                   // Độ rộng cursor (px)
-            barWidth: 3,                      // Độ rộng mỗi thanh sóng (px)
-            barGap: 2,                        // Khoảng cách giữa các thanh sóng (px)
-            barRadius: 3,                     // Bo góc thanh sóng (px)
-            height: 48,                       // Chiều cao waveform (px)
-            responsive: true,                 // Tự động resize theo container
-            normalize: true,                  // Chuẩn hóa biên độ sóng
-            hideScrollbar: true,              // Ẩn scrollbar ngang
+            container: waveformDiv,               // DOM element để render sóng âm
+            url: audioUrl,                        // Bắt buộc phải có URL để WebAudio API vẽ sóng âm!
+            waveColor: colors.waveColor,          // Màu sóng chưa phát
+            progressColor: colors.progressColor,  // Màu sóng đã phát
+            cursorColor: colors.cursorColor,      // Màu đường cursor
+            cursorWidth: 2,                       // Độ rộng cursor (px)
+            barWidth: 3,                          // Độ rộng mỗi thanh sóng (px)
+            barGap: 2,                            // Khoảng cách giữa các thanh sóng (px)
+            barRadius: 3,                         // Bo góc thanh sóng (px)
+            height: 48,                           // Chiều cao waveform (px)
+            normalize: true,                      // Chuẩn hóa biên độ sóng
+            hideScrollbar: true,                  // Ẩn scrollbar ngang
+        });
+
+        // Xử lý lỗi load audio
+        wavesurfer.on('error', (err) => {
+            console.error('WaveSurfer Error:', err);
+            waveformDiv.innerHTML = `<div class="text-danger small" style="line-height:48px; padding-left:10px;">Lỗi: ${err}</div>`;
+            playBtn.disabled = true;
+            playBtn.innerHTML = '<i class="bi bi-exclamation-triangle text-danger" title="Lỗi tải âm thanh"></i>';
         });
 
         // Đánh dấu player này đã được khởi tạo — ngăn khởi tạo lại sau AJAX

@@ -35,4 +35,10 @@ public class User
 
     // Navigation
     public ICollection<Spec> Specs { get; set; } = new List<Spec>();
+
+    /// <summary>Danh sách lượt Like SoundTest của user</summary>
+    public ICollection<SoundTestLike> SoundTestLikes { get; set; } = new List<SoundTestLike>();
+
+    /// <summary>Danh sách bình luận SoundTest của user</summary>
+    public ICollection<SoundTestComment> SoundTestComments { get; set; } = new List<SoundTestComment>();
 }

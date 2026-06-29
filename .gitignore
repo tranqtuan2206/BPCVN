@@ -5,19 +5,28 @@ obj/
 *.suo
 .vs/
 
-## EF Migrations (giữ lại file Migrations/ nhưng ignore snapshot nếu muốn)
-# Uncomment dòng dưới nếu muốn ignore snapshot:
-# **/Migrations/*ModelSnapshot.cs
+## Secrets — KHÔNG BAO GIỜ commit
+appsettings.*.json
+!appsettings.json
+Properties/serviceDependencies.json
 
 ## Logs
 *.log
 logs/
 
 ## Uploads
-wwwroot/uploads/soundtests/*
-!wwwroot/uploads/soundtests/.gitkeep
+wwwroot/uploads/
 
-## Secrets & Build
-appsettings.*.json
-!appsettings.json
+## Publish
 publish/
+
+## Node.js (dùng cho sync scripts)
+node_modules/
+
+## Media binaries
+FFmpeg/
+
+## Misc
+.mimocode
+AllCode.txt
+*.md

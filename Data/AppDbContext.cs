@@ -13,6 +13,8 @@ public class AppDbContext : DbContext
     public DbSet<Keycap> Keycaps { get; set; }
     public DbSet<Spec> Specs { get; set; }
     public DbSet<SoundTest> SoundTests { get; set; }
+    public DbSet<SoundTestLike> SoundTestLikes { get; set; }
+    public DbSet<SoundTestComment> SoundTestComments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -107,5 +109,55 @@ public class AppDbContext : DbContext
             entity.Property(st => st.CreatedAt)
                   .HasDefaultValueSql("GETUTCDATE()");
         });
+
+        // ── SoundTestLike ────────────────────────────────────────────────────
+        // Bảng trung gian: 1 user chỉ like 1 SoundTest 1 lần
+        modelBuilder.Entity<SoundTestLike>(entity =>
+        {
+            entity.ToTable("SoundTestLikes");
+
+            // Unique index đảm bảo mỗi cặp (UserId, SoundTestId) chỉ có 1 dòng
+            entity.HasIndex(l => new { l.UserId, l.SoundTestId })
+                  .IsUnique()
+                  .HasDatabaseName("IX_SoundTestLikes_UserId_SoundTestId");
+
+            entity.HasOne(l => l.User)
+                  .WithMany(u => u.SoundTestLikes)
+                  .HasForeignKey(l => l.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(l => l.SoundTest)
+                  .WithMany(st => st.Likes)
+                  .HasForeignKey(l => l.SoundTestId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── SoundTestComment ─────────────────────────────────────────────────
+        // Bình luận lồng nhau: self-referencing qua ParentCommentId
+        modelBuilder.Entity<SoundTestComment>(entity =>
+        {
+            entity.ToTable("SoundTestComments");
+
+            entity.HasOne(c => c.User)
+                  .WithMany(u => u.SoundTestComments)
+                  .HasForeignKey(c => c.UserId)
+                  .OnDelete(DeleteBehavior.Restrict); // Không xóa user khi còn comment
+
+            entity.HasOne(c => c.SoundTest)
+                  .WithMany(st => st.Comments)
+                  .HasForeignKey(c => c.SoundTestId)
+                  .OnDelete(DeleteBehavior.Cascade); // Xóa SoundTest → xóa luôn comment
+
+            // Quan hệ tự tham chiếu: bình luận cha ↔ replies
+            entity.HasOne(c => c.ParentComment)
+                  .WithMany(c => c.Replies)
+                  .HasForeignKey(c => c.ParentCommentId)
+                  .IsRequired(false)
+                  .OnDelete(DeleteBehavior.Restrict); // Tránh cascade cycle trên SQL Server
+
+            entity.Property(c => c.CreatedAt)
+                  .HasDefaultValueSql("GETUTCDATE()");
+        });
     }
 }
+

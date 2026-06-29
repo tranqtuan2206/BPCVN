@@ -27,4 +27,10 @@ public class SoundTest
     // Navigation
     [ForeignKey(nameof(SpecId))]
     public Spec Spec { get; set; } = null!;
+
+    /// <summary>Danh sách lượt Like từ bảng trung gian</summary>
+    public ICollection<SoundTestLike> Likes { get; set; } = new List<SoundTestLike>();
+
+    /// <summary>Danh sách bình luận</summary>
+    public ICollection<SoundTestComment> Comments { get; set; } = new List<SoundTestComment>();
 }

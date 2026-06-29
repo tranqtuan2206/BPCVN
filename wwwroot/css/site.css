@@ -1793,3 +1793,45 @@ html.dark .hero-section .text-body-lg {
 html.dark .game-fab {
     box-shadow: 0 4px 20px rgba(251, 122, 236, 0.6);
 }
+/* -- 30. Nested Comment Tree Line UI --------------------------------------- */
+.comment-item {
+    position: relative;
+}
+
+/* Ðu?ng k? d?c cho comment có reply */
+.comment-item-has-children::before {
+    content: '';
+    position: absolute;
+    top: 40px; /* B?t d?u bên du?i th? box c?a comment cha */
+    bottom: 0px; 
+    left: 15px; /* Can gi?a kho?ng th?t l? c?a comment con (32px) */
+    width: 2px;
+    background-color: var(--border-light);
+    z-index: 0;
+}
+
+/* N?u là ph?n t? cu?i cùng nhung có con, kéo dài xu?ng thêm 1 xíu */
+.comment-is-last::before {
+    bottom: -10px;
+}
+
+/* Ðu?ng r? nhánh ngang (góc L) n?i t? du?ng k? d?c sang comment con */
+.comment-item-child::after {
+    content: '';
+    position: absolute;
+    top: -10px; /* Kéo dài lên trên d? n?i v?i du?ng k? d?c c?a cha */
+    left: -17px; /* Canh dúng v?i t?a d? left c?a ::before bên trên */
+    width: 14px;
+    height: 32px; /* Kéo dài góc cong xu?ng gi?a comment box hi?n t?i */
+    border-left: 2px solid var(--border-light);
+    border-bottom: 2px solid var(--border-light);
+    border-bottom-left-radius: 8px; /* T?o góc bo nh? */
+    z-index: 0;
+}
+
+/* Fix CSS dè lên th? g?c d? tránh background che m?t line */
+.comment-item-box {
+    position: relative;
+    z-index: 1; 
+}
+
