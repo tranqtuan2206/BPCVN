@@ -97,7 +97,7 @@ public class SwitchController : Controller
         _db.Switches.Add(switchObj);
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = "Thêm Switch thành công!";
+        TempData["Success"] = "toast.switch.create.success";
         return RedirectToAction(nameof(Details), new { id = switchObj.SwitchId });
     }
 
@@ -134,7 +134,7 @@ public class SwitchController : Controller
             _db.Update(switchObj);
             await _db.SaveChangesAsync();
 
-            TempData["Success"] = "Cập nhật Switch thành công!";
+            TempData["Success"] = "toast.switch.update.success";
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -178,7 +178,7 @@ public class SwitchController : Controller
         _db.Update(sw);
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = "Đã xóa Switch thành công!";
+        TempData["Success"] = "toast.switch.delete.success";
         return RedirectToAction(nameof(Index));
     }
 }

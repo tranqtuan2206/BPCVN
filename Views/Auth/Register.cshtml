@@ -14,23 +14,23 @@
             <form asp-action="Register" method="post">
                 <div asp-validation-summary="ModelOnly" class="validation-summary-lovable" style="display:none"></div>
                 <div class="mb-3">
-                    <label asp-for="Username" class="form-label-lovable"></label>
-                    <input asp-for="Username" class="form-control" placeholder="Nhập username..." />
+                    <label asp-for="Username" class="form-label-lovable" data-i18n="register.usernameLabel">Tên người dùng</label>
+                    <input asp-for="Username" class="form-control" placeholder="Nhập username..." data-i18n-placeholder="register.usernamePlaceholder" />
                     <span asp-validation-for="Username" class="text-danger small"></span>
                 </div>
                 <div class="mb-3">
-                    <label asp-for="Email" class="form-label-lovable"></label>
+                    <label asp-for="Email" class="form-label-lovable">Email</label>
                     <input asp-for="Email" class="form-control" placeholder="example@email.com" />
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
                 <div class="mb-3">
-                    <label asp-for="Password" class="form-label-lovable"></label>
-                    <input asp-for="Password" class="form-control" placeholder="Tối thiểu 6 ký tự" />
+                    <label asp-for="Password" class="form-label-lovable" data-i18n="register.passwordLabel">Mật khẩu</label>
+                    <input asp-for="Password" class="form-control" placeholder="Tối thiểu 6 ký tự" data-i18n-placeholder="register.passwordPlaceholder" />
                     <span asp-validation-for="Password" class="text-danger small"></span>
                 </div>
                 <div class="mb-4">
-                    <label asp-for="ConfirmPassword" class="form-label-lovable"></label>
-                    <input asp-for="ConfirmPassword" class="form-control" placeholder="Nhập lại mật khẩu" />
+                    <label asp-for="ConfirmPassword" class="form-label-lovable" data-i18n="register.confirmLabel">Xác nhận mật khẩu</label>
+                    <input asp-for="ConfirmPassword" class="form-control" placeholder="Nhập lại mật khẩu" data-i18n-placeholder="register.confirmPlaceholder" />
                     <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
                 </div>
                 <button type="submit" class="btn-dark-lovable btn-block py-2">

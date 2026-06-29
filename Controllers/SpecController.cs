@@ -31,6 +31,7 @@ public class SpecController : Controller
             .Include(s => s.Kit)
             .Include(s => s.Switch)
             .Include(s => s.SoundTests)
+                .ThenInclude(st => st.Likes)
             .AsNoTracking()
             .AsQueryable();
 
@@ -181,7 +182,8 @@ public class SpecController : Controller
         _db.Specs.Add(spec);
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = $"Build \"{spec.BuildName}\" đã được tạo thành công!";
+        TempData["Success"] = "toast.spec.create.success";
+        TempData["SuccessParam"] = spec.BuildName;
         return RedirectToAction(nameof(Details), new { id = spec.SpecId });
     }
 
@@ -197,6 +199,7 @@ public class SpecController : Controller
             .Include(s => s.Switch)
             .Include(s => s.Keycap)
             .Include(s => s.SoundTests.OrderByDescending(st => st.CreatedAt))
+                .ThenInclude(st => st.Likes)
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.SpecId == id);
 
@@ -350,7 +353,8 @@ public class SpecController : Controller
 
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = $"Build \"{spec.BuildName}\" đã được cập nhật!";
+        TempData["Success"] = "toast.spec.update.success";
+        TempData["SuccessParam"] = spec.BuildName;
         return RedirectToAction(nameof(Details), new { id });
     }
 
@@ -390,7 +394,8 @@ public class SpecController : Controller
         _db.Specs.Remove(spec);
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = $"Đã xóa build \"{spec.BuildName}\" thành công.";
+        TempData["Success"] = "toast.spec.delete.success";
+        TempData["SuccessParam"] = spec.BuildName;
         return RedirectToAction("Profile", "User");
     }
 

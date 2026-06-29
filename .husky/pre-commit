@@ -1,0 +1,2 @@
+node scripts/sync-translations.js
+git add wwwroot/js/translations.js

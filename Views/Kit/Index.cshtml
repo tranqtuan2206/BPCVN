@@ -17,9 +17,17 @@
             <span id="kitCount">@Model.Count()</span> <span data-i18n="kit.countSuffix">kits trong cơ sở dữ liệu</span>
         </p>
     </div>
-    <span class="badge-count" id="kitBadge" style="font-size:0.9375rem;padding:6px 16px">
-        @Model.Count() Kits
-    </span>
+    <div class="d-flex gap-2 align-items-center">
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-controller="Kit" asp-action="Create" class="btn-dark-lovable">
+                <i class="bi bi-plus-circle"></i>Thêm Kit
+            </a>
+        }
+        <span class="badge-count" id="kitBadge" style="font-size:0.9375rem;padding:6px 16px">
+            @Model.Count() Kits
+        </span>
+    </div>
 </div>
 
 <!-- ── Bộ lọc & Live Search ────────────────────────────────────────────── -->
@@ -31,7 +39,7 @@
                 <i class="bi bi-search me-1"></i><span data-i18n="kit.searchLabel">Tìm kiếm</span>
             </label>
             <input type="text" id="searchInput" class="form-control"
-                placeholder="Nhập tên kit hoặc brand..." autocomplete="off" />
+                placeholder="Nhập tên kit hoặc brand..." data-i18n-placeholder="kit.index.searchPlaceholder" autocomplete="off" />
         </div>
 
         <!-- Dropdown Brand -->
@@ -40,7 +48,7 @@
                 <i class="bi bi-building me-1"></i>Brand
             </label>
             <select id="filterBrand" class="form-select">
-                <option value="">-- Tất cả --</option>
+                <option value="" data-i18n="kit.index.allBrands">-- Tất cả --</option>
                 @foreach (var b in brands)
                 {
                     <option value="@b">@b</option>
@@ -54,7 +62,7 @@
                 <i class="bi bi-grid me-1"></i>Layout
             </label>
             <select id="filterLayout" class="form-select">
-                <option value="">-- Tất cả --</option>
+                <option value="" data-i18n="kit.index.allLayouts">-- Tất cả --</option>
                 @foreach (var l in layouts)
                 {
                     <option value="@l">@l</option>

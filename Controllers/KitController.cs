@@ -75,6 +75,32 @@ public class KitController : Controller
         return View(kit);
     }
 
+    // ── GET /Kit/Create — Form tạo mới Kit (chỉ Admin) ──
+    [Authorize(Roles = "Admin")]
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+    // ── POST /Kit/Create — Xử lý tạo mới Kit (chỉ Admin) ──
+    [Authorize(Roles = "Admin")]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create([Bind("KitId,Name,Brand,Layout,MountType,PcbType,ImageUrl")] Kit kit)
+    {
+        if (!ModelState.IsValid)
+        {
+            // Trả lại form với lỗi validation
+            return View(kit);
+        }
+
+        _db.Kits.Add(kit);
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = "toast.kit.create.success";
+        return RedirectToAction(nameof(Details), new { id = kit.KitId });
+    }
+
     // GET /Kit/Edit/5 — Chỉ Admin được chỉnh sửa Kit
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(int? id)
@@ -108,7 +134,7 @@ public class KitController : Controller
             _db.Update(kit);
             await _db.SaveChangesAsync();
 
-            TempData["Success"] = "Cập nhật Kit thành công!";
+            TempData["Success"] = "toast.kit.update.success";
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -152,7 +178,7 @@ public class KitController : Controller
         _db.Update(kit);
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = "Đã xóa Kit thành công!";
+        TempData["Success"] = "toast.kit.delete.success";
         return RedirectToAction(nameof(Index));
     }
 }

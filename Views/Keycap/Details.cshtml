@@ -29,17 +29,17 @@
             <!-- Nút Chỉnh sửa — chỉ Admin -->
             <a asp-controller="Keycap" asp-action="Edit" asp-route-id="@Model.KeycapId"
                class="btn-dark-lovable">
-                <i class="bi bi-pencil-square"></i>Chỉnh sửa
+                <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Chỉnh sửa</span>
             </a>
             <!-- Nút Xóa — chỉ Admin -->
             <a asp-controller="Keycap" asp-action="Delete" asp-route-id="@Model.KeycapId"
                class="btn-ghost" style="color:#b91c1c">
-                <i class="bi bi-trash"></i>Xóa
+                <i class="bi bi-trash"></i><span data-i18n="common.delete">Xóa</span>
             </a>
         }
         <!-- Nút Quay lại danh sách -->
         <a asp-controller="Keycap" asp-action="Index" class="btn-ghost">
-            <i class="bi bi-arrow-left"></i>Danh sách
+            <i class="bi bi-arrow-left"></i><span data-i18n="common.backToList">Danh sách</span>
         </a>
     </div>
 </div>
@@ -56,13 +56,13 @@
 <!-- Thông số chi tiết Keycap -->
 <div class="card-lovable card-body-lovable mb-4">
     <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:16px">
-        <i class="bi bi-sliders me-2" style="opacity:0.5"></i>Thông số Keycap
+        <i class="bi bi-sliders me-2" style="opacity:0.5"></i><span data-i18n="keycap.details.specs">Thông số Keycap</span>
     </h5>
     <div class="row g-3">
         <!-- Tên Keycap -->
         <div class="col-md-6">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-tag me-1"></i>Tên Keycap</div>
+                <div class="text-caption mb-1"><i class="bi bi-tag me-1"></i><span data-i18n="keycap.details.name">Tên Keycap</span></div>
                 <div style="font-weight:600;color:var(--color-charcoal)">@Model.Name</div>
             </div>
         </div>
@@ -70,7 +70,7 @@
         <!-- Hãng sản xuất -->
         <div class="col-md-6">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-building me-1"></i>Hãng (Brand)</div>
+                <div class="text-caption mb-1"><i class="bi bi-building me-1"></i><span data-i18n="common.brand">Hãng (Brand)</span></div>
                 <div style="font-weight:600;color:var(--color-charcoal)">
                     @(Model.Brand ?? "—")
                 </div>
@@ -80,7 +80,7 @@
         <!-- Profile -->
         <div class="col-md-4">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-layers me-1"></i>Profile</div>
+                <div class="text-caption mb-1"><i class="bi bi-layers me-1"></i><span data-i18n="common.profile">Profile</span></div>
                 <div style="font-weight:600;color:var(--color-charcoal)">
                     @(Model.Profile ?? "—")
                 </div>
@@ -90,7 +90,7 @@
         <!-- Material -->
         <div class="col-md-4">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-gem me-1"></i>Chất liệu</div>
+                <div class="text-caption mb-1"><i class="bi bi-gem me-1"></i><span data-i18n="common.material">Chất liệu</span></div>
                 <div style="font-weight:600;color:var(--color-charcoal)">
                     @(Model.Material ?? "—")
                 </div>
@@ -100,9 +100,16 @@
         <!-- Image URL -->
         <div class="col-md-4">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-image me-1"></i>Hình ảnh</div>
+                <div class="text-caption mb-1"><i class="bi bi-image me-1"></i><span data-i18n="keycap.details.image">Hình ảnh</span></div>
                 <div style="font-weight:600;color:var(--color-charcoal)">
-                    @(string.IsNullOrEmpty(Model.ImageUrl) ? "—" : "Có")
+                    @if (string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        @("—")
+                    }
+                    else
+                    {
+                        <span data-i18n="common.yes">Có</span>
+                    }
                 </div>
             </div>
         </div>
@@ -112,7 +119,7 @@
         {
             <div class="col-12">
                 <div class="info-block">
-                    <div class="text-caption mb-1"><i class="bi bi-chat-left-text me-1"></i>Mô tả</div>
+                    <div class="text-caption mb-1"><i class="bi bi-chat-left-text me-1"></i><span data-i18n="keycap.details.description">Mô tả</span></div>
                     <div style="color:var(--color-charcoal)">@Model.Description</div>
                 </div>
             </div>
@@ -126,10 +133,10 @@
     {
         <a asp-controller="Keycap" asp-action="Edit" asp-route-id="@Model.KeycapId"
            class="btn-dark-lovable">
-            <i class="bi bi-pencil-square"></i>Chỉnh sửa
+            <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Chỉnh sửa</span>
         </a>
     }
     <a asp-controller="Keycap" asp-action="Index" class="btn-ghost">
-        <i class="bi bi-arrow-left"></i>Quay lại danh sách
+        <i class="bi bi-arrow-left"></i><span data-i18n="common.backToList">Quay lại danh sách</span>
     </a>
 </div>

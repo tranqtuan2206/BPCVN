@@ -1,0 +1,29 @@
+{
+  "name": "bpcvn",
+  "version": "1.0.0",
+  "description": "- ASP.NET Core 8 MVC - Entity Framework Core 8 (Code-First, SQL Server) - Bootstrap 5.3 (CDN) - Bootstrap Icons 1.11 (CDN)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky",
+    "sync:translations": "node scripts/sync-translations.js",
+    "scan:untranslated": "node scripts/scan-untranslated.js",
+    "wrap:i18n": "node scripts/wrap-i18n.js",
+    "wrap-and-sync": "node scripts/wrap-and-sync.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tranqtuan2206/BPCVN.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/tranqtuan2206/BPCVN/issues"
+  },
+  "homepage": "https://github.com/tranqtuan2206/BPCVN#readme",
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

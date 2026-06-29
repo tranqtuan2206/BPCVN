@@ -117,7 +117,7 @@ public class SoundTestController : Controller
         _db.SoundTests.Add(soundTest);
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = "Sound test đã được upload thành công!";
+        TempData["Success"] = "toast.soundtest.upload.success";
         return RedirectToAction("Details", "Spec", new { id = specId });
     }
 
@@ -154,7 +154,7 @@ public class SoundTestController : Controller
         _db.SoundTests.Remove(soundTest);
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = "Đã xóa sound test thành công.";
+        TempData["Success"] = "toast.soundtest.delete.success";
         return RedirectToAction("Details", "Spec", new { id = specId });
     }
 

@@ -20,21 +20,21 @@
             <form asp-action="Create" method="post">
                 <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
                 <div class="mb-3">
-                    <label asp-for="BuildName" class="form-label-lovable"></label>
-                    <input asp-for="BuildName" class="form-control" placeholder="VD: Neo65 Endgame Build..." />
+                    <label asp-for="BuildName" class="form-label-lovable" data-i18n="create.buildName">Tên build</label>
+                    <input asp-for="BuildName" class="form-control" placeholder="VD: Neo65 Endgame Build..." data-i18n-placeholder="spec.edit.namePlaceholder" />
                     <span asp-validation-for="BuildName" class="text-danger small"></span>
                 </div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label asp-for="KitName" class="form-label-lovable"></label>
-                        <input asp-for="KitName" class="form-control" placeholder="VD: Neo65, QK75, Zoom65 V2..." />
+                        <label asp-for="KitName" class="form-label-lovable" data-i18n="create.kitName">Kit</label>
+                        <input asp-for="KitName" class="form-control" placeholder="VD: Neo65, QK75, Zoom65 V2..." data-i18n-placeholder="spec.edit.kitPlaceholder" />
                         <span asp-validation-for="KitName" class="text-danger small"></span>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label-lovable">Switch</label>
-                        @* Input + Datalist — user vừa chọn có sẵn vừa gõ tên mới *@
+                        <label class="form-label-lovable" data-i18n="create.switchLabel">Switch</label>
                         <input type="text" id="switchInput" name="SwitchName" value="@Model.SwitchName"
                             class="form-control" list="switchDatalist" placeholder="Chọn hoặc nhập tên switch..."
+                            data-i18n-placeholder="spec.edit.switchPlaceholder"
                             autocomplete="off" />
                         <datalist id="switchDatalist">
                             @foreach (var sw in switches)
@@ -50,23 +50,23 @@
                     </div>
                 </div>
                 <div class="mb-3">
-                    <label asp-for="KeycapName" class="form-label-lovable"></label>
-                    <input asp-for="KeycapName" class="form-control" placeholder="VD: GMK Nord, EPBT BoW..." />
+                    <label asp-for="KeycapName" class="form-label-lovable" data-i18n="create.keycapName">Keycap (tùy chọn)</label>
+                    <input asp-for="KeycapName" class="form-control" placeholder="VD: GMK Nord, EPBT BoW..." data-i18n-placeholder="spec.edit.keycapPlaceholder" />
                 </div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label asp-for="PlateMaterial" class="form-label-lovable"></label>
-                        <input asp-for="PlateMaterial" class="form-control" placeholder="VD: Aluminium, PC, FR4..." />
+                        <label asp-for="PlateMaterial" class="form-label-lovable" data-i18n="create.plateMaterial">Vật liệu plate</label>
+                        <input asp-for="PlateMaterial" class="form-control" placeholder="VD: Aluminium, PC, FR4..." data-i18n-placeholder="spec.edit.platePlaceholder" />
                     </div>
                     <div class="col-md-6">
-                        <label asp-for="FoamSetup" class="form-label-lovable"></label>
-                        <input asp-for="FoamSetup" class="form-control" placeholder="VD: Case foam + PE foam..." />
+                        <label asp-for="FoamSetup" class="form-label-lovable" data-i18n="create.foamSetup">Foam setup</label>
+                        <input asp-for="FoamSetup" class="form-control" placeholder="VD: Case foam + PE foam..." data-i18n-placeholder="spec.edit.foamPlaceholder" />
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label asp-for="Mods" class="form-label-lovable"></label>
+                    <label asp-for="Mods" class="form-label-lovable" data-i18n="create.mods">Các mod đã thực hiện</label>
                     <textarea asp-for="Mods" class="form-control" rows="3"
-                        placeholder="VD: Tape mod, tempest mod, switch film..."></textarea>
+                        placeholder="VD: Tape mod, tempest mod, switch film..." data-i18n-placeholder="spec.edit.modsPlaceholder"></textarea>
                 </div>
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn-dark-lovable px-4 py-2">

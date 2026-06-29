@@ -13,7 +13,7 @@
             <i class="bi bi-building me-1"></i>@(Model.Brand ?? "Unknown Brand")
             @if (!string.IsNullOrEmpty(Model.Layout))
             {
-                <span>&nbsp;·&nbsp;</span>
+                <span data-i18n="kit.details.separator">&nbsp;·&nbsp;</span>
                 <i class="bi bi-grid-3x3 me-1"></i>@Model.Layout
             }
         </p>
@@ -21,20 +21,17 @@
     <div class="d-flex gap-2">
         @if (User.IsInRole("Admin"))
         {
-            <!-- Nút Chỉnh sửa Kit — chỉ Admin -->
             <a asp-controller="Kit" asp-action="Edit" asp-route-id="@Model.KitId"
                class="btn-dark-lovable">
-                <i class="bi bi-pencil-square"></i>Chỉnh sửa
+                <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Chỉnh sửa</span>
             </a>
-            <!-- Nút Xóa Kit — chỉ Admin -->
             <a asp-controller="Kit" asp-action="Delete" asp-route-id="@Model.KitId"
                class="btn-ghost" style="color:#b91c1c">
-                <i class="bi bi-trash"></i>Xóa
+                <i class="bi bi-trash"></i><span data-i18n="common.delete">Xóa</span>
             </a>
         }
-        <!-- Nút Quay lại danh sách -->
         <a asp-controller="Kit" asp-action="Index" class="btn-ghost">
-            <i class="bi bi-arrow-left"></i>Danh sách
+            <i class="bi bi-arrow-left"></i><span data-i18n="common.backToList">Danh sách</span>
         </a>
     </div>
 </div>
@@ -51,51 +48,42 @@
 <!-- Thông số chi tiết Kit -->
 <div class="card-lovable card-body-lovable mb-4">
     <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:16px">
-        <i class="bi bi-sliders me-2" style="opacity:0.5"></i>Thông số Kit
+        <i class="bi bi-sliders me-2" style="opacity:0.5"></i><span data-i18n="kit.details.specs">Thông số Kit</span>
     </h5>
     <div class="row g-3">
-        <!-- Tên Kit -->
         <div class="col-md-6">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-tag me-1"></i>Tên Kit</div>
+                <div class="text-caption mb-1"><i class="bi bi-tag me-1"></i><span data-i18n="kit.details.name">Tên Kit</span></div>
                 <div style="font-weight:600;color:var(--color-charcoal)">@Model.Name</div>
             </div>
         </div>
-
-        <!-- Hãng sản xuất -->
         <div class="col-md-6">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-building me-1"></i>Hãng (Brand)</div>
+                <div class="text-caption mb-1"><i class="bi bi-building me-1"></i><span data-i18n="kit.details.brand">Hãng (Brand)</span></div>
                 <div style="font-weight:600;color:var(--color-charcoal)">
                     @(Model.Brand ?? "—")
                 </div>
             </div>
         </div>
-
-        <!-- Layout -->
         <div class="col-md-4">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-grid-3x3 me-1"></i>Layout</div>
+                <div class="text-caption mb-1"><i class="bi bi-grid-3x3 me-1"></i><span data-i18n="kit.details.layout">Layout</span></div>
                 <div style="font-weight:600;color:var(--color-charcoal)">
                     @(Model.Layout ?? "—")
                 </div>
             </div>
         </div>
-
-        <!-- Mount Type -->
         <div class="col-md-4">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-layers me-1"></i>Mount Type</div>
+                <div class="text-caption mb-1"><i class="bi bi-layers me-1"></i><span data-i18n="kit.details.mountType">Mount Type</span></div>
                 <div style="font-weight:600;color:var(--color-charcoal)">
                     @(Model.MountType ?? "—")
                 </div>
             </div>
         </div>
-
-        <!-- PCB Type -->
         <div class="col-md-4">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-motherboard me-1"></i>PCB Type</div>
+                <div class="text-caption mb-1"><i class="bi bi-motherboard me-1"></i><span data-i18n="kit.details.pcbType">PCB Type</span></div>
                 <div style="font-weight:600;color:var(--color-charcoal)">
                     @(Model.PcbType ?? "—")
                 </div>
@@ -110,14 +98,14 @@
     {
         <a asp-controller="Kit" asp-action="Edit" asp-route-id="@Model.KitId"
            class="btn-dark-lovable">
-            <i class="bi bi-pencil-square"></i>Chỉnh sửa
+            <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Chỉnh sửa</span>
         </a>
         <a asp-controller="Kit" asp-action="Delete" asp-route-id="@Model.KitId"
            class="btn-ghost" style="color:#b91c1c">
-            <i class="bi bi-trash"></i>Xóa
+            <i class="bi bi-trash"></i><span data-i18n="common.delete">Xóa</span>
         </a>
     }
     <a asp-controller="Kit" asp-action="Index" class="btn-ghost">
-        <i class="bi bi-arrow-left"></i>Quay lại danh sách
+        <i class="bi bi-arrow-left"></i><span data-i18n="common.backToList">Quay lại danh sách</span>
     </a>
 </div>

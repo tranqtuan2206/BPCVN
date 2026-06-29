@@ -19,6 +19,7 @@ public class HomeController : Controller
             .Include(s => s.Kit)
             .Include(s => s.Switch)
             .Include(s => s.SoundTests)
+                .ThenInclude(st => st.Likes)
             .AsNoTracking()
             .OrderByDescending(s => s.CreatedAt)
             .Take(15)                           // Phase 3: tăng lên 15

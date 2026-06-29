@@ -97,7 +97,7 @@ public class KeycapController : Controller
         _db.Keycaps.Add(keycap);
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = "Thêm Keycap thành công!";
+        TempData["Success"] = "toast.keycap.create.success";
         return RedirectToAction(nameof(Details), new { id = keycap.KeycapId });
     }
 
@@ -134,7 +134,7 @@ public class KeycapController : Controller
             _db.Update(keycap);
             await _db.SaveChangesAsync();
 
-            TempData["Success"] = "Cập nhật Keycap thành công!";
+            TempData["Success"] = "toast.keycap.update.success";
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -178,7 +178,7 @@ public class KeycapController : Controller
         _db.Update(keycap);
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = "Đã xóa Keycap thành công!";
+        TempData["Success"] = "toast.keycap.delete.success";
         return RedirectToAction(nameof(Index));
     }
 }

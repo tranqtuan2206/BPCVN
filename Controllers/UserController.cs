@@ -80,7 +80,8 @@ public class UserController : Controller
         _db.Specs.Remove(spec);
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = $"Đã xóa build \"{spec.BuildName}\" thành công.";
+        TempData["Success"] = "toast.spec.delete.success";
+        TempData["SuccessParam"] = spec.BuildName;
         return RedirectToAction(nameof(Profile));
     }
 }

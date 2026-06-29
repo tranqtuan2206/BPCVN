@@ -76,26 +76,26 @@
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                                     aria-expanded="false">
-                                    <i class="bi bi-gear me-1"></i>Quản lý
+                                    <i class="bi bi-gear me-1"></i><span data-i18n="nav.management">Quản lý</span>
                                 </a>
                                 <ul class="dropdown-menu"
                                     style="background:var(--color-cream);border-color:var(--border-light)">
                                     <li>
                                         <a class="dropdown-item" asp-controller="Kit" asp-action="Index"
                                             style="color:var(--color-charcoal)">
-                                            <img src="~/icons/kit-removebg.png" class="custom-nav-icon" alt="icon" />Kits
+                                            <img src="~/icons/kit-removebg.png" class="custom-nav-icon" alt="icon" /><span data-i18n="nav.kits">Kits</span>
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-controller="Switch" asp-action="Index"
                                             style="color:var(--color-charcoal)">
-                                            <img src="~/icons/switch-removebg.png" class="custom-nav-icon" alt="icon" />Switches
+                                            <img src="~/icons/switch-removebg.png" class="custom-nav-icon" alt="icon" /><span data-i18n="nav.switches">Switches</span>
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-controller="Keycap" asp-action="Index"
                                             style="color:var(--color-charcoal)">
-                                            <img src="~/icons/keycap-removebg.png" class="custom-nav-icon" alt="icon" />Keycaps
+                                            <img src="~/icons/keycap-removebg.png" class="custom-nav-icon" alt="icon" /><span data-i18n="nav.keycaps">Keycaps</span>
                                         </a>
                                     </li>
                                 </ul>
@@ -112,18 +112,18 @@
                             <li class="nav-item dropdown hover-dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownLinhKien" role="button"
                                     data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-layers me-1"></i> Đồ Chơi
+                                    <i class="bi bi-layers me-1"></i> <span data-i18n="nav.parts">Đồ Chơi</span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDropdownLinhKien">
                                     <li><a class="dropdown-item" asp-controller="Kit" asp-action="Index"><img
-                                                src="~/icons/kit-removebg.png" class="custom-nav-icon" alt="icon" /> Kits</a>
+                                                src="~/icons/kit-removebg.png" class="custom-nav-icon" alt="icon" /> <span data-i18n="nav.kits">Kits</span></a>
                                     </li>
                                     <li><a class="dropdown-item" asp-controller="Switch" asp-action="Index"><img
                                                 src="~/icons/switch-removebg.png" class="custom-nav-icon" alt="icon" />
-                                            Switches</a></li>
+                                            <span data-i18n="nav.switches">Switches</span></a></li>
                                     <li><a class="dropdown-item" asp-controller="Keycap" asp-action="Index"><img
                                                 src="~/icons/keycap-removebg.png" class="custom-nav-icon" alt="icon" />
-                                            Keycaps</a></li>
+                                            <span data-i18n="nav.keycaps">Keycaps</span></a></li>
                                 </ul>
                             </li>
                     }
@@ -222,13 +222,13 @@
                                     <li>
                                         <a class="dropdown-item" asp-controller="User" asp-action="Profile"
                                             style="color:var(--color-charcoal)">
-                                            <i class="bi bi-person me-2"></i>Trang cá nhân
+                                            <i class="bi bi-person me-2"></i><span data-i18n="nav.myProfile">Trang cá nhân</span>
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-controller="Auth" asp-action="ChangePassword"
                                             style="color:var(--color-charcoal)">
-                                            <i class="bi bi-shield-lock me-2"></i>Đổi mật khẩu
+                                            <i class="bi bi-shield-lock me-2"></i><span data-i18n="nav.changePassword">Đổi mật khẩu</span>
                                         </a>
                                     </li>
                                     <li>
@@ -237,7 +237,7 @@
                                     <li>
                                         <form asp-controller="Auth" asp-action="Logout" method="post" class="mb-0">
                                             <button type="submit" class="dropdown-item" style="color:#b91c1c">
-                                                <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                                <i class="bi bi-box-arrow-right me-2"></i><span data-i18n="nav.logout">Đăng xuất</span>
                                             </button>
                                         </form>
                                     </li>
@@ -250,36 +250,7 @@
                             </a>
                     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     else
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     {
                             <!-- Đăng nhập — Ghost button -->
                             <a class="btn-ghost" asp-controller="Auth" asp-action="Login">
@@ -302,42 +273,11 @@
 
     <!-- Toast thông báo Success -->
     @if (TempData["Success"] != null)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     {
             <div class="toast-fixed">
                 <div class="toast-lovable toast-success" id="successToast">
                     <i class="bi bi-check-circle-fill toast-icon"></i>
-                    <span>@TempData["Success"]</span>
+                    <span data-i18n="@TempData["Success"]" data-i18n-param="@(TempData["SuccessParam"] ?? "")">@TempData["Success"]</span>
                     <button type="button" class="toast-close" onclick="document.getElementById('successToast').remove()">
                         <i class="bi bi-x-lg"></i>
                     </button>
@@ -347,42 +287,11 @@
 
     <!-- Toast thông báo Error -->
     @if (TempData["Error"] != null)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     {
             <div class="toast-fixed">
                 <div class="toast-lovable toast-error" id="errorToast">
                     <i class="bi bi-exclamation-circle-fill toast-icon"></i>
-                    <span>@TempData["Error"]</span>
+                    <span data-i18n="@TempData["Error"]">@TempData["Error"]</span>
                     <button type="button" class="toast-close" onclick="document.getElementById('errorToast').remove()">
                         <i class="bi bi-x-lg"></i>
                     </button>
@@ -395,8 +304,7 @@
         @RenderBody()
     </main>
 
-
-    <!-- ── Nút FAB mở Game — nằm phía trên nút Dark/Light Mode ───────────── -->
+<!-- ── Nút FAB mở Game — nằm phía trên nút Dark/Light Mode ───────────── -->
     <button id="gameFab" class="game-fab" title="Chơi Typing Defense!" onclick="openGameModal()">
         <i class="bi bi-controller"></i>
     </button>
@@ -469,218 +377,8 @@
     </script>
 
     <!-- ── Language Switcher Script ────────────────────────────────────────── -->
+    <script src="~/js/translations.js"></script>
     <script>
-        /*
-         * Bảng dịch i18n — key: data-i18n attribute, value: text theo ngôn ngữ
-         * Thêm key mới tại đây khi cần dịch thêm phần tử
-         */
-        const translations = {
-            en: {
-                /* ── Navbar ─── */
-                'nav.home': 'Home',
-                'nav.explore': 'Explore',
-                'nav.typing': 'Typing',
-                'nav.mypage': 'My Page',
-                'nav.createBuild': 'Create Build',
-                'nav.login': 'Login',
-                'nav.register': 'Register',
-                'footer.text': 'Vietnamese Mechanical Keyboard Community',
-
-                /* ── Typing Test ─── */
-                'typing.title': 'Typing Test',
-                'typing.subtitle': 'Practice typing speed with Vietnamese vocabulary',
-                'typing.words': 'words',
-                'typing.hint': 'Click here and start typing...',
-                'typing.restart': 'try again',
-                'typing.characters': 'characters',
-                'typing.correctIncorrect': 'correct/incorrect',
-                'typing.time': 'time',
-
-                /* ── Home ─── */
-                'home.title': 'Vietnamese Mechanical Keyboard Community',
-                'home.subtitle': 'Explore, listen and share your experience.',
-                'home.btnKit': 'Kit Catalog',
-                'home.btnExplore': 'Explore Builds',
-                'home.feedTitle': 'Latest from the community',
-                'home.viewAll': 'View all',
-                'home.emptyState': 'No builds yet. Be the first to share!',
-                'home.createFirst': 'Create Build now',
-                'home.noSoundTest': 'No sound test yet',
-                'home.viewDetail': 'View details',
-
-                /* ── Login ─── */
-                'login.title': 'Login',
-                'login.subtitle': 'Welcome back to BPCVN',
-                'login.submit': 'Login',
-                'login.noAccount': "Don't have an account?",
-                'login.registerLink': 'Register now',
-
-                /* ── Register ─── */
-                'register.title': 'Create Account',
-                'register.subtitle': 'Join the BPCVN community today',
-                'register.submit': 'Register',
-                'register.hasAccount': 'Already have an account?',
-                'register.loginLink': 'Login',
-
-                /* ── Kit ─── */
-                'kit.countSuffix': 'kits in database',
-                'kit.empty': 'No kits found. Run the seeder!',
-                'kit.viewDetail': 'View details',
-
-                /* ── Switch ─── */
-                'switch.countSuffix': 'switches in database',
-                'switch.empty': 'No switches found.',
-                'switch.viewDetail': 'View details',
-                'switch.actuationForce': 'Actuation Force',
-
-                /* ── Create Build ─── */
-                'create.title': 'Create New Build',
-                'create.subtitle': 'Share your keyboard config with the community',
-                'create.save': 'Save Build',
-
-                /* ── Details ─── */
-                'details.specTitle': 'Build Specifications',
-                'details.uploadBtn': 'Upload Sound Test',
-                'details.none': 'None',
-                'details.noSoundTest': 'No sound test yet.',
-                'details.uploadNow': 'Upload now',
-
-                /* ── Explore ─── */
-                'explore.title': 'Explore Builds',
-                'explore.found': 'Found',
-                'explore.results': 'results',
-                'explore.searchLabel': 'Search',
-                'explore.switchType': 'Switch Type',
-                'explore.allTypes': '-- All types --',
-                'explore.filter': 'Filter',
-                'explore.noResult': 'No matching builds found.',
-                'explore.tryAgain': 'Try different keywords or remove filters.',
-
-                /* ── Upload ─── */
-                'upload.backTo': 'Back to',
-                'upload.title': 'Upload Sound Test',
-                'upload.fileLabel': 'Audio file',
-                'upload.fileHint': 'Accepted: .mp4, .mp3, .wav, .flac, .ogg — Max 50MB',
-                'upload.micLabel': 'Microphone used',
-                'upload.submit': 'Upload',
-
-                /* ── Profile ─── */
-                'profile.joined': 'Joined',
-                'profile.upvotesReceived': 'Upvotes received',
-                'profile.newBuild': 'New Build',
-                'profile.myBuilds': 'My Builds',
-                'profile.noBuilds': "You don't have any builds yet.",
-                'profile.createFirst': 'Create your first build',
-                'profile.view': 'View',
-                'profile.delete': 'Delete',
-
-                /* ── Common ─── */
-                'common.cancel': 'Cancel',
-            },
-            vi: {
-                /* ── Navbar ─── */
-                'nav.home': 'Trang chủ',
-                'nav.explore': 'Khám phá',
-                'nav.typing': 'Gõ Phím',
-                'nav.mypage': 'Của tôi',
-                'nav.createBuild': 'Tạo Build',
-                'nav.login': 'Đăng nhập',
-                'nav.register': 'Đăng ký',
-                'footer.text': 'Cộng đồng Bàn Phím Cơ Việt Nam',
-
-                /* ── Typing Test ─── */
-                'typing.title': 'Gõ Phím',
-                'typing.subtitle': 'Luyện tốc độ gõ phím với từ vựng tiếng Việt',
-                'typing.words': 'từ',
-                'typing.hint': 'Click vào đây và bắt đầu gõ...',
-                'typing.restart': 'thử lại',
-                'typing.characters': 'ký tự',
-                'typing.correctIncorrect': 'đúng/sai',
-                'typing.time': 'thời gian',
-
-                /* ── Home ─── */
-                'home.title': 'Cộng đồng Bàn Phím Cơ Việt Nam',
-                'home.subtitle': 'Khám phá, lắng nghe và chia sẻ trải nghiệm của bạn.',
-                'home.btnKit': 'Kit Catalog',
-                'home.btnExplore': 'Khám phá Build',
-                'home.feedTitle': 'Mới nhất từ cộng đồng',
-                'home.viewAll': 'Xem tất cả',
-                'home.emptyState': 'Chưa có build nào. Hãy là người đầu tiên chia sẻ!',
-                'home.createFirst': 'Tạo Build ngay',
-                'home.noSoundTest': 'Chưa có sound test',
-                'home.viewDetail': 'Xem chi tiết',
-
-                /* ── Login ─── */
-                'login.title': 'Đăng nhập',
-                'login.subtitle': 'Chào mừng trở lại BPCVN',
-                'login.submit': 'Đăng nhập',
-                'login.noAccount': 'Chưa có tài khoản?',
-                'login.registerLink': 'Đăng ký ngay',
-
-                /* ── Register ─── */
-                'register.title': 'Tạo tài khoản',
-                'register.subtitle': 'Tham gia cộng đồng BPCVN ngay hôm nay',
-                'register.submit': 'Đăng ký',
-                'register.hasAccount': 'Đã có tài khoản?',
-                'register.loginLink': 'Đăng nhập',
-
-                /* ── Kit ─── */
-                'kit.countSuffix': 'kits trong cơ sở dữ liệu',
-                'kit.empty': 'Chưa có kit nào. Hãy chạy seeder!',
-                'kit.viewDetail': 'Xem chi tiết',
-
-                /* ── Switch ─── */
-                'switch.countSuffix': 'switches trong cơ sở dữ liệu',
-                'switch.empty': 'Chưa có switch nào.',
-                'switch.viewDetail': 'Xem chi tiết',
-                'switch.actuationForce': 'Lực nhấn',
-
-                /* ── Create Build ─── */
-                'create.title': 'Tạo Build mới',
-                'create.subtitle': 'Chia sẻ cấu hình bàn phím của bạn với cộng đồng',
-                'create.save': 'Lưu Build',
-
-                /* ── Details ─── */
-                'details.specTitle': 'Thông số cấu hình',
-                'details.uploadBtn': 'Upload Sound Test',
-                'details.none': 'Không có',
-                'details.noSoundTest': 'Chưa có sound test nào.',
-                'details.uploadNow': 'Upload ngay',
-
-                /* ── Explore ─── */
-                'explore.title': 'Khám phá Builds',
-                'explore.found': 'Tìm thấy',
-                'explore.results': 'kết quả',
-                'explore.searchLabel': 'Tìm kiếm',
-                'explore.switchType': 'Loại Switch',
-                'explore.allTypes': '-- Tất cả loại --',
-                'explore.filter': 'Lọc',
-                'explore.noResult': 'Không tìm thấy build nào phù hợp.',
-                'explore.tryAgain': 'Thử tìm với từ khóa khác hoặc bỏ bộ lọc.',
-
-                /* ── Upload ─── */
-                'upload.backTo': 'Quay về',
-                'upload.title': 'Upload Sound Test',
-                'upload.fileLabel': 'File âm thanh',
-                'upload.fileHint': 'Chấp nhận: .mp4, .mp3, .wav, .flac, .ogg — Tối đa 50MB',
-                'upload.micLabel': 'Microphone sử dụng',
-                'upload.submit': 'Upload',
-
-                /* ── Profile ─── */
-                'profile.joined': 'Tham gia',
-                'profile.upvotesReceived': 'Upvotes nhận được',
-                'profile.newBuild': 'Build mới',
-                'profile.myBuilds': 'Builds của tôi',
-                'profile.noBuilds': 'Bạn chưa có build nào.',
-                'profile.createFirst': 'Tạo build đầu tiên',
-                'profile.view': 'Xem',
-                'profile.delete': 'Xóa',
-
-                /* ── Common ─── */
-                'common.cancel': 'Huỷ',
-            }
-        };
-
         /* Áp dụng ngôn ngữ: quét tất cả [data-i18n] và thay text */
         function applyLang(lang) {
             const dict = translations[lang];
@@ -688,7 +386,17 @@
 
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (dict[key]) el.textContent = dict[key];
+                if (dict[key]) {
+                    let text = dict[key];
+                    const param = el.getAttribute('data-i18n-param');
+                    if (param) text = text.replace('{0}', param);
+                    el.textContent = text;
+                }
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (dict[key]) el.placeholder = dict[key];
             });
 
             // Cập nhật flag + label trên nút chính
@@ -701,6 +409,59 @@
 
             // Cập nhật lang attribute trên html
             document.documentElement.setAttribute('lang', lang);
+
+            // Dịch validation messages (server-rendered)
+            if (typeof window.validationMap === 'undefined') {
+                window.validationMap = {
+                    vi: {
+                        'Username là bắt buộc': 'Username là bắt buộc',
+                        'Email là bắt buộc': 'Email là bắt buộc',
+                        'Email không hợp lệ': 'Email không hợp lệ',
+                        'Mật khẩu là bắt buộc': 'Mật khẩu là bắt buộc',
+                        'Vui lòng nhập mật khẩu': 'Vui lòng nhập mật khẩu',
+                        'Vui lòng xác nhận mật khẩu': 'Vui lòng xác nhận mật khẩu',
+                        'Mật khẩu không khớp': 'Mật khẩu không khớp',
+                        'Username từ 3-50 ký tự': 'Username từ 3-50 ký tự',
+                        'Mật khẩu ít nhất 6 ký tự': 'Mật khẩu ít nhất 6 ký tự',
+                        'Email này đã được sử dụng.': 'Email này đã được sử dụng.',
+                        'Username này đã được sử dụng.': 'Username này đã được sử dụng.',
+                        'Email hoặc mật khẩu không đúng.': 'Email hoặc mật khẩu không đúng.',
+                        'Mật khẩu hiện tại không đúng.': 'Mật khẩu hiện tại không đúng.',
+                        'Vui lòng nhập mật khẩu hiện tại': 'Vui lòng nhập mật khẩu hiện tại',
+                        'Vui lòng nhập mật khẩu mới': 'Vui lòng nhập mật khẩu mới',
+                        'Mật khẩu mới ít nhất 6 ký tự': 'Mật khẩu mới ít nhất 6 ký tự',
+                        'Vui lòng xác nhận mật khẩu mới': 'Vui lòng xác nhận mật khẩu mới',
+                        'Mật khẩu xác nhận không khớp': 'Mật khẩu xác nhận không khớp',
+                        'Tài khoản chưa được kích hoạt, vui lòng kiểm tra email.': 'Tài khoản chưa được kích hoạt, vui lòng kiểm tra email.',
+                    },
+                    en: {
+                        'Username là bắt buộc': 'Username is required',
+                        'Email là bắt buộc': 'Email is required',
+                        'Email không hợp lệ': 'Invalid email address',
+                        'Mật khẩu là bắt buộc': 'Password is required',
+                        'Vui lòng nhập mật khẩu': 'Password is required',
+                        'Vui lòng xác nhận mật khẩu': 'Please confirm your password',
+                        'Mật khẩu không khớp': 'Passwords do not match',
+                        'Username từ 3-50 ký tự': 'Username must be 3-50 characters',
+                        'Mật khẩu ít nhất 6 ký tự': 'Password must be at least 6 characters',
+                        'Email này đã được sử dụng.': 'This email is already in use.',
+                        'Username này đã được sử dụng.': 'This username is already taken.',
+                        'Email hoặc mật khẩu không đúng.': 'Invalid email or password.',
+                        'Mật khẩu hiện tại không đúng.': 'Current password is incorrect.',
+                        'Vui lòng nhập mật khẩu hiện tại': 'Please enter your current password',
+                        'Vui lòng nhập mật khẩu mới': 'Please enter a new password',
+                        'Mật khẩu mới ít nhất 6 ký tự': 'New password must be at least 6 characters',
+                        'Vui lòng xác nhận mật khẩu mới': 'Please confirm your new password',
+                        'Mật khẩu xác nhận không khớp': 'Passwords do not match',
+                        'Tài khoản chưa được kích hoạt, vui lòng kiểm tra email.': 'Account not activated, please check your email.',
+                    }
+                };
+            }
+            const vMap = window.validationMap[lang] || window.validationMap.vi;
+            document.querySelectorAll('.text-danger').forEach(el => {
+                const text = el.textContent.trim();
+                if (vMap[text]) el.textContent = vMap[text];
+            });
         }
 
         /* Đặt ngôn ngữ + lưu localStorage, đóng dropdown bằng Bootstrap API */
@@ -717,8 +478,51 @@
 
         /* Khôi phục ngôn ngữ khi load trang */
         (function () {
-            const saved = localStorage.getItem('bpcvn-lang') || 'vi';
+            var saved = localStorage.getItem('bpcvn-lang') || 'vi';
             applyLang(saved);
+
+            function translateValidationMessages() {
+                var lang = localStorage.getItem('bpcvn-lang') || 'vi';
+                var vMap = (typeof window.validationMap !== 'undefined' && window.validationMap[lang]) || {};
+                document.querySelectorAll('.text-danger, .validation-summary-lovable li, .validation-summary-lovable').forEach(function (el) {
+                    var text = el.textContent.trim();
+                    if (vMap[text]) el.textContent = vMap[text];
+                });
+            }
+
+            // Override jQuery Validate để mỗi lần show error đều dịch
+            function patchjQueryValidate() {
+                if (typeof $ === 'undefined' || !$.validator) return false;
+
+                var origShowErrors = $.validator.prototype.showErrors;
+                $.validator.prototype.showErrors = function () {
+                    origShowErrors.call(this);
+                    translateValidationMessages();
+                };
+
+                var origHighlight = $.validator.prototype.highlight;
+                $.validator.prototype.highlight = function (element) {
+                    origHighlight.call(this, element);
+                    translateValidationMessages();
+                };
+
+                return true;
+            }
+
+            if (!patchjQueryValidate()) {
+                var jqCheck = setInterval(function () {
+                    if (patchjQueryValidate()) clearInterval(jqCheck);
+                }, 100);
+                setTimeout(function () { clearInterval(jqCheck); }, 5000);
+            }
+
+            // Fallback cho server-side validation
+            document.querySelectorAll('form').forEach(function (form) {
+                form.addEventListener('submit', function () {
+                    setTimeout(translateValidationMessages, 200);
+                    setTimeout(translateValidationMessages, 500);
+                });
+            });
         })();
     </script>
 

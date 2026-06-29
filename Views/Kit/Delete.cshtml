@@ -9,7 +9,7 @@
         <!-- Header cảnh báo -->
         <div class="mb-4">
             <h2 class="section-title" style="color:#b91c1c">
-                <i class="bi bi-exclamation-triangle me-2"></i>Xác nhận xóa Kit
+                <i class="bi bi-exclamation-triangle me-2"></i><span data-i18n="kit.delete.title">Xác nhận xóa Kit</span>
             </h2>
             <p class="section-subtitle">Hành động này không thể hoàn tác.</p>
         </div>
@@ -22,7 +22,7 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <div class="info-block">
-                        <div class="text-caption mb-1"><i class="bi bi-building me-1"></i>Hãng</div>
+                        <div class="text-caption mb-1"><i class="bi bi-building me-1"></i><span data-i18n="common.brand">Hãng</span></div>
                         <div style="font-weight:600;color:var(--color-charcoal)">
                             @(Model.Brand ?? "—")
                         </div>
@@ -30,7 +30,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="info-block">
-                        <div class="text-caption mb-1"><i class="bi bi-grid-3x3 me-1"></i>Layout</div>
+                        <div class="text-caption mb-1"><i class="bi bi-grid-3x3 me-1"></i><span data-i18n="common.layout">Layout</span></div>
                         <div style="font-weight:600;color:var(--color-charcoal)">
                             @(Model.Layout ?? "—")
                         </div>
@@ -38,7 +38,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="info-block">
-                        <div class="text-caption mb-1"><i class="bi bi-layers me-1"></i>Mount</div>
+                        <div class="text-caption mb-1"><i class="bi bi-layers me-1"></i><span data-i18n="common.mount">Mount</span></div>
                         <div style="font-weight:600;color:var(--color-charcoal)">
                             @(Model.MountType ?? "—")
                         </div>
@@ -54,12 +54,12 @@
                 <!-- Nút Xóa — màu đỏ cảnh báo -->
                 <button type="submit" class="btn-dark-lovable px-4 py-2"
                         style="background-color:#b91c1c">
-                    <i class="bi bi-trash"></i>Xóa vĩnh viễn
+                    <i class="bi bi-trash"></i><span data-i18n="common.deletePermanently">Xóa vĩnh viễn</span>
                 </button>
                 <!-- Nút Huỷ — quay về Details -->
                 <a asp-controller="Kit" asp-action="Details" asp-route-id="@Model.KitId"
                     class="btn-ghost px-4 py-2">
-                    <i class="bi bi-x-lg"></i>Huỷ
+                    <i class="bi bi-x-lg"></i><span data-i18n="common.cancel">Huỷ</span>
                 </a>
             </div>
         </form>

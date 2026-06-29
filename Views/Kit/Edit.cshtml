@@ -34,12 +34,12 @@
                 <!-- Hãng + Layout trên cùng một hàng -->
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label asp-for="Brand" class="form-label-lovable">Hãng (Brand)</label>
+                        <label asp-for="Brand" class="form-label-lovable" data-i18n="kit.details.brand">Hãng (Brand)</label>
                         <input asp-for="Brand" class="form-control" placeholder="VD: Qwertykeys, Mode, KBDFans..." />
                         <span asp-validation-for="Brand" class="text-danger small"></span>
                     </div>
                     <div class="col-md-6">
-                        <label asp-for="Layout" class="form-label-lovable">Layout</label>
+                        <label asp-for="Layout" class="form-label-lovable" data-i18n="common.layout">Layout</label>
                         <select asp-for="Layout" class="form-select">
                             <option value="">— Chọn layout —</option>
                             <option value="40%">40%</option>
@@ -60,7 +60,7 @@
                 <!-- Mount Type + PCB Type -->
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label asp-for="MountType" class="form-label-lovable">Mount Type</label>
+                        <label asp-for="MountType" class="form-label-lovable" data-i18n="kit.details.mountType">Mount Type</label>
                         <select asp-for="MountType" class="form-select">
                             <option value="">— Chọn mount —</option>
                             <option value="Gasket Mount">Gasket Mount</option>
@@ -75,7 +75,7 @@
                         <span asp-validation-for="MountType" class="text-danger small"></span>
                     </div>
                     <div class="col-md-6">
-                        <label asp-for="PcbType" class="form-label-lovable">PCB Type</label>
+                        <label asp-for="PcbType" class="form-label-lovable" data-i18n="kit.details.pcbType">PCB Type</label>
                         <select asp-for="PcbType" class="form-select">
                             <option value="">— Chọn loại PCB —</option>
                             <option value="Hotswap">Hotswap</option>

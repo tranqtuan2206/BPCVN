@@ -17,9 +17,17 @@
             <span id="switchCount">@Model.Count()</span> <span data-i18n="switch.countSuffix">switches trong cơ sở dữ liệu</span>
         </p>
     </div>
-    <span class="badge-count" id="switchBadge" style="font-size:0.9375rem;padding:6px 16px">
-        @Model.Count() Switches
-    </span>
+    <div class="d-flex gap-2 align-items-center">
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-controller="Switch" asp-action="Create" class="btn-dark-lovable">
+                <i class="bi bi-plus-circle"></i>Thêm Switch
+            </a>
+        }
+        <span class="badge-count" id="switchBadge" style="font-size:0.9375rem;padding:6px 16px">
+            @Model.Count() Switches
+        </span>
+    </div>
 </div>
 
 <!-- ── Bộ lọc & Live Search ────────────────────────────────────────────── -->
@@ -31,7 +39,7 @@
                 <i class="bi bi-search me-1"></i><span data-i18n="switch.searchLabel">Tìm kiếm</span>
             </label>
             <input type="text" id="searchInput" class="form-control"
-                placeholder="Nhập tên switch hoặc brand..." autocomplete="off" />
+                placeholder="Nhập tên switch hoặc brand..." data-i18n-placeholder="switch.index.searchPlaceholder" autocomplete="off" />
         </div>
 
         <!-- Dropdown Loại Switch -->
@@ -40,7 +48,7 @@
                 <i class="bi bi-toggles me-1"></i><span data-i18n="switch.typeLabel">Loại</span>
             </label>
             <select id="filterType" class="form-select">
-                <option value="">-- Tất cả --</option>
+                <option value="" data-i18n="switch.index.allTypes">-- Tất cả --</option>
                 @foreach (var t in types)
                 {
                     <option value="@t">@t</option>
@@ -54,7 +62,7 @@
                 <i class="bi bi-building me-1"></i>Brand
             </label>
             <select id="filterBrand" class="form-select">
-                <option value="">-- Tất cả --</option>
+                <option value="" data-i18n="switch.index.allBrands">-- Tất cả --</option>
                 @foreach (var b in brands)
                 {
                     <option value="@b">@b</option>

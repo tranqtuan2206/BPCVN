@@ -100,7 +100,7 @@ public class AuthController : Controller
         }
 
         // KHÔNG tự động đăng nhập — yêu cầu xác thực email trước
-        TempData["Success"] = "Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản trước khi đăng nhập.";
+        TempData["Success"] = "toast.auth.register.success";
         return RedirectToAction("Login");
     }
 
@@ -115,7 +115,7 @@ public class AuthController : Controller
         // Validate tham số đầu vào
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
         {
-            TempData["Error"] = "Link xác thực không hợp lệ.";
+            TempData["Error"] = "toast.auth.verify.invalid";
             return RedirectToAction("Login");
         }
 
@@ -125,7 +125,7 @@ public class AuthController : Controller
 
         if (user == null)
         {
-            TempData["Error"] = "Link xác thực không hợp lệ hoặc đã hết hạn.";
+            TempData["Error"] = "toast.auth.verify.expired";
             return RedirectToAction("Login");
         }
 
@@ -134,7 +134,7 @@ public class AuthController : Controller
         user.VerificationToken = null; // Xóa token sau khi xác thực
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = "Xác thực thành công! Bạn có thể đăng nhập ngay bây giờ.";
+        TempData["Success"] = "toast.auth.verify.success";
         return RedirectToAction("Login");
     }
 
@@ -163,22 +163,20 @@ public class AuthController : Controller
         // Kiểm tra user tồn tại và password đúng
         if (user == null || !BCrypt.Net.BCrypt.Verify(vm.Password, user.PasswordHash))
         {
-            ModelState.AddModelError(string.Empty, "Email hoặc mật khẩu không đúng.");
-            return View(vm);
+            TempData["Error"] = "toast.auth.login.invalid";
+            return RedirectToAction("Login");
         }
 
-        // ── Kiểm tra xác thực email ─────────────────────────────────────────
-        // Bỏ qua kiểm tra cho tài khoản có Role = "Admin"
         if (!user.IsEmailConfirmed && user.Role != "Admin")
         {
-            ModelState.AddModelError(string.Empty,
-                "Tài khoản chưa được kích hoạt, vui lòng kiểm tra email.");
-            return View(vm);
+            TempData["Error"] = "toast.auth.login.unverified";
+            return RedirectToAction("Login");
         }
 
         await SignInUser(user, isPersistent: vm.RememberMe);
 
-        TempData["Success"] = $"Đăng nhập thành công. Xin chào {user.Username}!";
+        TempData["Success"] = "toast.auth.login.success";
+        TempData["SuccessParam"] = user.Username;
 
         // Redirect về returnUrl nếu hợp lệ, không thì về Home
         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -194,7 +192,7 @@ public class AuthController : Controller
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        TempData["Success"] = "Đã đăng xuất thành công.";
+        TempData["Success"] = "toast.auth.logout.success";
         return RedirectToAction("Index", "Home");
     }
 
@@ -233,7 +231,7 @@ public class AuthController : Controller
         // Đăng nhập lại để refresh cookie claims
         await SignInUser(user, isPersistent: false);
 
-        TempData["Success"] = "Đổi mật khẩu thành công!";
+        TempData["Success"] = "toast.auth.changePassword.success";
         return RedirectToAction("Profile", "User");
     }
 

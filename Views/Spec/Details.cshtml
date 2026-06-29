@@ -28,7 +28,7 @@
             </a>
             <!-- Sửa Build — chỉ owner -->
             <a asp-controller="Spec" asp-action="Edit" asp-route-id="@Model.SpecId" class="btn-ghost">
-                <i class="bi bi-pencil-square"></i>Sửa
+                <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Sửa</span>
             </a>
         }
         @if (isOwner || isAdmin)
@@ -39,7 +39,7 @@
                 onsubmit="return confirm('Xóa build \'@Model.BuildName\'?\nHành động này không thể hoàn tác.')">
                 <button type="submit" class="btn-ghost btn-sm-lovable"
                     style="color:#b91c1c;border-color:rgba(185,28,28,0.3)">
-                    <i class="bi bi-trash"></i>Xóa
+                    <i class="bi bi-trash"></i><span data-i18n="common.delete">Xóa</span>
                 </button>
             </form>
         }
@@ -76,13 +76,13 @@
                 {
                     @* Custom switch do user tự nhập — chỉ hiển thị tên *@
                     <div style="font-weight:600;color:var(--color-charcoal)">@Model.CustomSwitchName</div>
-                    <div class="text-caption" style="font-style:italic">Custom switch</div>
+                    <div class="text-caption" style="font-style:italic" data-i18n="spec.details.customSwitch">Custom switch</div>
                 }
 
                 else
 
                 {
-                    <div class="text-caption" style="font-style:italic">Không rõ</div>
+                    <div class="text-caption" style="font-style:italic" data-i18n="spec.details.unknown">Không rõ</div>
                 }
             </div>
         </div>
@@ -108,7 +108,7 @@
         {
             <div class="col-md-4">
                 <div class="info-block">
-                    <div class="text-caption mb-1"><i class="bi bi-layers me-1"></i>Plate</div>
+                    <div class="text-caption mb-1"><i class="bi bi-layers me-1"></i><span data-i18n="spec.details.plate">Plate</span></div>
                     <div style="font-weight:600;color:var(--color-charcoal)">@Model.PlateMaterial</div>
                 </div>
             </div>
@@ -118,7 +118,7 @@
         {
             <div class="col-md-4">
                 <div class="info-block">
-                    <div class="text-caption mb-1"><i class="bi bi-stack me-1"></i>Foam Setup</div>
+                    <div class="text-caption mb-1"><i class="bi bi-stack me-1"></i><span data-i18n="spec.details.foamSetup">Foam Setup</span></div>
                     <div style="font-weight:600;color:var(--color-charcoal)">@Model.FoamSetup</div>
                 </div>
             </div>
@@ -128,7 +128,7 @@
         {
             <div class="col-12">
                 <div class="info-block">
-                    <div class="text-caption mb-1"><i class="bi bi-tools me-1"></i>Mods</div>
+                    <div class="text-caption mb-1"><i class="bi bi-tools me-1"></i><span data-i18n="spec.details.mods">Mods</span></div>
                     <div style="font-weight:600;color:var(--color-charcoal)">@Model.Mods</div>
                 </div>
             </div>
@@ -140,7 +140,7 @@
 <div class="card-lovable card-body-lovable">
     <div class="d-flex align-items-center justify-content-between mb-3">
         <h5 style="font-weight:600;color:var(--color-charcoal);margin:0">
-            <i class="bi bi-soundwave me-2" style="opacity:0.5"></i>Sound Tests
+            <i class="bi bi-soundwave me-2" style="opacity:0.5"></i><span data-i18n="spec.details.soundTests">Sound Tests</span>
             <span class="badge-count ms-2">@Model.SoundTests.Count</span>
         </h5>
     </div>
@@ -171,7 +171,14 @@
                         <div>
                             <span style="font-weight:600;color:var(--color-charcoal)">
                                 <i class="bi bi-mic me-1"></i>
-                                @(st.MicUsed ?? "Không rõ mic")
+                                @if (!string.IsNullOrEmpty(st.MicUsed))
+                                {
+                                    @st.MicUsed
+                                }
+                                else
+                                {
+                                    <span data-i18n="spec.details.unknownMic">Không rõ mic</span>
+                                }
                             </span>
                             <span class="text-caption ms-2">@st.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
                         </div>

@@ -1,0 +1,114 @@
+@model BPCVN.Models.Entities.Kit
+@{
+    ViewData["Title"] = "Thêm Kit mới";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+
+        @* ── Header trang ── *@
+        <div class="mb-4">
+            <h2 class="section-title">
+                <i class="bi bi-plus-circle me-2" style="opacity:0.5"></i>Thêm Kit mới
+            </h2>
+            <p class="section-subtitle" data-i18n="kit.create.addDesc">Điền đầy đủ thông tin để thêm một kit vào hệ thống.</p>
+        </div>
+
+        @* ── Form Card ── *@
+        <div class="card-lovable card-body-lovable">
+            <form asp-action="Create" method="post">
+
+                @* Validation Summary — hiển thị lỗi tổng quan *@
+                <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
+
+                @* Tên Kit (bắt buộc) *@
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label-lovable" data-i18n="kit.create.nameLabel">Tên Kit *</label>
+                    <input asp-for="Name" class="form-control" placeholder="VD: Neo65, QK75, Zoom65 V2..." />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                @* Hãng + Layout trên cùng một hàng *@
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Brand" class="form-label-lovable" data-i18n="kit.create.brandLabel">Hãng (Brand)</label>
+                        <input asp-for="Brand" class="form-control" placeholder="VD: Qwertykeys, Mode, KBDFans..." />
+                        <span asp-validation-for="Brand" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Layout" class="form-label-lovable" data-i18n="kit.create.layoutLabel">Layout</label>
+                        <select asp-for="Layout" class="form-select">
+                            <option value="" data-i18n="kit.create.selectLayout">— Chọn layout —</option>
+                            <option value="40%" data-i18n="kit.create.layout40">40%</option>
+                            <option value="60%" data-i18n="kit.create.layout60">60%</option>
+                            <option value="65%" data-i18n="kit.create.layout65">65%</option>
+                            <option value="Alice" data-i18n="kit.create.layoutAlice">Alice</option>
+                            <option value="70% - FRL" data-i18n="kit.create.layout70Frl">70% - FRL</option>
+                            <option value="75%" data-i18n="kit.create.layout75">75%</option>
+                            <option value="TKL" data-i18n="kit.create.layoutTkl">TKL</option>
+                            <option value="98% - Full-size" data-i18n="kit.create.layout98Fullsize">98% - Full-size</option>
+                            <option value="Numpad" data-i18n="kit.create.layoutNumpad">Numpad</option>
+                            <option value="Other" data-i18n="kit.create.other">Khác</option>
+                        </select>
+                        <span asp-validation-for="Layout" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                @* Mount Type + PCB Type *@
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="MountType" class="form-label-lovable" data-i18n="kit.create.mountTypeLabel">Mount Type</label>
+                        <select asp-for="MountType" class="form-select">
+                            <option value="" data-i18n="kit.create.selectMount">— Chọn mount —</option>
+                            <option value="Gasket Mount" data-i18n="kit.create.gasketMount">Gasket Mount</option>
+                            <option value="Oring" data-i18n="kit.create.oring">Oring</option>
+                            <option value="Oringless" data-i18n="kit.create.oringless">Oringless</option>
+                            <option value="Top Mount" data-i18n="kit.create.topMount">Top Mount</option>
+                            <option value="Tray Mount" data-i18n="kit.create.trayMount">Tray Mount</option>
+                            <option value="Sandwich Mount" data-i18n="kit.create.sandwichMount">Sandwich Mount</option>
+                            <option value="Plateless" data-i18n="kit.create.plateless">Plateless</option>
+                            <option value="Other" data-i18n="kit.create.otherMount">Khác</option>
+                        </select>
+                        <span asp-validation-for="MountType" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="PcbType" class="form-label-lovable" data-i18n="kit.create.pcbTypeLabel">PCB Type</label>
+                        <select asp-for="PcbType" class="form-select">
+                            <option value="" data-i18n="kit.create.selectPcb">— Chọn loại PCB —</option>
+                            <option value="Hotswap" data-i18n="kit.create.hotswap">Hotswap</option>
+                            <option value="Soldered" data-i18n="kit.create.soldered">Soldered</option>
+                            <option value="Hotswap + Soldered" data-i18n="kit.create.hotswapSoldered">Hotswap + Soldered</option>
+                        </select>
+                        <span asp-validation-for="PcbType" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                @* Image URL *@
+                <div class="mb-4">
+                    <label asp-for="ImageUrl" class="form-label-lovable" data-i18n="kit.create.imageUrlLabel">URL Hình ảnh</label>
+                    <input asp-for="ImageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
+                    <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                    <p class="form-hint" data-i18n="kit.create.imageUrlHint">Dán link hình ảnh trực tiếp (JPG, PNG, WebP).</p>
+                </div>
+
+                @* Nút hành động *@
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn-dark-lovable px-4 py-2">
+                        <i class="bi bi-plus-circle"></i>Thêm Kit
+                    </button>
+                    @* Huỷ → quay về danh sách *@
+                    <a asp-controller="Kit" asp-action="Index" class="btn-ghost px-4 py-2">
+                        <i class="bi bi-x-lg"></i>Huỷ
+                    </a>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @* Client-side validation scripts (jQuery Unobtrusive Validation) *@
+    <partial name="_ValidationScriptsPartial" />
+}
