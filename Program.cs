@@ -16,10 +16,17 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
 
 // Đăng ký dịch vụ gửi email (xác thực tài khoản)
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+// Đăng ký dịch vụ xử lý file âm thanh / tách âm từ video
+builder.Services.AddScoped<IAudioService, AudioService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
