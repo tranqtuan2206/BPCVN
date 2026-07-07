@@ -15,6 +15,7 @@ public class AppDbContext : DbContext
     public DbSet<SoundTest> SoundTests { get; set; }
     public DbSet<SoundTestLike> SoundTestLikes { get; set; }
     public DbSet<SoundTestComment> SoundTestComments { get; set; }
+    public DbSet<KitImage> KitImages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,6 +44,22 @@ public class AppDbContext : DbContext
             entity.ToTable("Kits");
             // Global Query Filter: tự động ẩn Kit đã bị xóa mềm
             entity.HasQueryFilter(e => !e.IsDeleted);
+        });
+
+        // ── KitImage ────────────────────────────────────────────────────────
+        // Quan hệ 1 Kit → N KitImage: xóa Kit → xóa luôn tất cả ảnh
+        modelBuilder.Entity<KitImage>(entity =>
+        {
+            entity.ToTable("KitImages");
+
+            entity.HasOne(ki => ki.Kit)
+                  .WithMany(k => k.KitImages)
+                  .HasForeignKey(ki => ki.KitId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Đảm bảo mỗi Kit có SortOrder unique
+            entity.HasIndex(ki => new { ki.KitId, ki.SortOrder })
+                  .HasDatabaseName("IX_KitImages_KitId_SortOrder");
         });
 
         // ── Switch ───────────────────────────────────────────────────────────

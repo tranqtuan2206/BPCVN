@@ -117,9 +117,15 @@ const translations = {
         'upload.backTo': 'Back to',
         'upload.title': 'Upload Sound Test',
         'upload.fileLabel': 'Audio file',
-        'upload.fileHint': 'Accepted: .mp4, .mp3, .wav, .flac, .ogg',
+        'upload.fileHint': 'Accepted: .mp3, .wav, .flac, .ogg, .mp4, .mov',
         'upload.micLabel': 'Microphone used',
         'upload.submit': 'Upload',
+        'upload.processing': 'Processing...',
+        'upload.uploadingPercent': 'Uploading: {0}%',
+        'upload.toastSuccess': 'Sound test uploaded successfully!',
+        'upload.toastError': 'Upload failed. Please try again.',
+        'upload.toastNoFile': 'Please select a file.',
+        'upload.successBtn': 'Success!',
 
         /* ── Profile ─── */
         'profile.joined': 'Joined',
@@ -511,9 +517,15 @@ const translations = {
         'upload.backTo': 'Quay về',
         'upload.title': 'Upload Sound Test',
         'upload.fileLabel': 'File âm thanh',
-        'upload.fileHint': 'Các file được nhận: .mp4, .mp3, .wav, .flac, .ogg',
+        'upload.fileHint': 'Các file được nhận: .mp3, .wav, .flac, .ogg, .mp4, .mov',
         'upload.micLabel': 'Microphone sử dụng',
         'upload.submit': 'Upload',
+        'upload.processing': 'Đang xử lý...',
+        'upload.uploadingPercent': 'Đang tải lên: {0}%',
+        'upload.toastSuccess': 'Sound test đã được upload thành công!',
+        'upload.toastError': 'Upload thất bại. Vui lòng thử lại.',
+        'upload.toastNoFile': 'Vui lòng chọn file.',
+        'upload.successBtn': 'Thành công!',
 
         /* ── Profile ─── */
         'profile.joined': 'Tham gia',

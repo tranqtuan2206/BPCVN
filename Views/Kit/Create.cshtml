@@ -1,4 +1,4 @@
-@model BPCVN.Models.Entities.Kit
+@model BPCVN.Models.ViewModels.KitCreateViewModel
 @{
     ViewData["Title"] = "Thêm Kit mới";
 }
@@ -16,19 +16,18 @@
 
         @* ── Form Card ── *@
         <div class="card-lovable card-body-lovable">
-            <form asp-action="Create" method="post">
+            <form asp-action="Create" method="post" enctype="multipart/form-data" id="kitForm">
 
-                @* Validation Summary — hiển thị lỗi tổng quan *@
                 <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
 
-                @* Tên Kit (bắt buộc) *@
+                @* ── Tên Kit ── *@
                 <div class="mb-3">
                     <label asp-for="Name" class="form-label-lovable" data-i18n="kit.create.nameLabel">Tên Kit *</label>
                     <input asp-for="Name" class="form-control" placeholder="VD: Neo65, QK75, Zoom65 V2..." />
                     <span asp-validation-for="Name" class="text-danger small"></span>
                 </div>
 
-                @* Hãng + Layout trên cùng một hàng *@
+                @* ── Hãng + Layout ── *@
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
                         <label asp-for="Brand" class="form-label-lovable" data-i18n="kit.create.brandLabel">Hãng (Brand)</label>
@@ -54,7 +53,7 @@
                     </div>
                 </div>
 
-                @* Mount Type + PCB Type *@
+                @* ── Mount Type + PCB Type ── *@
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
                         <label asp-for="MountType" class="form-label-lovable" data-i18n="kit.create.mountTypeLabel">Mount Type</label>
@@ -83,20 +82,39 @@
                     </div>
                 </div>
 
-                @* Image URL *@
-                <div class="mb-4">
-                    <label asp-for="ImageUrl" class="form-label-lovable" data-i18n="kit.create.imageUrlLabel">URL Hình ảnh</label>
-                    <input asp-for="ImageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
-                    <span asp-validation-for="ImageUrl" class="text-danger small"></span>
-                    <p class="form-hint" data-i18n="kit.create.imageUrlHint">Dán link hình ảnh trực tiếp (JPG, PNG, WebP).</p>
+                @* ── PHẦN ẢNH KIT (kéo thả + chọn màu) ── *@
+                <div class="mb-4 p-3" style="border:1px dashed var(--border-interactive);border-radius:var(--radius-comfortable);background:var(--color-off-white)">
+                    <h6 style="font-weight:600;color:var(--color-charcoal);margin-bottom:12px">
+                        <i class="bi bi-images me-2" style="opacity:0.5"></i>Ảnh Kit
+                        <small class="text-muted fw-normal ms-2">(Kéo thả để sắp xếp thứ tự)</small>
+                    </h6>
+
+                    @* Container chứa tất cả ảnh (upload + URL) — SortableJS sẽ kéo thả trong này *@
+                    <div id="imageSortableList" class="d-flex flex-wrap gap-2 mb-3" style="min-height:40px"></div>
+
+                    @* Ô Upload file (ẩn — trigger bởi nút) *@
+                    <input type="file" asp-for="UploadImages" multiple accept="image/*"
+                           class="d-none" id="kitFileInput" />
+
+                    @* Ô nhập URL ẩn (sẽ append row mới khi nhập) *@
+                    <div id="externalUrlContainer" class="d-none"></div>
+
+                    @* Nút thêm ảnh *@
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-ghost btn-sm" id="triggerFileBtn">
+                            <i class="bi bi-upload me-1"></i>Upload ảnh
+                        </button>
+                        <button type="button" class="btn btn-ghost btn-sm" id="addUrlBtn">
+                            <i class="bi bi-link-45deg me-1"></i>Thêm link URL
+                        </button>
+                    </div>
                 </div>
 
-                @* Nút hành động *@
+                @* ── Nút hành động ── *@
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn-dark-lovable px-4 py-2">
                         <i class="bi bi-plus-circle"></i>Thêm Kit
                     </button>
-                    @* Huỷ → quay về danh sách *@
                     <a asp-controller="Kit" asp-action="Index" class="btn-ghost px-4 py-2">
                         <i class="bi bi-x-lg"></i>Huỷ
                     </a>
@@ -109,6 +127,287 @@
 </div>
 
 @section Scripts {
-    @* Client-side validation scripts (jQuery Unobtrusive Validation) *@
     <partial name="_ValidationScriptsPartial" />
+
+    @* SortableJS CDN — kéo thả sắp xếp ảnh *@
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+
+    <script>
+        (function () {
+            var sortableList = document.getElementById('imageSortableList');
+            var fileInput = document.getElementById('kitFileInput');
+            var triggerFileBtn = document.getElementById('triggerFileBtn');
+            var addUrlBtn = document.getElementById('addUrlBtn');
+            var form = document.getElementById('kitForm');
+
+            // Mảng lưu File objects — gắn vào card để biết cái nào là file nào
+            // Key: card element, Value: File object
+            var fileMap = new WeakMap();
+
+            // ── Kích hoạt SortableJS (kéo cả card, không cần nút grip) ──
+            new Sortable(sortableList, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                onEnd: updateCoverBadge
+            });
+
+            // ── Cập nhật badge "Ảnh đại diện" — card đầu tiên luôn có badge ──
+            function updateCoverBadge() {
+                // Xóa tất cả badge cũ
+                sortableList.querySelectorAll('.img-cover-badge').forEach(function (b) { b.remove(); });
+                // Thêm badge vào card đầu tiên
+                var firstCard = sortableList.querySelector('.img-sortable-card');
+                if (firstCard) {
+                    var badge = document.createElement('span');
+                    badge.className = 'img-cover-badge';
+                    badge.textContent = 'Ảnh đại diện';
+                    firstCard.style.position = 'relative';
+                    firstCard.appendChild(badge);
+                }
+            }
+
+            // ── Trigger upload file ──
+            triggerFileBtn.addEventListener('click', function () { fileInput.click(); });
+
+            // ── Khi chọn file → render preview + lưu File vào map ──
+            fileInput.addEventListener('change', function () {
+                var files = Array.from(this.files);
+                files.forEach(function (file) {
+                    if (!file.type.startsWith('image/')) return;
+                    var card = addImageCard('upload', file.name, URL.createObjectURL(file));
+                    fileMap.set(card, file); // Lưu File object kèm card
+                });
+                this.value = ''; // OK vì File đã lưu trong fileMap
+            });
+
+            // ── Thêm link URL mới ──
+            addUrlBtn.addEventListener('click', function () {
+                var url = prompt('Dán link ảnh vào đây:');
+                if (!url || !url.trim()) return;
+                addImageCard('url', url.trim(), url.trim());
+            });
+
+            // ── Tạo thẻ ảnh trong sortable list, trả về card element ──
+            function addImageCard(type, name, previewSrc) {
+                var card = document.createElement('div');
+                card.className = 'img-sortable-card';
+                card.setAttribute('data-type', type);
+
+                var handle = document.createElement('div');
+                handle.className = 'img-drag-handle';
+                handle.innerHTML = '<i class="bi bi-grip-vertical"></i>';
+                handle.title = 'Kéo để sắp xếp';
+
+                var imgWrap = document.createElement('div');
+                imgWrap.style.cssText = 'width:70px;height:70px;border-radius:var(--radius-micro);overflow:hidden;flex-shrink:0;background:#f0f0f0';
+                var img = document.createElement('img');
+                img.src = previewSrc;
+                img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+                imgWrap.appendChild(img);
+
+                var label = document.createElement('div');
+                label.className = 'img-card-label';
+                label.textContent = name.length > 20 ? name.substring(0, 20) + '...' : name;
+                label.title = name;
+
+                var colorWrap = document.createElement('div');
+                colorWrap.className = 'img-card-color';
+                var colorInput = document.createElement('input');
+                colorInput.type = 'color';
+                colorInput.value = '#1c1c1c';
+                colorInput.title = 'Chọn màu';
+                colorInput.className = 'img-color-picker';
+                var noColorLabel = document.createElement('label');
+                noColorLabel.className = 'img-no-color-label';
+                var noColorCheck = document.createElement('input');
+                noColorCheck.type = 'checkbox';
+                noColorCheck.className = 'no-color-checkbox';
+                noColorCheck.checked = true;
+                noColorCheck.addEventListener('change', function () {
+                    colorInput.disabled = this.checked;
+                    if (this.checked) {
+                        colorInput.value = '#1c1c1c';
+                        colorWrap.classList.add('no-color-active');
+                    } else {
+                        colorWrap.classList.remove('no-color-active');
+                    }
+                });
+                colorInput.disabled = true;
+                colorWrap.classList.add('no-color-active');
+                noColorLabel.appendChild(noColorCheck);
+                noColorLabel.appendChild(document.createTextNode(' Không màu'));
+                colorWrap.appendChild(colorInput);
+                colorWrap.appendChild(noColorLabel);
+
+                var removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'img-card-remove';
+                removeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
+                removeBtn.title = 'Xóa ảnh này';
+                removeBtn.addEventListener('click', function () {
+                    fileMap.delete(card); // Xóa file khỏi map khi remove card
+                    card.remove();
+                });
+
+                card.appendChild(handle);
+                card.appendChild(imgWrap);
+                card.appendChild(label);
+                card.appendChild(colorWrap);
+                card.appendChild(removeBtn);
+                sortableList.appendChild(card);
+
+                return card;
+            }
+
+            // ── Submit: build FormData theo đúng thứ tự kéo thả ──
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                var fd = new FormData();
+
+                // Copy các field bình thường (Name, Brand, Layout...) từ form
+                var inputs = form.querySelectorAll('input, select, textarea');
+                inputs.forEach(function (el) {
+                    if (el.name && el.type !== 'file' && el.type !== 'hidden' && el.type !== 'submit') {
+                        fd.append(el.name, el.value);
+                    }
+                });
+
+                // Duyệt sortable list theo đúng thứ tự DOM
+                var cards = sortableList.querySelectorAll('.img-sortable-card');
+                cards.forEach(function (card) {
+                    var type = card.getAttribute('data-type');
+                    var colorPicker = card.querySelector('.img-color-picker');
+                    var noColorCheck = card.querySelector('.no-color-checkbox');
+                    var color = (noColorCheck && noColorCheck.checked) ? '' : (colorPicker ? colorPicker.value : '');
+
+                    if (type === 'upload') {
+                        // File upload: append file + color vào FormData
+                        var file = fileMap.get(card);
+                        if (file) {
+                            fd.append('UploadImages', file, file.name);
+                            fd.append('UploadImageColors', color);
+                        }
+                    } else if (type === 'url') {
+                        // URL: append url + color
+                        var label = card.querySelector('.img-card-label');
+                        fd.append('ExternalImageUrls', label ? label.title : '');
+                        fd.append('ExternalImageColors', color);
+                    }
+                });
+
+                // Gửi AJAX
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', form.action, true);
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+                // CSRF token
+                var token = form.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) fd.append('__RequestVerificationToken', token.value);
+
+                xhr.onload = function () {
+                    if (xhr.status === 200 || xhr.status === 302) {
+                        // Thành công → redirect về trang Details
+                        window.location.href = xhr.responseURL || '/Kit';
+                    } else {
+                        alert('Có lỗi xảy ra, vui lòng thử lại.');
+                    }
+                };
+                xhr.onerror = function () {
+                    alert('Lỗi kết nối, vui lòng thử lại.');
+                };
+                xhr.send(fd);
+            });
+        })();
+    </script>
+
+    <style>
+        /* ── Sortable card styles ── */
+        .img-sortable-card {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 8px;
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-standard);
+            position: relative;
+            transition: box-shadow 0.2s ease;
+            cursor: grab;
+        }
+        .img-sortable-card:active { cursor: grabbing; }
+        .img-sortable-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .img-drag-handle {
+            cursor: grab;
+            color: var(--color-charcoal-40);
+            font-size: 1rem;
+            flex-shrink: 0;
+            padding: 0 2px;
+        }
+        .img-drag-handle:active { cursor: grabbing; }
+        .img-card-label {
+            font-size: 11px;
+            color: var(--color-muted);
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .img-card-color {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .img-color-picker {
+            width: 26px;
+            height: 26px;
+            padding: 1px;
+            cursor: pointer;
+            border-radius: var(--radius-micro);
+            border: 1px solid var(--border-light);
+        }
+        .img-no-color-label {
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+            white-space: nowrap;
+            color: var(--color-muted);
+        }
+        .img-card-remove {
+            background: none;
+            border: none;
+            color: #b91c1c;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+        .img-card-remove:hover {
+            background: rgba(185,28,28,0.1);
+        }
+        /* Hiệu ứng khi kéo */
+        .sortable-ghost { opacity: 0.4; }
+        .sortable-chosen { box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+        /* Badge ảnh đại diện trên card đầu tiên */
+        .img-cover-badge {
+            position: absolute; top: -6px; left: -6px;
+            background: var(--color-charcoal); color: #fff;
+            font-size: 9px; padding: 1px 5px; border-radius: var(--radius-pill);
+            white-space: nowrap; pointer-events: none; z-index: 1;
+        }
+        /* Liquid glass effect khi "Không màu" được tick */
+        .img-card-color.no-color-active .img-color-picker {
+            background: repeating-conic-gradient(rgba(0,0,0,0.06) 0% 25%, transparent 0% 50%) 50% / 10px 10px;
+            border: 1px dashed var(--color-charcoal-40);
+            opacity: 0.5;
+        }
+    </style>
 }

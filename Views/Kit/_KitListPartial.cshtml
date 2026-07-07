@@ -14,9 +14,13 @@ else
         {
             <div class="col">
                 <div class="card-lovable h-100 d-flex flex-column">
-                    @if (!string.IsNullOrEmpty(kit.ImageUrl))
+                    @{
+                        // Ảnh đầu tiên trong danh sách KitImages sẽ là ảnh đại diện
+                        var coverImage = kit.KitImages?.OrderBy(i => i.SortOrder).FirstOrDefault();
+                    }
+                    @if (coverImage != null)
                     {
-                        <img src="@kit.ImageUrl" class="img-lovable img-card-cover"
+                        <img src="@coverImage.ImageUrl" class="img-lovable img-card-cover"
                             alt="@kit.Name" />
                     }
                     else

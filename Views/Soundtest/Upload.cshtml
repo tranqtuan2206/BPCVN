@@ -13,7 +13,7 @@
                 <i class="bi bi-arrow-left me-1"></i><span data-i18n="upload.backTo">Quay về</span> @spec.BuildName
             </a>
         </div>
-        <div class="card-lovable card-body-lovable">
+        <div class="card-lovable card-body-lovable" id="uploadCard" style="position:relative">
             <div class="text-center mb-4">
                 <i class="bi bi-cloud-upload" style="font-size:2.5rem;color:var(--color-charcoal)"></i>
                 <h4 class="text-subheading mt-2" style="font-size:1.3rem" data-i18n="upload.title">Upload Sound Test</h4>
@@ -21,31 +21,196 @@
                     Build: <strong>@spec.BuildName</strong>
                 </p>
             </div>
-            <form asp-action="Upload" method="post" enctype="multipart/form-data">
+            <form asp-action="Upload" method="post" enctype="multipart/form-data" id="uploadForm">
                 <input type="hidden" name="specId" value="@spec.SpecId" />
                 <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
                 <div class="mb-3">
                     <label class="form-label-lovable">
                         <span data-i18n="upload.fileLabel">File âm thanh</span> <span style="color:#b91c1c">*</span>
                     </label>
-                    <input type="file" name="audioFile" accept=".mp4,.mp3,.wav,.flac,.ogg" class="form-control" required />
+                    <input type="file" name="audioFile" class="form-control" id="audioFileInput" required />
                     <div class="form-hint" data-i18n="upload.fileHint">
-                        Chấp nhận: .mp4, .mp3, .wav, .flac, .ogg — Tối đa 50MB
+                        Chấp nhận: .mp3, .wav, .flac, .ogg, .mp4, .mov — Tối đa 50MB
                     </div>
                 </div>
-                <div class="mb-4">
+                <div class="mb-3">
                     <label class="form-label-lovable" data-i18n="upload.micLabel">Microphone sử dụng</label>
-                    <input type="text" name="micUsed" class="form-control"
+                    <input type="text" name="micUsed" class="form-control" id="micUsedInput"
                         placeholder="VD: Blue Yeti, Rode NT-USB, điện thoại..." />
                 </div>
+
+                <!-- Thanh tiến trình — ẩn mặc định, hiện khi upload -->
+                <div class="mb-4" id="uploadProgressWrap" style="display:none">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-caption" id="uploadProgressLabel"></small>
+                        <small class="text-caption fw-bold" id="uploadProgressText">0%</small>
+                    </div>
+                    <div style="height:8px;border-radius:99px;background:var(--color-border,#e5e7eb);overflow:hidden">
+                        <div id="uploadProgressBar" role="progressbar"
+                             style="width:0%;height:100%;background:var(--color-charcoal);border-radius:99px;transition:width .25s ease">
+                        </div>
+                    </div>
+                </div>
+
                 <div class="d-flex gap-2">
-                    <button type="submit" class="btn-dark-lovable px-4 py-2">
+                    <button type="submit" class="btn-dark-lovable px-4 py-2" id="uploadBtn">
                         <i class="bi bi-cloud-upload"></i><span data-i18n="upload.submit">Upload</span>
                     </button>
                     <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId"
                         class="btn-ghost px-4 py-2" data-i18n="common.cancel">Huỷ</a>
                 </div>
             </form>
+
+            <!-- Overlay mờ — khóa tương tác form khi đang upload/xử lý -->
+            <div id="uploadOverlay" style="display:none;position:absolute;inset:0;
+                 background:rgba(0,0,0,.5);border-radius:inherit;z-index:10;cursor:not-allowed"></div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Spinner xoay cho nút submit */
+    @@keyframes spin { to { transform: rotate(360deg); } }
+    .btn-spinner {
+        display:inline-block; width:1rem; height:1rem;
+        border:2px solid currentColor; border-right-color:transparent;
+        border-radius:50%; animation:spin .6s linear infinite;
+        vertical-align:middle; margin-right:.4rem;
+    }
+</style>
+
+<script>
+(function () {
+    'use strict';
+
+    /* ── DOM refs ─────────────────────────────────────────── */
+    var form        = document.getElementById('uploadForm');
+    var submitBtn   = document.getElementById('uploadBtn');
+    var fileInput   = document.getElementById('audioFileInput');
+    var overlay     = document.getElementById('uploadOverlay');
+    var progressWrap = document.getElementById('uploadProgressWrap');
+    var progressBar  = document.getElementById('uploadProgressBar');
+    var progressText = document.getElementById('uploadProgressText');
+    var progressLabel = document.getElementById('uploadProgressLabel');
+    var specId      = '@spec.SpecId';
+
+    /* ── Lấy text i18n theo key ──────────────────────────── */
+    function t(key) {
+        var lang = localStorage.getItem('bpcvn-lang') || 'vi';
+        return (translations[lang] && translations[lang][key]) || key;
+    }
+
+    /* ── Hiển thị Toast thủ công (clone cấu trúc từ _Layout) ── */
+    function showToast(type, msg) {
+        var isSuccess = type === 'success';
+        var wrap = document.createElement('div');
+        wrap.className = 'toast-fixed';
+        wrap.innerHTML =
+            '<div class="toast-lovable ' + (isSuccess ? 'toast-success' : 'toast-error') + '">' +
+                '<i class="bi bi-' + (isSuccess ? 'check-circle-fill' : 'exclamation-circle-fill') + ' toast-icon"></i>' +
+                '<span>' + msg + '</span>' +
+                '<button type="button" class="toast-close" onclick="this.closest(\'.toast-fixed\').remove()">' +
+                    '<i class="bi bi-x-lg"></i>' +
+                '</button>' +
+            '</div>';
+        document.body.appendChild(wrap);
+        setTimeout(function () { wrap.remove(); }, 4000);
+    }
+
+    /* ── Bật/tắt trạng thái Loading ──────────────────────── */
+    function setLoading(on) {
+        submitBtn.disabled = on;
+        if (on) {
+            submitBtn.innerHTML = '<span class="btn-spinner"></span>' +
+                '<span data-i18n="upload.processing">' + t('upload.processing') + '</span>';
+            overlay.style.display = 'block';
+            progressWrap.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressText.textContent = '0%';
+            progressLabel.textContent = t('upload.uploadingPercent').replace('{0}', '0');
+        } else {
+            submitBtn.innerHTML = '<i class="bi bi-cloud-upload"></i>' +
+                '<span data-i18n="upload.submit">' + t('upload.submit') + '</span>';
+            overlay.style.display = 'none';
+            progressWrap.style.display = 'none';
+            progressBar.style.width = '0%';
+        }
+    }
+
+    /* ── Chặn submit mặc định — dùng AJAX + theo dõi tiến trình ── */
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        /* Validate client-side: bắt buộc phải chọn file */
+        if (!fileInput.files || !fileInput.files.length) {
+            showToast('error', t('upload.toastNoFile'));
+            return;
+        }
+
+        setLoading(true);
+
+        var fd = new FormData(form);
+        var xhr = new XMLHttpRequest();
+
+        /* Theo dõi % file được đẩy lên server (upload phase) */
+        xhr.upload.addEventListener('progress', function (ev) {
+            if (ev.lengthComputable) {
+                var pct = Math.round((ev.loaded / ev.total) * 100);
+                progressBar.style.width = pct + '%';
+                progressText.textContent = pct + '%';
+                progressLabel.textContent = t('upload.uploadingPercent').replace('{0}', pct);
+            }
+        });
+
+        /* Xử lý khi request hoàn tất (server đã trả về response) */
+        xhr.addEventListener('load', function () {
+            var finalUrl = xhr.responseURL || '';
+            var isOnUploadPage = finalUrl.indexOf('SoundTest/Upload') !== -1;
+
+            if (xhr.status >= 200 && xhr.status < 400 && !isOnUploadPage) {
+                /* Thành công — đổi nút thành "Thành công!" màu xanh, giữ disabled */
+                submitBtn.disabled = true;
+                submitBtn.style.background = '#16a34a';
+                submitBtn.style.borderColor = '#16a34a';
+                submitBtn.innerHTML = '<i class="bi bi-check-circle"></i>' +
+                    '<span data-i18n="upload.successBtn">' + t('upload.successBtn') + '</span>';
+
+                /* Ẩn overlay và progress bar vì upload xong rồi */
+                overlay.style.display = 'none';
+                progressWrap.style.display = 'none';
+
+                /* Hiện toast thông báo thành công */
+                showToast('success', t('upload.toastSuccess'));
+
+                /* Chuyển hướng sau 2 giây để user kịp thấy toast + trạng thái thành công */
+                setTimeout(function () {
+                    window.location.href = finalUrl;
+                }, 2000);
+            } else {
+                /* Lỗi validation từ backend — hiện toast và cho user sửa lại */
+                setLoading(false);
+                showToast('error', t('upload.toastError'));
+            }
+        });
+
+        /* Lỗi mạng / CORS */
+        xhr.addEventListener('error', function () {
+            setLoading(false);
+            showToast('error', t('upload.toastError'));
+        });
+
+        /* User bấm Cancel trên browser (hiếm gặp) */
+        xhr.addEventListener('abort', function () {
+            setLoading(false);
+        });
+
+        /* Gửi AJAX POST kèm Anti-forgery token */
+        xhr.open('POST', '/SoundTest/Upload');
+        var afToken = document.querySelector('input[name="__RequestVerificationToken"]');
+        if (afToken) {
+            xhr.setRequestHeader('RequestVerificationToken', afToken.value);
+        }
+        xhr.send(fd);
+    });
+})();
+</script>

@@ -34,4 +34,5 @@ public class Kit
 
     // Navigation
     public ICollection<Spec> Specs { get; set; } = new List<Spec>();
+    public ICollection<KitImage> KitImages { get; set; } = new List<KitImage>();
 }

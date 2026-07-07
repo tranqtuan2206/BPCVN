@@ -28,6 +28,9 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 // Đăng ký dịch vụ xử lý file âm thanh / tách âm từ video
 builder.Services.AddScoped<IAudioService, AudioService>();
 
+// Đăng ký dịch vụ upload ảnh lên Cloudinary
+builder.Services.AddScoped<IImageService, ImageService>();
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {

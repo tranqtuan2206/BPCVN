@@ -27,6 +27,7 @@ node_modules/
 FFmpeg/
 
 ## Misc
+.gemini
 .mimocode
 AllCode.txt
 *.md
