@@ -43,6 +43,8 @@ jobs:
                   password: ${{ secrets.FTP_PASSWORD }}
                   local-dir: ./publish/
                   server-dir: /site1/
+                  exclude: |
+                      **/appsettings.json
 
             # BƯỚC 3: Xóa file ẩn để kích hoạt web chạy lại bình thường
             - name: Turn on App (Remove App Offline)
