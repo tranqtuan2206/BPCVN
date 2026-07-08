@@ -1,15 +1,12 @@
-name: Build BPCVN
+name: Build and Deploy BPCVN
 
 on:
     push:
         branches:
             - main
-    pull_request:
-        branches:
-            - main
 
 jobs:
-    build:
+    build-and-deploy:
         runs-on: ubuntu-latest
 
         steps:
@@ -26,3 +23,17 @@ jobs:
 
             - name: Build Project
               run: dotnet build --no-restore --configuration Release
+
+            # 1. Gom toàn bộ file chạy, views, cấu hình ra thư mục ./publish
+            - name: Publish Project
+              run: dotnet publish -c Release -o ./publish
+
+            # 2. Dùng Action FTP để đẩy file trong ./publish lên SmarterASP
+            - name: FTP Deploy to SmarterASP
+              uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+              with:
+                  server: ${{ secrets.FTP_SERVER }}
+                  username: ${{ secrets.FTP_USERNAME }}
+                  password: ${{ secrets.FTP_PASSWORD }}
+                  local-dir: ./publish/
+                  server-dir: /site1/
