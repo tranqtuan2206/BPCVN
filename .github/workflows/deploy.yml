@@ -24,11 +24,17 @@ jobs:
             - name: Build Project
               run: dotnet build --no-restore --configuration Release
 
-            # 1. Gom toàn bộ file chạy, views, cấu hình ra thư mục ./publish
             - name: Publish Project
               run: dotnet publish -c Release -o ./publish
 
-            # 2. Dùng Action FTP để đẩy file trong ./publish lên SmarterASP
+            # BƯỚC 1: Tạo và up file ẩn web để giải phóng file bị khóa
+            - name: Turn off App (App Offline)
+              run: |
+                  echo "<h1>He thong dang cap nhat, vui long quay lai sau...</h1>" > app_offline.htm
+                  curl --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://${{ secrets.FTP_SERVER }}/site1/app_offline.htm --upload-file app_offline.htm
+                  sleep 5
+
+            # BƯỚC 2: Đẩy code mới lên
             - name: FTP Deploy to SmarterASP
               uses: SamKirkland/FTP-Deploy-Action@v4.3.5
               with:
@@ -37,3 +43,9 @@ jobs:
                   password: ${{ secrets.FTP_PASSWORD }}
                   local-dir: ./publish/
                   server-dir: /site1/
+
+            # BƯỚC 3: Xóa file ẩn để kích hoạt web chạy lại bình thường
+            - name: Turn on App (Remove App Offline)
+              if: always() #Luôn luôn chạy bước này kể cả bước trên có fail để web ko bị sập
+              run: |
+                  curl --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://${{ secrets.FTP_SERVER }}/ -Q "DELE /site1/app_offline.htm"
