@@ -204,7 +204,7 @@ public class AudioService : IAudioService
         try
         {
             Directory.CreateDirectory(_ffmpegDir);
-            await FFmpegDownloader.DownloadLatestVersion(_ffmpegDir);
+            await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official, _ffmpegDir);
             _logger.LogInformation("[AudioService] FFmpeg đã tải xuống thành công.");
         }
         catch (Exception ex)
