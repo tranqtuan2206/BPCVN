@@ -64,9 +64,15 @@ public class SoundTestController : Controller
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (spec.UserId.ToString() != userId) return Forbid();
 
+        // Xác định request có phải AJAX không (gửi từ JS uploads)
+        // Nếu là AJAX → trả JSON lỗi để client hiển thị chính xác
+        // Nếu không phải → trả View như cũ
+        bool isAjax = Request.Headers.XRequestedWith == "XMLHttpRequest";
+
         // ── Validation file ───────────────────────────────────────────────────
         if (audioFile == null || audioFile.Length == 0)
         {
+            if (isAjax) return Json(new { success = false, message = "Vui lòng chọn file âm thanh." });
             ModelState.AddModelError("audioFile", "Vui lòng chọn file âm thanh.");
             ViewBag.Spec = spec;
             return View();
@@ -75,14 +81,16 @@ public class SoundTestController : Controller
         var ext = Path.GetExtension(audioFile.FileName).ToLowerInvariant();
         if (!AllowedExtensions.Contains(ext))
         {
-            ModelState.AddModelError("audioFile",
-                $"Chỉ chấp nhận: {string.Join(", ", AllowedExtensions)}");
+            var msg = $"Chỉ chấp nhận: {string.Join(", ", AllowedExtensions)}";
+            if (isAjax) return Json(new { success = false, message = msg });
+            ModelState.AddModelError("audioFile", msg);
             ViewBag.Spec = spec;
             return View();
         }
 
         if (audioFile.Length > MaxFileSizeBytes)
         {
+            if (isAjax) return Json(new { success = false, message = "File không được vượt quá 50MB." });
             ModelState.AddModelError("audioFile", "File không được vượt quá 50MB.");
             ViewBag.Spec = spec;
             return View();
@@ -99,7 +107,8 @@ public class SoundTestController : Controller
         }
         catch (Exception ex)
         {
-            Console.WriteLine("====== LỖI RỒI TỨN ƠI: " + ex.ToString());
+            Console.WriteLine("====== LỖI XỬ LÝ FILE: " + ex.ToString());
+            if (isAjax) return Json(new { success = false, message = $"Lỗi xử lý file: {ex.Message}" });
             ModelState.AddModelError("audioFile", $"Lỗi xử lý file: {ex.Message}");
             ViewBag.Spec = spec;
             return View();
@@ -116,6 +125,9 @@ public class SoundTestController : Controller
 
         _db.SoundTests.Add(soundTest);
         await _db.SaveChangesAsync();
+
+        // AJAX: trả về URL redirect để client tự chuyển hướng
+        if (isAjax) return Json(new { success = true, redirectUrl = Url.Action("Details", "Spec", new { id = specId }) });
 
         TempData["Success"] = "toast.soundtest.upload.success";
         return RedirectToAction("Details", "Spec", new { id = specId });
@@ -357,4 +369,45 @@ public class SoundTestController : Controller
 
     // Record nhận JSON body cho xóa comment
     public record DeleteCommentRequest(int CommentId);
+
+    /// <summary>
+    /// Sửa nội dung bình luận — chỉ chủ comment.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditComment([FromBody] EditCommentRequest req)
+    {
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdStr, out var userId))
+            return Json(new { success = false, message = "Chưa đăng nhập." });
+
+        if (string.IsNullOrWhiteSpace(req.Content))
+            return Json(new { success = false, message = "Nội dung không được để trống." });
+
+        var comment = await _db.SoundTestComments.FindAsync(req.CommentId);
+        if (comment == null)
+            return Json(new { success = false, message = "Không tìm thấy bình luận." });
+
+        if (comment.UserId != userId)
+            return Json(new { success = false, message = "Bạn không có quyền sửa." });
+
+        comment.Content = req.Content.Trim();
+        await _db.SaveChangesAsync();
+
+        return Json(new
+        {
+            success = true,
+            comment = new
+            {
+                comment.Id,
+                comment.Content,
+                createdAt = comment.CreatedAt.ToString("dd/MM/yyyy HH:mm"),
+                comment.ParentCommentId,
+                userId = userId.ToString(),
+                username = User.FindFirstValue(ClaimTypes.Name) ?? "User"
+            }
+        });
+    }
+
+    public record EditCommentRequest(int CommentId, string Content);
 }

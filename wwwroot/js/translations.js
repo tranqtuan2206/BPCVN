@@ -398,6 +398,24 @@ const translations = {
         'spec.edit.platePlaceholder': 'e.g. Aluminium, PC, FR4...',
         'spec.edit.foamPlaceholder': 'e.g. Case foam + PE foam',
         'spec.edit.modsPlaceholder': 'e.g. Tape mod, tempest mod, switch film...',
+
+        /* ── Comment ─── */
+        'comment.title': 'Comments',
+        'comment.placeholder': 'Write a comment...',
+        'comment.reply': 'Reply',
+        'comment.delete': 'Delete',
+        'comment.empty': 'No comments yet. Be the first to comment!',
+        'comment.loginToComment': 'Login to comment',
+        'comment.submit': 'Send',
+        'comment.cancel': 'Cancel',
+        'toast.comment.add.success': 'Comment posted!',
+        'toast.comment.delete.success': 'Comment deleted!',
+        'toast.comment.add.error': 'Failed to post comment.',
+        'toast.comment.delete.error': 'Failed to delete comment.',
+        'comment.confirmDelete': 'Delete this comment?',
+        'comment.edit': 'Edit',
+        'toast.comment.edit.success': 'Comment updated!',
+        'toast.comment.edit.error': 'Failed to edit comment.',
     },
     vi: {
         /* ── Navbar ─── */
@@ -798,5 +816,23 @@ const translations = {
         'spec.edit.platePlaceholder': 'VD: Aluminium, PC, FR4...',
         'spec.edit.foamPlaceholder': 'VD: Case foam + PE foam',
         'spec.edit.modsPlaceholder': 'VD: Tape mod, tempest mod, switch film...',
+
+        /* ── Comment ─── */
+        'comment.title': 'Bình luận',
+        'comment.placeholder': 'Viết bình luận...',
+        'comment.reply': 'Trả lời',
+        'comment.delete': 'Xóa',
+        'comment.empty': 'Chưa có bình luận nào. Hãy là người đầu tiên!',
+        'comment.loginToComment': 'Đăng nhập để bình luận',
+        'comment.submit': 'Gửi',
+        'comment.cancel': 'Huỷ',
+        'toast.comment.add.success': 'Đã đăng bình luận!',
+        'toast.comment.delete.success': 'Đã xóa bình luận!',
+        'toast.comment.add.error': 'Đăng bình luận thất bại.',
+        'toast.comment.delete.error': 'Xóa bình luận thất bại.',
+        'comment.confirmDelete': 'Xóa bình luận này?',
+        'comment.edit': 'Sửa',
+        'toast.comment.edit.success': 'Đã cập nhật bình luận!',
+        'toast.comment.edit.error': 'Sửa bình luận thất bại.',
     }
 };

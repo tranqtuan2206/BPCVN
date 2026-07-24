@@ -28,7 +28,8 @@
                     <label class="form-label-lovable">
                         <span data-i18n="upload.fileLabel">File âm thanh</span> <span style="color:#b91c1c">*</span>
                     </label>
-                    <input type="file" name="audioFile" class="form-control" id="audioFileInput" required />
+                    <input type="file" name="audioFile" class="form-control" id="audioFileInput"
+                           accept=".mp3,.wav,.flac,.ogg,.mp4,.mov,audio/*,video/mp4,video/quicktime" required />
                     <div class="form-hint" data-i18n="upload.fileHint">
                         Chấp nhận: .mp3, .wav, .flac, .ogg, .mp4, .mov — Tối đa 50MB
                     </div>
@@ -152,6 +153,9 @@
         var fd = new FormData(form);
         var xhr = new XMLHttpRequest();
 
+        /* Timeout 5 phút — video lớn từ điện thoại có thể mất thời gian xử lý (FFmpeg, Cloudinary) */
+        xhr.timeout = 5 * 60 * 1000;
+
         /* Theo dõi % file được đẩy lên server (upload phase) */
         xhr.upload.addEventListener('progress', function (ev) {
             if (ev.lengthComputable) {
@@ -164,30 +168,48 @@
 
         /* Xử lý khi request hoàn tất (server đã trả về response) */
         xhr.addEventListener('load', function () {
+            /* Server trả JSON (AJAX mode) — xử lý theo JSON response */
+            var isJson = xhr.getResponseHeader('content-type') &&
+                         xhr.getResponseHeader('content-type').indexOf('application/json') !== -1;
+
+            if (isJson) {
+                var resp;
+                try { resp = JSON.parse(xhr.responseText); } catch (_) { resp = null; }
+
+                if (resp && resp.success) {
+                    /* Thành công — hiện toast rồi redirect */
+                    submitBtn.disabled = true;
+                    submitBtn.style.background = '#16a34a';
+                    submitBtn.style.borderColor = '#16a34a';
+                    submitBtn.innerHTML = '<i class="bi bi-check-circle"></i>' +
+                        '<span data-i18n="upload.successBtn">' + t('upload.successBtn') + '</span>';
+                    overlay.style.display = 'none';
+                    progressWrap.style.display = 'none';
+                    showToast('success', t('upload.toastSuccess'));
+                    setTimeout(function () { window.location.href = resp.redirectUrl; }, 2000);
+                } else {
+                    /* Lỗi từ server — hiện thông báo cụ thể */
+                    setLoading(false);
+                    showToast('error', (resp && resp.message) || t('upload.toastError'));
+                }
+                return;
+            }
+
+            /* Fallback: server trả HTML (không phải AJAX request) — kiểm tra theo URL */
             var finalUrl = xhr.responseURL || '';
             var isOnUploadPage = finalUrl.indexOf('SoundTest/Upload') !== -1;
 
             if (xhr.status >= 200 && xhr.status < 400 && !isOnUploadPage) {
-                /* Thành công — đổi nút thành "Thành công!" màu xanh, giữ disabled */
                 submitBtn.disabled = true;
                 submitBtn.style.background = '#16a34a';
                 submitBtn.style.borderColor = '#16a34a';
                 submitBtn.innerHTML = '<i class="bi bi-check-circle"></i>' +
                     '<span data-i18n="upload.successBtn">' + t('upload.successBtn') + '</span>';
-
-                /* Ẩn overlay và progress bar vì upload xong rồi */
                 overlay.style.display = 'none';
                 progressWrap.style.display = 'none';
-
-                /* Hiện toast thông báo thành công */
                 showToast('success', t('upload.toastSuccess'));
-
-                /* Chuyển hướng sau 2 giây để user kịp thấy toast + trạng thái thành công */
-                setTimeout(function () {
-                    window.location.href = finalUrl;
-                }, 2000);
+                setTimeout(function () { window.location.href = finalUrl; }, 2000);
             } else {
-                /* Lỗi validation từ backend — hiện toast và cho user sửa lại */
                 setLoading(false);
                 showToast('error', t('upload.toastError'));
             }
@@ -199,6 +221,12 @@
             showToast('error', t('upload.toastError'));
         });
 
+        /* Request hết thời gian chờ (video lớn, server xử lý chậm) */
+        xhr.addEventListener('timeout', function () {
+            setLoading(false);
+            showToast('error', 'Upload hết thời gian chờ. File có thể quá lớn, vui lòng thử lại.');
+        });
+
         /* User bấm Cancel trên browser (hiếm gặp) */
         xhr.addEventListener('abort', function () {
             setLoading(false);
@@ -206,6 +234,7 @@
 
         /* Gửi AJAX POST kèm Anti-forgery token */
         xhr.open('POST', '/SoundTest/Upload');
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         var afToken = document.querySelector('input[name="__RequestVerificationToken"]');
         if (afToken) {
             xhr.setRequestHeader('RequestVerificationToken', afToken.value);

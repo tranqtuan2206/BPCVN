@@ -213,7 +213,430 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Bình luận cho từng sound test -->
+                <div class="comment-section mt-3" data-test-id="@st.TestId">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-chat-dots" style="opacity:0.5"></i>
+                        <span class="text-caption" data-i18n="comment.title">Bình luận</span>
+                        <span class="comment-count badge-count ms-1">0</span>
+                    </div>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <!-- Form nhập bình luận (đã đăng nhập) -->
+                        <div class="comment-form d-flex gap-2 mb-3">
+                            <textarea class="comment-input form-control form-control-sm" rows="1" maxlength="1000"
+                                      data-i18n-placeholder="comment.placeholder" placeholder="Viết bình luận..."></textarea>
+                            <button class="btn-dark-lovable btn-sm-lovable comment-submit-btn" disabled>
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-caption mb-3" style="font-style:italic">
+                            <a asp-controller="Auth" asp-action="Login" data-i18n="comment.loginToComment">Đăng nhập để bình luận</a>
+                        </div>
+                    }
+
+                    <!-- Danh sách bình luận (load qua AJAX) -->
+                    <div class="comment-list"></div>
+                </div>
             }
         </div>
     }
 </div>
+
+@section Scripts {
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// BÌNH LUẬN — AJAX load / thêm / reply / xóa
+// ═══════════════════════════════════════════════════════════════════
+
+// Token chống CSRF — lấy từ input ẩn trong _Layout.cshtml
+const _commentToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+
+// Lấy ngôn ngữ hiện tại từ localStorage
+function _commentLang() {
+    return localStorage.getItem('bpcvn-lang') || 'vi';
+}
+
+// Dịch key i18n
+function _t(key) {
+    const lang = _commentLang();
+    return translations?.[lang]?.[key] || translations?.vi?.[key] || key;
+}
+
+// Hiển thị toast
+function _showToast(msg, type) {
+    const existing = document.querySelector('.toast-fixed');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-fixed';
+    toast.innerHTML = `
+        <div class="toast-lovable toast-${type}">
+            <i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'exclamation-circle-fill'} toast-icon"></i>
+            <span>${msg}</span>
+            <button type="button" class="toast-close" onclick="this.closest('.toast-fixed').remove()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// LOAD BÌNH LUẬN — Gọi API GetComments, build tree, render
+// ═══════════════════════════════════════════════════════════════════
+
+async function loadComments(section) {
+    const testId = section.dataset.testId;
+    const listEl = section.querySelector('.comment-list');
+    const countEl = section.querySelector('.comment-count');
+
+    try {
+        const res = await fetch(`/SoundTest/GetComments?testId=${testId}`);
+        const data = await res.json();
+
+        countEl.textContent = data.length;
+
+        if (data.length === 0) {
+            listEl.innerHTML = `<p class="text-caption" style="font-style:italic">${_t('comment.empty')}</p>`;
+            return;
+        }
+
+        const tree = buildTree(data);
+        listEl.innerHTML = renderTree(tree, testId);
+    } catch {
+        listEl.innerHTML = '';
+    }
+}
+
+// Chuyển flat list → nested tree
+function buildTree(list) {
+    const map = {};
+    const roots = [];
+
+    list.forEach(c => { map[c.id] = { ...c, children: [] }; });
+    list.forEach(c => {
+        if (c.parentCommentId && map[c.parentCommentId]) {
+            map[c.parentCommentId].children.push(map[c.id]);
+        } else {
+            roots.push(map[c.id]);
+        }
+    });
+    return roots;
+}
+
+// Render HTML cho tree bình luận (đệ quy)
+function renderTree(nodes, testId, depth = 0) {
+    return nodes.map((node, i) => {
+        const isLast = i === nodes.length - 1;
+        const hasChildren = node.children.length > 0;
+
+        let itemClasses = 'comment-item';
+        if (hasChildren) itemClasses += ' comment-item-has-children';
+        if (isLast && depth > 0) itemClasses += ' comment-is-last';
+
+        const childHtml = hasChildren
+            ? `<div class="comment-children" style="padding-left:32px">${renderTree(node.children, testId, depth + 1)}</div>`
+            : '';
+
+        const currentUserId = '@User.FindFirstValue(ClaimTypes.NameIdentifier)';
+        const isAdmin = @User.IsInRole("Admin").ToString().ToLower();
+        const canDelete = node.userId.toLowerCase() === currentUserId.toLowerCase() || isAdmin;
+
+        return `
+            <div class="${itemClasses}">
+                <div class="comment-item-box mb-2">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="bi bi-person-circle"></i>
+                        <span style="font-weight:600;font-size:0.85rem">${escapeHtml(node.username)}</span>
+                        <span class="text-caption" style="font-size:0.75rem">${node.createdAt}</span>
+                    </div>
+                    <p class="mb-1" style="font-size:0.9rem;white-space:pre-wrap">${escapeHtml(node.content)}</p>
+                    <div class="d-flex gap-2 align-items-center">
+                        ${currentUserId ? `<button class="btn-link text-caption reply-btn" style="font-size:0.8rem;padding:0;border:0" data-comment-id="${node.id}">${_t('comment.reply')}</button>` : ''}
+                        ${node.userId.toLowerCase() === currentUserId.toLowerCase() ? `<button class="btn-link text-caption edit-btn" style="font-size:0.8rem;padding:0;border:0" data-comment-id="${node.id}" data-content="${escapeHtml(node.content)}">${_commentLang() === 'vi' ? 'Sửa' : 'Edit'}</button>` : ''}
+                        ${canDelete ? `<button class="btn-link text-caption delete-btn" style="font-size:0.8rem;padding:0;border:0;color:#b91c1c" data-comment-id="${node.id}">${_t('comment.delete')}</button>` : ''}
+                    </div>
+                    <!-- Form reply -->
+                    <div class="reply-form mt-2" style="display:none">
+                        <div class="d-flex gap-2">
+                            <textarea class="form-control form-control-sm reply-input" rows="1" maxlength="1000"
+                                      placeholder="${_t('comment.placeholder')}"></textarea>
+                            <button class="btn-dark-lovable btn-sm-lovable reply-submit" disabled>
+                                <i class="bi bi-send"></i>
+                            </button>
+                            <button class="btn-ghost btn-sm-lovable reply-cancel">${_t('comment.cancel')}</button>
+                        </div>
+                    </div>
+                    <!-- Form sửa comment -->
+                    <div class="edit-form mt-2" style="display:none">
+                        <div class="d-flex gap-2">
+                            <textarea class="form-control form-control-sm edit-input" rows="1" maxlength="1000">${escapeHtml(node.content)}</textarea>
+                            <button class="btn-dark-lovable btn-sm-lovable edit-submit" disabled>
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                            <button class="btn-ghost btn-sm-lovable edit-cancel">${_t('comment.cancel')}</button>
+                        </div>
+                    </div>
+                </div>
+                ${childHtml}
+            </div>
+        `;
+    }).join('');
+}
+
+// Escape HTML防止 XSS
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// THÊM BÌNH LUẬN MỚI
+// ═══════════════════════════════════════════════════════════════════
+
+async function addComment(section, content, parentId = null) {
+    const testId = section.dataset.testId;
+
+    try {
+        const res = await fetch('/SoundTest/AddComment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': _commentToken
+            },
+            body: JSON.stringify({
+                soundTestId: testId,
+                content: content.trim(),
+                parentCommentId: parentId
+            })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            _showToast(_t('toast.comment.add.success'), 'success');
+            await loadComments(section);
+        } else {
+            _showToast(data.message || _t('toast.comment.add.error'), 'error');
+        }
+    } catch {
+        _showToast(_t('toast.comment.add.error'), 'error');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// XÓA BÌNH LUẬN
+// ═══════════════════════════════════════════════════════════════════
+
+async function deleteComment(section, commentId) {
+    if (!confirm(_t('comment.confirmDelete'))) return;
+
+    try {
+        const res = await fetch('/SoundTest/DeleteComment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': _commentToken
+            },
+            body: JSON.stringify({ commentId })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            _showToast(_t('toast.comment.delete.success'), 'success');
+            await loadComments(section);
+        } else {
+            _showToast(data.message || _t('toast.comment.delete.error'), 'error');
+        }
+    } catch {
+        _showToast(_t('toast.comment.delete.error'), 'error');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SỬA BÌNH LUẬN
+// ═══════════════════════════════════════════════════════════════════
+
+async function editComment(section, commentId, content) {
+    try {
+        const res = await fetch('/SoundTest/EditComment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': _commentToken
+            },
+            body: JSON.stringify({ commentId, content: content.trim() })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            _showToast(_t('toast.comment.edit.success'), 'success');
+            await loadComments(section);
+        } else {
+            _showToast(data.message || _t('toast.comment.edit.error'), 'error');
+        }
+    } catch {
+        _showToast(_t('toast.comment.edit.error'), 'error');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TỰ ĐỘNG MỞ RỘNG TEXTAREA
+// ═══════════════════════════════════════════════════════════════════
+
+function autoResize(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// GẮN SỰ KIỆN — Khởi tạo khi DOM sẵn sàng
+// ═══════════════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.comment-section').forEach(section => {
+        loadComments(section);
+
+        // Form nhập bình luận chính
+        const input = section.querySelector('.comment-input');
+        const submitBtn = section.querySelector('.comment-submit-btn');
+
+        if (input && submitBtn) {
+            input.addEventListener('input', () => {
+                submitBtn.disabled = !input.value.trim();
+                autoResize(input);
+            });
+
+            submitBtn.addEventListener('click', () => {
+                const content = input.value.trim();
+                if (!content) return;
+                addComment(section, content);
+                input.value = '';
+                input.style.height = 'auto';
+                submitBtn.disabled = true;
+            });
+
+            // Enter để gửi, Shift+Enter để xuống dòng
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    submitBtn.click();
+                }
+            });
+        }
+
+        // Event delegation cho reply / delete
+        section.addEventListener('click', (e) => {
+            const target = e.target;
+
+            // Nút "Trả lời"
+            if (target.classList.contains('reply-btn')) {
+                const commentBox = target.closest('.comment-item-box');
+                const replyForm = commentBox.querySelector('.reply-form');
+                replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+                if (replyForm.style.display === 'block') {
+                    replyForm.querySelector('.reply-input').focus();
+                }
+            }
+
+            // Nút "Sửa"
+            if (target.classList.contains('edit-btn')) {
+                const commentBox = target.closest('.comment-item-box');
+                const editForm = commentBox.querySelector('.edit-form');
+                editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
+                if (editForm.style.display === 'block') {
+                    const editInput = editForm.querySelector('.edit-input');
+                    editInput.focus();
+                    editInput.setSelectionRange(editInput.value.length, editInput.value.length);
+                }
+            }
+
+            // Nút "Huỷ" reply
+            if (target.classList.contains('reply-cancel')) {
+                const replyForm = target.closest('.reply-form');
+                replyForm.style.display = 'none';
+                replyForm.querySelector('.reply-input').value = '';
+            }
+
+            // Nút "Huỷ" edit
+            if (target.classList.contains('edit-cancel')) {
+                const editForm = target.closest('.edit-form');
+                editForm.style.display = 'none';
+            }
+
+            // Gửi reply
+            if (target.classList.contains('reply-submit') || target.closest('.reply-submit')) {
+                const btn = target.classList.contains('reply-submit') ? target : target.closest('.reply-submit');
+                const replyForm = btn.closest('.reply-form');
+                const replyInput = replyForm.querySelector('.reply-input');
+                const commentBox = btn.closest('.comment-item-box');
+                const commentId = parseInt(commentBox.querySelector('.reply-btn')?.dataset.commentId ||
+                                          commentBox.querySelector('.delete-btn')?.dataset.commentId);
+
+                const content = replyInput.value.trim();
+                if (!content || !commentId) return;
+
+                addComment(section, content, commentId);
+            }
+
+            // Gửi edit
+            if (target.classList.contains('edit-submit') || target.closest('.edit-submit')) {
+                const btn = target.classList.contains('edit-submit') ? target : target.closest('.edit-submit');
+                const editForm = btn.closest('.edit-form');
+                const editInput = editForm.querySelector('.edit-input');
+                const commentBox = btn.closest('.comment-item-box');
+                const commentId = parseInt(target.dataset.commentId || commentBox.querySelector('.edit-btn')?.dataset.commentId);
+
+                const content = editInput.value.trim();
+                if (!content || !commentId) return;
+
+                editComment(section, commentId, content);
+            }
+
+            // Xóa bình luận
+            if (target.classList.contains('delete-btn')) {
+                const commentId = parseInt(target.dataset.commentId);
+                if (commentId) deleteComment(section, commentId);
+            }
+        });
+
+        // Auto-resize + Enter cho reply và edit textarea
+        section.addEventListener('input', (e) => {
+            if (e.target.classList.contains('reply-input')) {
+                autoResize(e.target);
+                const replyForm = e.target.closest('.reply-form');
+                replyForm.querySelector('.reply-submit').disabled = !e.target.value.trim();
+            }
+            if (e.target.classList.contains('edit-input')) {
+                autoResize(e.target);
+                const editForm = e.target.closest('.edit-form');
+                editForm.querySelector('.edit-submit').disabled = !e.target.value.trim();
+            }
+        });
+
+        // Enter để gửi trong reply và edit form
+        section.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                if (e.target.classList.contains('reply-input')) {
+                    e.preventDefault();
+                    const replyForm = e.target.closest('.reply-form');
+                    replyForm.querySelector('.reply-submit').click();
+                }
+                if (e.target.classList.contains('edit-input')) {
+                    e.preventDefault();
+                    const editForm = e.target.closest('.edit-form');
+                    editForm.querySelector('.edit-submit').click();
+                }
+            }
+        });
+    });
+});
+</script>
+}

@@ -186,7 +186,8 @@ public class AudioService : IAudioService
     /// </summary>
     private async Task ExtractAudioToPathAsync(string videoPath, string outputMp3Path)
     {
-        Xabe.FFmpeg.FFmpeg.SetExecutablesPath(Path.Combine(Directory.GetCurrentDirectory(), "FFmpeg"));
+        // Dùng chung path đã set ở constructor (AppContext.BaseDirectory/FFmpeg)
+        // Tránh trường hợp Directory.GetCurrentDirectory() trả sai path trên production
 
         // -vn        : bỏ qua stream video
         // -acodec mp3: encode âm thanh thành mp3
