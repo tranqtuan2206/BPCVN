@@ -64,10 +64,10 @@ public class SoundTestController : Controller
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (spec.UserId.ToString() != userId) return Forbid();
 
-        // Xác định request có phải AJAX không (gửi từ JS uploads)
-        // Nếu là AJAX → trả JSON lỗi để client hiển thị chính xác
-        // Nếu không phải → trả View như cũ
-        bool isAjax = Request.Headers.XRequestedWith == "XMLHttpRequest";
+        // Xác định request có phải AJAX không
+        // Check header X-Requested-With (desktop) HOẶC hidden field isAjax (mobile fallback)
+        bool isAjax = Request.Headers.XRequestedWith == "XMLHttpRequest"
+                      || Request.Form.ContainsKey("isAjax");
 
         // ── Validation file ───────────────────────────────────────────────────
         if (audioFile == null || audioFile.Length == 0)

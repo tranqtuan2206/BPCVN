@@ -1,6 +1,7 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Xabe.FFmpeg;
+using Xabe.FFmpeg.Downloader;
 
 namespace BPCVN.Services;
 
@@ -29,6 +30,7 @@ public class AudioService : IAudioService
     private readonly IWebHostEnvironment _env;
     private readonly ILogger<AudioService> _logger;
     private readonly Cloudinary _cloudinary;
+    private readonly string _ffmpegDir;
 
     public AudioService(IWebHostEnvironment env, ILogger<AudioService> logger, IConfiguration config)
     {
@@ -36,10 +38,11 @@ public class AudioService : IAudioService
         _logger = logger;
 
         // ── Khởi tạo FFmpeg ──────────────────────────────────────────────────
-        // ffmpeg.exe phải nằm trong thư mục FFmpeg/ của project
-        // và được cấu hình CopyToOutputDirectory trong .csproj
-        var ffmpegDir = Path.Combine(AppContext.BaseDirectory, "FFmpeg");
-        FFmpeg.SetExecutablesPath(ffmpegDir);
+        // Chỉ set path ở đây — KHÔNG check/tải FFmpeg trong constructor
+        // vì constructor chạy mỗi request, nếu FFmpeg thiếu sẽ chết cả Like, Comment, Delete
+        // Việc check + tải FFmpeg sẽ diễn ra trong ProcessAndSaveAsync khi cần xử lý video
+        _ffmpegDir = Path.Combine(AppContext.BaseDirectory, "FFmpeg");
+        FFmpeg.SetExecutablesPath(_ffmpegDir);
 
         // ── Khởi tạo Cloudinary từ appsettings ───────────────────────────────
         var cloudName = config["CloudinarySettings:CloudName"];
@@ -73,6 +76,13 @@ public class AudioService : IAudioService
 
         // Lấy đuôi file gốc (lowercase) để phân loại
         var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+        // ── Nếu là video → kiểm tra FFmpeg trước khi xử lý ──────────────────
+        // Chỉ cần FFmpeg khi xử lý video, audio lưu local không cần
+        if (VideoExtensions.Contains(ext))
+        {
+            await EnsureFFmpegAvailableAsync();
+        }
 
         // Tên file tạm dùng GUID để tránh xung đột khi nhiều request đồng thời
         var tempFileName = $"{Guid.NewGuid()}{ext}";
@@ -180,6 +190,31 @@ public class AudioService : IAudioService
     // ══════════════════════════════════════════════════════════════════════════
     // PRIVATE — FFmpeg Helpers
     // ══════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Kiểm tra FFmpeg đã có chưa. Nếu chưa → tự động tải về.
+    /// Chỉ gọi khi cần xử lý video, không gọi trong constructor.
+    /// </summary>
+    private async Task EnsureFFmpegAvailableAsync()
+    {
+        var ffmpegExe = Path.Combine(_ffmpegDir, "ffmpeg.exe");
+        if (File.Exists(ffmpegExe)) return;
+
+        _logger.LogWarning("[AudioService] FFmpeg không tìm thấy tại {Path}, đang tải xuống...", _ffmpegDir);
+        try
+        {
+            Directory.CreateDirectory(_ffmpegDir);
+            await FFmpegDownloader.DownloadLatestVersion(_ffmpegDir);
+            _logger.LogInformation("[AudioService] FFmpeg đã tải xuống thành công.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[AudioService] Không thể tải FFmpeg tự động.");
+            throw new InvalidOperationException(
+                "FFmpeg không tìm thấy và không thể tải xuống tự động. " +
+                "Vui lòng đặt ffmpeg.exe và ffprobe.exe vào thư mục FFmpeg/.");
+        }
+    }
 
     /// <summary>
     /// Dùng FFmpeg tách âm thanh từ file video, xuất ra .mp3 tại đường dẫn chỉ định.

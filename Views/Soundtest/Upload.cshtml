@@ -23,6 +23,7 @@
             </div>
             <form asp-action="Upload" method="post" enctype="multipart/form-data" id="uploadForm">
                 <input type="hidden" name="specId" value="@spec.SpecId" />
+                <input type="hidden" name="isAjax" value="true" />
                 <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
                 <div class="mb-3">
                     <label class="form-label-lovable">
