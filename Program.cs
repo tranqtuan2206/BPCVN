@@ -9,7 +9,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 200 * 1024 * 1024; // 200MB
-    options.Limits.RequestTimeout = TimeSpan.FromMinutes(10); // 10 phút
 });
 
 // ── Services ──────────────────────────────────────────────────────────────────
