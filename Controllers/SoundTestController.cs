@@ -51,7 +51,7 @@ public class SoundTestController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [RequestSizeLimit(52_428_800)] // 50MB limit cho request
+    [RequestSizeLimit(200 * 1024 * 1024)] // 200MB — cho phép upload video lớn từ điện thoại
     public async Task<IActionResult> Upload(Guid specId, IFormFile audioFile, string? micUsed)
     {
         // Lấy lại spec để hiển thị nếu có lỗi
