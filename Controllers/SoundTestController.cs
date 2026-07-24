@@ -17,7 +17,7 @@ public class SoundTestController : Controller
 
     // Các định dạng file được phép upload (audio + video)
     private static readonly string[] AllowedExtensions = [".mp3", ".wav", ".flac", ".ogg", ".mp4", ".mov"];
-    private const long MaxFileSizeBytes = 50 * 1024 * 1024; // 50 MB
+    private const long MaxFileSizeBytes = 200 * 1024 * 1024; // 200 MB
 
     public SoundTestController(AppDbContext db, IWebHostEnvironment env, IAudioService audioService)
     {
@@ -90,8 +90,8 @@ public class SoundTestController : Controller
 
         if (audioFile.Length > MaxFileSizeBytes)
         {
-            if (isAjax) return Json(new { success = false, message = "File không được vượt quá 50MB." });
-            ModelState.AddModelError("audioFile", "File không được vượt quá 50MB.");
+            if (isAjax) return Json(new { success = false, message = "File không được vượt quá 200MB." });
+            ModelState.AddModelError("audioFile", "File không được vượt quá 200MB.");
             ViewBag.Spec = spec;
             return View();
         }
