@@ -47,19 +47,9 @@ public class KitController : Controller
         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             return PartialView("_KitListPartial", kits);
 
-        ViewBag.Brands = await _db.Kits
-            .Where(k => k.Brand != null)
-            .Select(k => k.Brand!)
-            .Distinct()
-            .OrderBy(b => b)
-            .ToListAsync();
-
-        ViewBag.Layouts = await _db.Kits
-            .Where(k => k.Layout != null)
-            .Select(k => k.Layout!)
-            .Distinct()
-            .OrderBy(l => l)
-            .ToListAsync();
+        // Tính brands/layouts từ data đã có trong memory — tránh 2 DB call thêm
+        ViewBag.Brands  = kits.Where(k => k.Brand  != null).Select(k => k.Brand!).Distinct().Order().ToList();
+        ViewBag.Layouts = kits.Where(k => k.Layout != null).Select(k => k.Layout!).Distinct().Order().ToList();
 
         return View(kits);
     }

@@ -113,8 +113,6 @@ public class AuthController : Controller
         return RedirectToAction("Login");
     }
 
-
-
     // ── VERIFY EMAIL ─────────────────────────────────────────────────────────
 
     /// <summary>
@@ -130,8 +128,8 @@ public class AuthController : Controller
             return RedirectToAction("Login");
         }
 
-        // ── Enumeration-safe: chỉ tìm theo token (unique) ───────────────────────────────
-        // Không cần check email trong WHERE clause → tránh timing attack lộ email tồn tại
+        // Chỉ tìm theo token (GUID unique) — không cần thêm email vào WHERE
+        // tránh timing difference lộ thông tin email có tồn tại không
         var user = await _db.Users.FirstOrDefaultAsync(u => u.VerificationToken == token);
 
         if (user == null)

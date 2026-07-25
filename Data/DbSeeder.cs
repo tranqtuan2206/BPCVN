@@ -203,21 +203,22 @@ public class DbSeeder
         const string special = "!@#$%^&*";
         const string all     = upper + lower + digits + special;
 
-        var rng  = System.Security.Cryptography.RandomNumberGenerator.Create();
+        // Dùng static GetBytes() thay cho Create() để tránh phải Dispose() thủ công
         var bytes = new byte[length];
-        rng.GetBytes(bytes);
+        System.Security.Cryptography.RandomNumberGenerator.Fill(bytes);
 
-        // Đảm bảo có ít nhất 1 ký tự từ mỗi nhóm
+        // Đảm bảo có ít nhất 1 ký tự từ mỗi nhóm (upper/lower/digit/special)
         var chars = new char[length];
-        chars[0] = upper[bytes[0]  % upper.Length];
-        chars[1] = lower[bytes[1]  % lower.Length];
-        chars[2] = digits[bytes[2] % digits.Length];
+        chars[0] = upper[bytes[0]   % upper.Length];
+        chars[1] = lower[bytes[1]   % lower.Length];
+        chars[2] = digits[bytes[2]  % digits.Length];
         chars[3] = special[bytes[3] % special.Length];
 
         for (int i = 4; i < length; i++)
             chars[i] = all[bytes[i] % all.Length];
 
-        // Xáo trộn để không bị đoán vị trí cố định
-        return new string(chars.OrderBy(_ => System.Security.Cryptography.RandomNumberGenerator.GetInt32(length)).ToArray());
+        // Xáo trộn để không bị đoán vị trí cố định của từng nhóm ký tự
+        return new string(chars.OrderBy(_ =>
+            System.Security.Cryptography.RandomNumberGenerator.GetInt32(length)).ToArray());
     }
 }

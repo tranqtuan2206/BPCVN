@@ -66,12 +66,12 @@ public class UserController : Controller
 
         if (spec == null) return NotFound();
 
-        // Xóa file âm thanh vật lý khỏi wwwroot
+        // Xóa file âm thanh local — bỏ qua nếu là Cloudinary URL (https://...)
         foreach (var st in spec.SoundTests)
         {
+            if (st.AudioUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)) continue;
             var relativePath = st.AudioUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
             var filePath = Path.Combine(_env.WebRootPath, relativePath);
-
             if (System.IO.File.Exists(filePath))
                 System.IO.File.Delete(filePath);
         }

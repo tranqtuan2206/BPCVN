@@ -11,11 +11,12 @@ namespace BPCVN.Controllers;
 [Authorize]
 public class SoundTestController : Controller
 {
-    private readonly AppDbContext _db;
-    private readonly IWebHostEnvironment _env;
-    private readonly IAudioService _audioService;
+    private readonly AppDbContext         _db;
+    private readonly IWebHostEnvironment  _env;
+    private readonly IAudioService        _audioService;
+    private readonly ILogger<SoundTestController> _logger;
 
-    // Audio: lưu local | Video: FFmpeg tách âm → upload .mp3 lên Cloudinary
+    // Loại file được chấp nhận — audio lưu local, video qua FFmpeg → Cloudinary
     private static readonly string[] AudioExtensions =
         [".mp3", ".m4a", ".aac", ".flac", ".ogg", ".wav", ".bwf", ".aiff", ".dsf", ".dff", ".alac"];
     private static readonly string[] VideoExtensions =
@@ -24,11 +25,13 @@ public class SoundTestController : Controller
     private const long MaxAudioSizeBytes = 100 * 1024 * 1024;  // 100 MB — WAV/FLAC dài nặng
     private const long MaxVideoSizeBytes = 200 * 1024 * 1024;  // 200 MB — video từ iPhone
 
-    public SoundTestController(AppDbContext db, IWebHostEnvironment env, IAudioService audioService)
+    public SoundTestController(AppDbContext db, IWebHostEnvironment env,
+        IAudioService audioService, ILogger<SoundTestController> logger)
     {
-        _db = db;
-        _env = env;
+        _db           = db;
+        _env          = env;
         _audioService = audioService;
+        _logger       = logger;
     }
 
     // ── UPLOAD GET ────────────────────────────────────────────────────────────
@@ -118,7 +121,8 @@ public class SoundTestController : Controller
         }
         catch (Exception ex)
         {
-            Console.WriteLine("====== LỖI XỬ LÝ FILE: " + ex.ToString());
+            // Dùng logger thay vì Console.WriteLine để tích hợp với ASP.NET logging pipeline
+            _logger.LogError(ex, "[SoundTest] Lỗi xử lý file upload cho Spec {SpecId}", specId);
             if (isAjax) return Json(new { success = false, message = $"Lỗi xử lý file: {ex.Message}" });
             ModelState.AddModelError("audioFile", $"Lỗi xử lý file: {ex.Message}");
             ViewBag.Spec = spec;
@@ -165,12 +169,14 @@ public class SoundTestController : Controller
         if (!isOwner && !isAdmin)
             return Forbid();
 
-        // Xóa file âm thanh vật lý khỏi wwwroot
-        var relativePath = soundTest.AudioUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-        var filePath = Path.Combine(_env.WebRootPath, relativePath);
-
-        if (System.IO.File.Exists(filePath))
-            System.IO.File.Delete(filePath);
+        // Chỉ xóa file local — bỏ qua nếu AudioUrl là Cloudinary URL (https://...)
+        if (!soundTest.AudioUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            var relativePath = soundTest.AudioUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+            var filePath = Path.Combine(_env.WebRootPath, relativePath);
+            if (System.IO.File.Exists(filePath))
+                System.IO.File.Delete(filePath);
+        }
 
         var specId = soundTest.SpecId;
 

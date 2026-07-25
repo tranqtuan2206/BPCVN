@@ -94,89 +94,31 @@ public class SpecController : Controller
         if (!Guid.TryParse(userIdStr, out var userId))
             return Unauthorized();
 
-        // Tìm hoặc tạo mới Kit theo tên
-        var kitName = vm.KitName.Trim();
-        var kit = await _db.Kits
-            .FirstOrDefaultAsync(k => k.Name.ToLower() == kitName.ToLower());
-        if (kit == null)
-        {
-            kit = new Kit { Name = kitName };
-            _db.Kits.Add(kit);
-            await _db.SaveChangesAsync();
-        }
+        // Giải quyết Kit / Switch / Keycap qua helper dùng chung với Edit POST
+        var kit = await ResolveKitAsync(vm.KitName);
 
-        // ── Xử lý Switch — Tự động tạo Switch mới nếu tên chưa có trong DB ──
-        int? switchId = null;
-        string? customSwitchName = null;
-
-        if (vm.SelectedSwitchId.HasValue)
+        var (switchId, _) = await ResolveSwitchAsync(vm.SelectedSwitchId, vm.SwitchName);
+        if (switchId == null && !vm.SelectedSwitchId.HasValue)
         {
-            // User chọn Switch có sẵn từ datalist → dùng ID
-            switchId = vm.SelectedSwitchId.Value;
-        }
-        else if (!string.IsNullOrWhiteSpace(vm.SwitchName))
-        {
-            // User nhập text → kiểm tra xem có trùng tên Switch trong DB không
-            var inputName = vm.SwitchName.Trim();
-            var existingSwitch = await _db.Switches
-                .FirstOrDefaultAsync(s => s.Name.ToLower() == inputName.ToLower());
-
-            if (existingSwitch != null)
-            {
-                // Tên trùng với Switch có sẵn → tự động map SwitchId
-                switchId = existingSwitch.SwitchId;
-            }
-            else
-            {
-                // Tên mới → tự động tạo Switch mới vào Master Data
-                var newSwitch = new Switch
-                {
-                    Name = inputName,
-                    IsDeleted = false
-                };
-                _db.Switches.Add(newSwitch);
-                await _db.SaveChangesAsync();
-
-                // Gán SwitchId vừa tạo cho Build
-                switchId = newSwitch.SwitchId;
-            }
-        }
-        else
-        {
-            // Không nhập gì → báo lỗi
+            // ResolveSwitchAsync trả null khi không nhập gì → báo lỗi
             ModelState.AddModelError("SwitchName", "Vui lòng chọn hoặc nhập tên switch.");
             ViewBag.Switches = await _db.Switches.OrderBy(s => s.Name).AsNoTracking().ToListAsync();
             return View(vm);
         }
 
-        // Tìm hoặc tạo mới Keycap theo tên (nếu có nhập)
-        int? keycapId = null;
-        if (!string.IsNullOrWhiteSpace(vm.KeycapName))
-        {
-            var keycapName = vm.KeycapName.Trim();
-            var keycap = await _db.Keycaps
-                .FirstOrDefaultAsync(k => k.Name.ToLower() == keycapName.ToLower());
-            if (keycap == null)
-            {
-                keycap = new Keycap { Name = keycapName };
-                _db.Keycaps.Add(keycap);
-                await _db.SaveChangesAsync();
-            }
-            keycapId = keycap.KeycapId;
-        }
+        var keycapId = await ResolveKeycapAsync(vm.KeycapName);
 
         var spec = new Spec
         {
-            UserId           = userId,
-            BuildName        = vm.BuildName.Trim(),
-            KitId            = kit.KitId,
-            SwitchId         = switchId,
-            CustomSwitchName = customSwitchName,
-            KeycapId         = keycapId,
-            PlateMaterial    = vm.PlateMaterial?.Trim(),
-            FoamSetup        = vm.FoamSetup?.Trim(),
-            Mods             = vm.Mods?.Trim(),
-            CreatedAt        = DateTime.UtcNow
+            UserId        = userId,
+            BuildName     = vm.BuildName.Trim(),
+            KitId         = kit.KitId,
+            SwitchId      = switchId,
+            KeycapId      = keycapId,
+            PlateMaterial = vm.PlateMaterial?.Trim(),
+            FoamSetup     = vm.FoamSetup?.Trim(),
+            Mods          = vm.Mods?.Trim(),
+            CreatedAt     = DateTime.UtcNow
         };
 
         _db.Specs.Add(spec);
@@ -270,54 +212,11 @@ public class SpecController : Controller
         if (spec.UserId.ToString() != currentUserId)
             return Forbid();
 
-        // Tìm hoặc tạo Kit mới
-        var kitName = vm.KitName.Trim();
-        var kit = await _db.Kits
-            .FirstOrDefaultAsync(k => k.Name.ToLower() == kitName.ToLower());
-        if (kit == null)
-        {
-            kit = new Kit { Name = kitName };
-            _db.Kits.Add(kit);
-            await _db.SaveChangesAsync();
-        }
+        // Giải quyết Kit / Switch / Keycap qua helper dùng chung với Create POST
+        var kit = await ResolveKitAsync(vm.KitName);
 
-        // ── Xử lý Switch — Tự động tạo Switch mới nếu tên chưa có trong DB ──
-        int? switchId = null;
-        string? customSwitchName = null;
-
-        if (vm.SelectedSwitchId.HasValue)
-        {
-            // User chọn Switch có sẵn từ datalist → dùng ID
-            switchId = vm.SelectedSwitchId.Value;
-        }
-        else if (!string.IsNullOrWhiteSpace(vm.SwitchName))
-        {
-            // User nhập text → kiểm tra tên trùng DB
-            var inputName = vm.SwitchName.Trim();
-            var existingSwitch = await _db.Switches
-                .FirstOrDefaultAsync(s => s.Name.ToLower() == inputName.ToLower());
-
-            if (existingSwitch != null)
-            {
-                // Tên trùng → tự động map SwitchId
-                switchId = existingSwitch.SwitchId;
-            }
-            else
-            {
-                // Tên mới → tự động tạo Switch mới vào Master Data
-                var newSwitch = new Switch
-                {
-                    Name = inputName,
-                    IsDeleted = false
-                };
-                _db.Switches.Add(newSwitch);
-                await _db.SaveChangesAsync();
-
-                // Gán SwitchId vừa tạo cho Build
-                switchId = newSwitch.SwitchId;
-            }
-        }
-        else
+        var (switchId, _) = await ResolveSwitchAsync(vm.SelectedSwitchId, vm.SwitchName);
+        if (switchId == null && !vm.SelectedSwitchId.HasValue)
         {
             ModelState.AddModelError("SwitchName", "Vui lòng chọn hoặc nhập tên switch.");
             ViewBag.Switches = await _db.Switches.OrderBy(s => s.Name).AsNoTracking().ToListAsync();
@@ -325,31 +224,16 @@ public class SpecController : Controller
             return View(vm);
         }
 
-        // Tìm hoặc tạo Keycap mới (nếu có nhập)
-        int? keycapId = null;
-        if (!string.IsNullOrWhiteSpace(vm.KeycapName))
-        {
-            var keycapName = vm.KeycapName.Trim();
-            var keycap = await _db.Keycaps
-                .FirstOrDefaultAsync(k => k.Name.ToLower() == keycapName.ToLower());
-            if (keycap == null)
-            {
-                keycap = new Keycap { Name = keycapName };
-                _db.Keycaps.Add(keycap);
-                await _db.SaveChangesAsync();
-            }
-            keycapId = keycap.KeycapId;
-        }
+        var keycapId = await ResolveKeycapAsync(vm.KeycapName);
 
         // Cập nhật thông tin Spec
-        spec.BuildName        = vm.BuildName.Trim();
-        spec.KitId            = kit.KitId;
-        spec.SwitchId         = switchId;
-        spec.CustomSwitchName = customSwitchName;
-        spec.KeycapId         = keycapId;
-        spec.PlateMaterial    = vm.PlateMaterial?.Trim();
-        spec.FoamSetup        = vm.FoamSetup?.Trim();
-        spec.Mods             = vm.Mods?.Trim();
+        spec.BuildName     = vm.BuildName.Trim();
+        spec.KitId         = kit.KitId;
+        spec.SwitchId      = switchId;
+        spec.KeycapId      = keycapId;
+        spec.PlateMaterial = vm.PlateMaterial?.Trim();
+        spec.FoamSetup     = vm.FoamSetup?.Trim();
+        spec.Mods          = vm.Mods?.Trim();
 
         await _db.SaveChangesAsync();
 
@@ -380,12 +264,12 @@ public class SpecController : Controller
         if (!isOwner && !isAdmin)
             return Forbid();
 
-        // Xóa file âm thanh vật lý khỏi wwwroot
+        // Xóa file âm thanh local — bỏ qua nếu là Cloudinary URL (https://...)
         foreach (var st in spec.SoundTests)
         {
+            if (st.AudioUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)) continue;
             var relativePath = st.AudioUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
             var filePath = Path.Combine(_env.WebRootPath, relativePath);
-
             if (System.IO.File.Exists(filePath))
                 System.IO.File.Delete(filePath);
         }
@@ -446,5 +330,83 @@ public class SpecController : Controller
             return PartialView("_ExploreResults", specs);
 
         return View(specs);
+    }
+
+    // ── HELPER — Resolve entity (tìm hoặc tạo mới) ───────────────────────────
+    // Dùng chung cho cả Create POST và Edit POST để tránh lặp code (DRY).
+
+    /// <summary>
+    /// Tìm Kit theo tên (case-insensitive). Nếu chưa có → tạo mới và lưu vào DB.
+    /// </summary>
+    private async Task<Kit> ResolveKitAsync(string kitName)
+    {
+        var name = kitName.Trim();
+        var kit  = await _db.Kits
+            .FirstOrDefaultAsync(k => k.Name.ToLower() == name.ToLower());
+
+        if (kit == null)
+        {
+            kit = new Kit { Name = name };
+            _db.Kits.Add(kit);
+            await _db.SaveChangesAsync(); // SaveChanges ngay để có KitId
+        }
+
+        return kit;
+    }
+
+    /// <summary>
+    /// Giải quyết Switch từ ViewModel:
+    ///   - Nếu selectedId có giá trị → dùng ID đó.
+    ///   - Nếu nhập tên text → tìm theo tên, nếu không có thì tạo mới.
+    ///   - Nếu không nhập gì → trả (null, null) để caller báo lỗi.
+    /// </summary>
+    private async Task<(int? SwitchId, string? CustomSwitchName)> ResolveSwitchAsync(
+        int? selectedSwitchId, string? switchName)
+    {
+        // Trường hợp 1: user chọn Switch có sẵn từ datalist
+        if (selectedSwitchId.HasValue)
+            return (selectedSwitchId.Value, null);
+
+        // Trường hợp 2: user nhập text tự do
+        if (!string.IsNullOrWhiteSpace(switchName))
+        {
+            var inputName      = switchName.Trim();
+            var existingSwitch = await _db.Switches
+                .FirstOrDefaultAsync(s => s.Name.ToLower() == inputName.ToLower());
+
+            if (existingSwitch != null)
+                return (existingSwitch.SwitchId, null); // Tên trùng → map ID có sẵn
+
+            // Tên mới → tạo Switch mới vào Master Data
+            var newSwitch = new Switch { Name = inputName, IsDeleted = false };
+            _db.Switches.Add(newSwitch);
+            await _db.SaveChangesAsync();
+            return (newSwitch.SwitchId, null);
+        }
+
+        // Trường hợp 3: không nhập gì → caller cần xử lý lỗi
+        return (null, null);
+    }
+
+    /// <summary>
+    /// Tìm Keycap theo tên (case-insensitive). Nếu chưa có → tạo mới.
+    /// Trả về null nếu không nhập tên.
+    /// </summary>
+    private async Task<int?> ResolveKeycapAsync(string? keycapName)
+    {
+        if (string.IsNullOrWhiteSpace(keycapName)) return null;
+
+        var name   = keycapName.Trim();
+        var keycap = await _db.Keycaps
+            .FirstOrDefaultAsync(k => k.Name.ToLower() == name.ToLower());
+
+        if (keycap == null)
+        {
+            keycap = new Keycap { Name = name };
+            _db.Keycaps.Add(keycap);
+            await _db.SaveChangesAsync();
+        }
+
+        return keycap.KeycapId;
     }
 }
