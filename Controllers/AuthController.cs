@@ -8,19 +8,27 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace BPCVN.Controllers;
 
 public class AuthController : Controller
 {
-    private readonly AppDbContext _db;
-    private readonly IEmailService _emailService;
+    private readonly AppDbContext    _db;
+    private readonly IEmailService   _emailService;
+    private readonly IMemoryCache    _cache;
 
-    // Inject thêm IEmailService để gửi mail xác thực
-    public AuthController(AppDbContext db, IEmailService emailService)
+    // Cấu hình rate-limit cho login
+    private const int    MaxLoginAttempts   = 5;                         // Số lần thử tối đa
+    private const int    LockoutMinutes     = 15;                        // Thời gian khóa (phút)
+    private const string LoginAttemptPrefix = "login_attempt:";          // Prefix cache key
+
+    // Inject IMemoryCache để track số lần login sai theo email
+    public AuthController(AppDbContext db, IEmailService emailService, IMemoryCache cache)
     {
-        _db = db;
+        _db           = db;
         _emailService = emailService;
+        _cache        = cache;
     }
 
     // ── REGISTER ──────────────────────────────────────────────────────────────
@@ -34,75 +42,78 @@ public class AuthController : Controller
     {
         if (!ModelState.IsValid) return View(vm);
 
-        // Kiểm tra email đã tồn tại chưa
-        if (await _db.Users.AnyAsync(u => u.Email == vm.Email))
-        {
-            ModelState.AddModelError(nameof(vm.Email), "Email này đã được sử dụng.");
-            return View(vm);
-        }
+        var email    = vm.Email.Trim().ToLower();
+        var username = vm.Username.Trim();
 
-        // Kiểm tra username đã tồn tại chưa
-        if (await _db.Users.AnyAsync(u => u.Username == vm.Username))
+        // ── Enumeration-safe: không tiết lộ email có tồn tại không ───────────
+        // Username báo lỗi bình thường (không nhạy cảm bằng email)
+        // Email: nếu tồn tại → bỏ qua silently; nếu chưa → tạo user và gửi mail
+        var emailExists    = await _db.Users.AnyAsync(u => u.Email    == email);
+        var usernameExists = await _db.Users.AnyAsync(u => u.Username == username);
+
+        if (usernameExists)
         {
             ModelState.AddModelError(nameof(vm.Username), "Username này đã được sử dụng.");
             return View(vm);
         }
 
-        // Tạo token xác thực email (Guid ngẫu nhiên)
-        var verificationToken = Guid.NewGuid().ToString();
-
-        // Tạo user mới — chưa kích hoạt email (IsEmailConfirmed = false)
-        var user = new User
+        if (!emailExists)
         {
-            Username = vm.Username.Trim(),
-            Email = vm.Email.Trim().ToLower(),
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(vm.Password),
-            Role = "User",
-            CreatedAt = DateTime.UtcNow,
-            IsEmailConfirmed = false,         // Chưa xác thực
-            VerificationToken = verificationToken // Token để verify
-        };
+            // Chỉ tạo user mới khi email chưa tồn tại
+            var verificationToken = Guid.NewGuid().ToString();
 
-        _db.Users.Add(user);
-        await _db.SaveChangesAsync();
+            var user = new User
+            {
+                Username          = username,
+                Email             = email,
+                PasswordHash      = BCrypt.Net.BCrypt.HashPassword(vm.Password),
+                Role              = "User",
+                CreatedAt         = DateTime.UtcNow,
+                IsEmailConfirmed  = false,
+                VerificationToken = verificationToken
+            };
 
-        // ── Gửi email xác thực ──────────────────────────────────────────────
-        // Sinh link kích hoạt trỏ tới action VerifyEmail
-        var verifyLink = Url.Action(
-            action: "VerifyEmail",
-            controller: "Auth",
-            values: new { email = user.Email, token = verificationToken },
-            protocol: Request.Scheme // https hoặc http tùy môi trường
-        );
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
 
-        // Nội dung email HTML
-        var emailBody = $@"
-            <h2>Chào mừng bạn đến với BPCVN!</h2>
-            <p>Xin chào <strong>{user.Username}</strong>,</p>
-            <p>Vui lòng nhấn vào link bên dưới để kích hoạt tài khoản của bạn:</p>
-            <p><a href='{verifyLink}' style='display:inline-block;padding:10px 20px;background:#333;color:#fff;text-decoration:none;border-radius:5px;'>
-                ✅ Kích hoạt tài khoản
-            </a></p>
-            <p>Hoặc copy link này vào trình duyệt:</p>
-            <p>{verifyLink}</p>
-            <hr/>
-            <p style='color:#888;font-size:12px;'>Nếu bạn không đăng ký tài khoản này, vui lòng bỏ qua email này.</p>
-        ";
+            // ── Gửi email xác thực ──────────────────────────────────────────
+            var verifyLink = Url.Action(
+                action:     "VerifyEmail",
+                controller: "Auth",
+                values:     new { email = user.Email, token = verificationToken },
+                protocol:   Request.Scheme
+            );
 
-        try
-        {
-            await _emailService.SendEmailAsync(user.Email, "BPCVN - Xác thực tài khoản", emailBody);
+            var emailBody = $@"
+                <h2>Chào mừng bạn đến với BPCVN!</h2>
+                <p>Xin chào <strong>{user.Username}</strong>,</p>
+                <p>Vui lòng nhấn vào link bên dưới để kích hoạt tài khoản của bạn:</p>
+                <p><a href='{verifyLink}' style='display:inline-block;padding:10px 20px;background:#333;color:#fff;text-decoration:none;border-radius:5px;'>
+                    ✅ Kích hoạt tài khoản
+                </a></p>
+                <p>Hoặc copy link này vào trình duyệt:</p>
+                <p>{verifyLink}</p>
+                <hr/>
+                <p style='color:#888;font-size:12px;'>Nếu bạn không đăng ký tài khoản này, vui lòng bỏ qua email này.</p>
+            ";
+
+            try
+            {
+                await _emailService.SendEmailAsync(user.Email, "BPCVN - Xác thực tài khoản", emailBody);
+            }
+            catch (Exception)
+            {
+                // Nếu gửi mail lỗi, vẫn tạo tài khoản thành công
+            }
         }
-        catch (Exception)
-        {
-            // Nếu gửi mail lỗi, vẫn tạo tài khoản thành công
-            // User có thể yêu cầu gửi lại sau
-        }
+        // Nếu email đã tồn tại: không làm gì thêm → message chung bên dưới
 
-        // KHÔNG tự động đăng nhập — yêu cầu xác thực email trước
+        // Luôn hiển thị message chung — không tiết lộ email có tồn tại không
         TempData["Success"] = "toast.auth.register.success";
         return RedirectToAction("Login");
     }
+
+
 
     // ── VERIFY EMAIL ─────────────────────────────────────────────────────────
 
@@ -113,15 +124,15 @@ public class AuthController : Controller
     public async Task<IActionResult> VerifyEmail(string email, string token)
     {
         // Validate tham số đầu vào
-        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
+        if (string.IsNullOrEmpty(token))
         {
             TempData["Error"] = "toast.auth.verify.invalid";
             return RedirectToAction("Login");
         }
 
-        // Tìm user theo email và token
-        var user = await _db.Users.FirstOrDefaultAsync(
-            u => u.Email == email.Trim().ToLower() && u.VerificationToken == token);
+        // ── Enumeration-safe: chỉ tìm theo token (unique) ───────────────────────────────
+        // Không cần check email trong WHERE clause → tránh timing attack lộ email tồn tại
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.VerificationToken == token);
 
         if (user == null)
         {
@@ -157,12 +168,36 @@ public class AuthController : Controller
     {
         if (!ModelState.IsValid) return View(vm);
 
+        // ── Rate-limit: kiểm tra xem email có đang bị tạm khóa không ─────────
+        var email      = vm.Email.Trim().ToLower();
+        var cacheKey   = LoginAttemptPrefix + email;
+        var attempts   = _cache.GetOrCreate(cacheKey, entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(LockoutMinutes);
+            return 0;
+        });
+
+        if (attempts >= MaxLoginAttempts)
+        {
+            TempData["Error"] = "toast.auth.login.locked";
+            return RedirectToAction("Login");
+        }
+
         var user = await _db.Users
-                            .FirstOrDefaultAsync(u => u.Email == vm.Email.Trim().ToLower());
+                            .FirstOrDefaultAsync(u => u.Email == email);
 
         // Kiểm tra user tồn tại và password đúng
         if (user == null || !BCrypt.Net.BCrypt.Verify(vm.Password, user.PasswordHash))
         {
+            // Tăng counter thất bại, giữ nguyên thời gian expire hiện tại
+            _cache.Set(cacheKey, attempts + 1, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(LockoutMinutes)
+            });
+
+            // Thêm delay nhỏ để chống timing attack
+            await Task.Delay(TimeSpan.FromMilliseconds(300));
+
             TempData["Error"] = "toast.auth.login.invalid";
             return RedirectToAction("Login");
         }
@@ -172,6 +207,9 @@ public class AuthController : Controller
             TempData["Error"] = "toast.auth.login.unverified";
             return RedirectToAction("Login");
         }
+
+        // ── Login thành công → xóa counter để reset lockout ─────────────────
+        _cache.Remove(cacheKey);
 
         await SignInUser(user, isPersistent: vm.RememberMe);
 

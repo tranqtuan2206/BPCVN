@@ -159,25 +159,65 @@ public class DbSeeder
             // Đọc mật khẩu Admin từ cấu hình (appsettings.json) thay vì hardcode
             var adminPassword = _config["AdminSettings:DefaultPassword"];
 
-            // Kiểm tra null/empty — tránh lỗi khi cấu hình thiếu hoặc sai
-            if (string.IsNullOrWhiteSpace(adminPassword))
+            // ── Bảo mật: chặn các password yếu / placeholder ────────────────
+            var weakPasswords = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
-                throw new InvalidOperationException(
-                    "Thiếu cấu hình 'AdminSettings:DefaultPassword' trong appsettings.json. " +
-                    "Vui lòng thêm section AdminSettings với key DefaultPassword.");
+                "password", "Password", "123456", "admin", "Admin",
+                "admin123", "test", "secret", "[PASSWORD]",
+                "[REDACTED — set via Environment Variable: AdminSettings__DefaultPassword]"
+            };
+
+            if (string.IsNullOrWhiteSpace(adminPassword) || weakPasswords.Contains(adminPassword))
+            {
+                // Generate random strong password và in ra console để admin biết
+                adminPassword = GenerateRandomPassword();
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("╔══════════════════════════════════════════════════════════╗");
+                Console.WriteLine("║  [SECURITY] Admin password tự động được tạo:            ║");
+                Console.WriteLine($"║  Password: {adminPassword,-46}║");
+                Console.WriteLine("║  Hãy đổi ngay sau lần đăng nhập đầu tiên!               ║");
+                Console.WriteLine("╚══════════════════════════════════════════════════════════╝");
+                Console.ResetColor();
             }
 
             db.Users.Add(new User
             {
-                Username     = "Admin",
-                Email        = "admin@twsnwithunikey",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
-                Role         = "Admin",
-                CreatedAt    = DateTime.UtcNow,
+                Username         = "Admin",
+                Email            = "admin@twsnwithunikey",
+                PasswordHash     = BCrypt.Net.BCrypt.HashPassword(adminPassword),
+                Role             = "Admin",
+                CreatedAt        = DateTime.UtcNow,
                 IsEmailConfirmed = true // Admin luôn được kích hoạt sẵn
             });
         }
 
         await db.SaveChangesAsync();
+    }
+
+    // ── Helper: Sinh mật khẩu ngẫu nhiên đủ mạnh ────────────────────────────
+    private static string GenerateRandomPassword(int length = 16)
+    {
+        const string upper   = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+        const string lower   = "abcdefghjkmnpqrstuvwxyz";
+        const string digits  = "23456789";
+        const string special = "!@#$%^&*";
+        const string all     = upper + lower + digits + special;
+
+        var rng  = System.Security.Cryptography.RandomNumberGenerator.Create();
+        var bytes = new byte[length];
+        rng.GetBytes(bytes);
+
+        // Đảm bảo có ít nhất 1 ký tự từ mỗi nhóm
+        var chars = new char[length];
+        chars[0] = upper[bytes[0]  % upper.Length];
+        chars[1] = lower[bytes[1]  % lower.Length];
+        chars[2] = digits[bytes[2] % digits.Length];
+        chars[3] = special[bytes[3] % special.Length];
+
+        for (int i = 4; i < length; i++)
+            chars[i] = all[bytes[i] % all.Length];
+
+        // Xáo trộn để không bị đoán vị trí cố định
+        return new string(chars.OrderBy(_ => System.Security.Cryptography.RandomNumberGenerator.GetInt32(length)).ToArray());
     }
 }

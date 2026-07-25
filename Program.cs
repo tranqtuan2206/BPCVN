@@ -28,6 +28,9 @@ builder.Services.AddControllersWithViews()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
+// Đăng ký IMemoryCache (dùng cho rate-limit login)
+builder.Services.AddMemoryCache();
+
 // Đăng ký dịch vụ gửi email (xác thực tài khoản)
 builder.Services.AddScoped<IEmailService, EmailService>();
 
@@ -69,6 +72,30 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// ── Security Headers ─────────────────────────────────────────────────────
+app.Use(async (context, next) =>
+{
+    var headers = context.Response.Headers;
+
+    // Chống MIME-type sniffing
+    headers["X-Content-Type-Options"] = "nosniff";
+
+    // Chống Clickjacking — chỉ cho phép iframe từ cùng domain
+    headers["X-Frame-Options"] = "SAMEORIGIN";
+
+    // Bật XSS filter của trình duyệt cũ (IE/Edge legacy)
+    headers["X-XSS-Protection"] = "1; mode=block";
+
+    // Kiểm soát Referrer khi chuyển trang
+    headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+
+    // Giới hạn các browser API nguy hiểm
+    headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), payment=()";
+
+    await next();
+});
+
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
