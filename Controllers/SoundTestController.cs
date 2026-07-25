@@ -15,9 +15,14 @@ public class SoundTestController : Controller
     private readonly IWebHostEnvironment _env;
     private readonly IAudioService _audioService;
 
-    // Các định dạng file được phép upload (audio + video)
-    private static readonly string[] AllowedExtensions = [".mp3", ".wav", ".flac", ".ogg", ".mp4", ".mov"];
-    private const long MaxFileSizeBytes = 200 * 1024 * 1024; // 200 MB
+    // Audio: lưu local | Video: FFmpeg tách âm → upload .mp3 lên Cloudinary
+    private static readonly string[] AudioExtensions =
+        [".mp3", ".m4a", ".aac", ".flac", ".ogg", ".wav", ".bwf", ".aiff", ".dsf", ".dff", ".alac"];
+    private static readonly string[] VideoExtensions =
+        [".mp4", ".mov", ".mkv", ".webm", ".avi", ".wmv", ".mxf"];
+    private static readonly string[] AllowedExtensions = [.. AudioExtensions, .. VideoExtensions];
+    private const long MaxAudioSizeBytes = 100 * 1024 * 1024;  // 100 MB — WAV/FLAC dài nặng
+    private const long MaxVideoSizeBytes = 200 * 1024 * 1024;  // 200 MB — video từ iPhone
 
     public SoundTestController(AppDbContext db, IWebHostEnvironment env, IAudioService audioService)
     {
@@ -88,10 +93,16 @@ public class SoundTestController : Controller
             return View();
         }
 
-        if (audioFile.Length > MaxFileSizeBytes)
+        // Kiểm tra dung lượng theo loại file (audio nhỏ hơn, video lớn hơn)
+        var isVideo = VideoExtensions.Contains(ext);
+        var maxSize = isVideo ? MaxVideoSizeBytes : MaxAudioSizeBytes;
+        var maxSizeLabel = isVideo ? "200MB" : "100MB";
+
+        if (audioFile.Length > maxSize)
         {
-            if (isAjax) return Json(new { success = false, message = "File không được vượt quá 200MB." });
-            ModelState.AddModelError("audioFile", "File không được vượt quá 200MB.");
+            var msg = $"File không được vượt quá {maxSizeLabel}.";
+            if (isAjax) return Json(new { success = false, message = msg });
+            ModelState.AddModelError("audioFile", msg);
             ViewBag.Spec = spec;
             return View();
         }

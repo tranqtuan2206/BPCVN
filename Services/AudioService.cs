@@ -1,6 +1,7 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Xabe.FFmpeg;
+using Xabe.FFmpeg.Downloader;
 
 namespace BPCVN.Services;
 
@@ -8,22 +9,18 @@ namespace BPCVN.Services;
 /// Xử lý upload file âm thanh/video cho tính năng SoundTest.
 ///
 /// Chiến lược lưu trữ:
-///   - Audio (.mp3, .wav, .flac, .ogg) → Lưu Local (wwwroot/uploads/soundtests).
-///   - Video (.mp4, .mov)              → Upload Cloudinary → URL transformation trích audio
-///                                        (Không cần FFmpeg trên server — Cloudinary xử lý)
+///   - Audio (.mp3, .wav, .flac, .ogg, .m4a, .aac, .aiff) → Lưu Local
+///   - Video (.mp4, .mov, .webm) → FFmpeg tách âm → Upload .mp3 lên Cloudinary
+///     (FFmpeg tự tải về wwwroot/FFmpeg/ nếu chưa có)
 /// </summary>
 public class AudioService : IAudioService
 {
-    // Các đuôi file phân loại là video → upload lên Cloudinary (không cần FFmpeg)
-    private static readonly HashSet<string> VideoExtensions = [".mp4", ".mov", ".avi", ".mkv"];
+    private static readonly HashSet<string> VideoExtensions =
+        [".mp4", ".mov", ".mkv", ".webm", ".avi", ".wmv", ".mxf"];
 
-    // Thư mục lưu trữ local cuối cùng (chỉ dùng cho Audio)
     private const string UploadSubPath = "uploads/soundtests";
-
-    // Thư mục tạm — dùng cho mọi loại file khi nhận từ user
     private const string TempSubPath = "temp";
-
-    // Tên folder trên Cloudinary
+    private const string FFmpegSubPath = "FFmpeg";
     private const string CloudinaryFolder = "BPCVN_Soundtests";
 
     private readonly IWebHostEnvironment _env;
@@ -36,62 +33,51 @@ public class AudioService : IAudioService
         _env    = env;
         _logger = logger;
 
-        // ── Khởi tạo FFmpeg (chỉ dùng cho convert audio wav/flac/ogg → mp3) ──
-        // Video upload không cần FFmpeg — dùng Cloudinary URL transformation
-        _ffmpegDir = Path.Combine(AppContext.BaseDirectory, "FFmpeg");
+        // FFmpeg lưu vào wwwroot/FFmpeg/ — thư mục ghi được trên IIS shared hosting
+        _ffmpegDir = Path.Combine(_env.WebRootPath, FFmpegSubPath);
         FFmpeg.SetExecutablesPath(_ffmpegDir);
 
-        // ── Khởi tạo Cloudinary từ appsettings ───────────────────────────────
         var cloudName = config["CloudinarySettings:CloudName"];
         var apiKey    = config["CloudinarySettings:ApiKey"];
         var apiSecret = config["CloudinarySettings:ApiSecret"];
 
         if (string.IsNullOrWhiteSpace(cloudName) || cloudName.StartsWith("YOUR_"))
-            throw new InvalidOperationException(
-                "CloudinarySettings:CloudName chưa cấu hình. " +
-                "Hãy đặt giá trị thật trong User Secrets (dotnet user-secrets set) hoặc appsettings.Development.json.");
+            throw new InvalidOperationException("CloudinarySettings:CloudName chưa cấu hình.");
         if (string.IsNullOrWhiteSpace(apiKey) || apiKey.StartsWith("YOUR_"))
-            throw new InvalidOperationException(
-                "CloudinarySettings:ApiKey chưa cấu hình. " +
-                "Hãy đặt giá trị thật trong User Secrets (dotnet user-secrets set) hoặc appsettings.Development.json.");
+            throw new InvalidOperationException("CloudinarySettings:ApiKey chưa cấu hình.");
         if (string.IsNullOrWhiteSpace(apiSecret) || apiSecret.StartsWith("YOUR_"))
-            throw new InvalidOperationException(
-                "CloudinarySettings:ApiSecret chưa cấu hình. " +
-                "Hãy đặt giá trị thật trong User Secrets (dotnet user-secrets set) hoặc appsettings.Development.json.");
+            throw new InvalidOperationException("CloudinarySettings:ApiSecret chưa cấu hình.");
 
         var account   = new Account(cloudName, apiKey, apiSecret);
         _cloudinary   = new Cloudinary(account);
-        _cloudinary.Api.Secure = true; // Bắt buộc trả về HTTPS (SecureUrl)
+        _cloudinary.Api.Secure = true;
     }
 
-    /// <inheritdoc />
     public async Task<string> ProcessAndSaveAsync(IFormFile file)
     {
-        // Chuẩn bị thư mục tạm
         var tempDir = Path.Combine(_env.WebRootPath, TempSubPath);
         Directory.CreateDirectory(tempDir);
 
-        // Lấy đuôi file gốc (lowercase) để phân loại
         var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-
-        // Tên file tạm dùng GUID để tránh xung đột khi nhiều request đồng thời
         var tempFileName = $"{Guid.NewGuid()}{ext}";
         var tempFilePath = Path.Combine(tempDir, tempFileName);
 
         try
         {
-            // ── BƯỚC 1: Lưu file user upload vào thư mục tạm ─────────────────
             await using (var stream = new FileStream(tempFilePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
             _logger.LogInformation("[AudioService] Đã lưu file tạm: {Path}", tempFilePath);
 
-            // ── BƯỚC 2: Phân nhánh xử lý theo loại file ──────────────────────
             if (VideoExtensions.Contains(ext))
             {
-                // Video: upload thẳng lên Cloudinary (không cần FFmpeg)
-                // Cloudinary tự trích xuất audio qua URL transformation
+                // Video: đảm bảo FFmpeg có sẵn → tách âm → upload .mp3 lên Cloudinary
+                var ffmpegReady = await EnsureFFmpegAvailableAsync();
+                if (!ffmpegReady)
+                    throw new InvalidOperationException(
+                        "Không thể xử lý video: FFmpeg chưa sẵn sàng. " +
+                        "Vui lòng upload file âm thanh (.mp3, .wav, .m4a) thay vì video.");
                 return await HandleVideoAsync(tempFilePath);
             }
             else
@@ -102,56 +88,140 @@ public class AudioService : IAudioService
         }
         catch
         {
-            // Nếu có lỗi trong xử lý: đảm bảo xóa file tạm đầu vào
             DeleteIfExists(tempFilePath);
-            throw; // Re-throw để Controller bắt và báo lỗi cho user
+            throw;
         }
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // PRIVATE — Luồng VIDEO: Upload Cloudinary trực tiếp (không cần FFmpeg)
+    // FFmpeg — Tự tải về nếu chưa có
     // ══════════════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// Upload video lên Cloudinary. Cloudinary tự trích xuất audio khi client
-    /// request với đuôi .mp3 (URL transformation).
-    /// Trả về URL trỏ đến bản audio của video.
+    /// Kiểm tra FFmpeg đã có chưa. Nếu chưa → tự tải về từ internet.
+    /// Trả về true nếu FFmpeg sẵn sàng, false nếu tải thất bại.
     /// </summary>
-    private async Task<string> HandleVideoAsync(string videoTempPath)
+    private async Task<bool> EnsureFFmpegAvailableAsync()
     {
+        // 1. Check FFmpeg đã có trong wwwroot/FFmpeg/ chưa
+        var ffmpegExe = Path.Combine(_ffmpegDir, "ffmpeg.exe");
+        if (File.Exists(ffmpegExe)) return true;
+
+        // 2. Check FFmpeg trên system PATH (đã cài sẵn trên máy)
+        var systemFfmpeg = FindFFmpegOnPath();
+        if (systemFfmpeg != null)
+        {
+            _logger.LogInformation("[AudioService] Tìm thấy FFmpeg trên system: {Path}", systemFfmpeg);
+            FFmpeg.SetExecutablesPath(Path.GetDirectoryName(systemFfmpeg)!);
+            return true;
+        }
+
+        // 3. Tự tải FFmpeg từ internet về wwwroot/FFmpeg/
+        _logger.LogWarning("[AudioService] FFmpeg chưa có, đang tải về {Path}...", _ffmpegDir);
         try
         {
-            // Upload video gốc lên Cloudinary (giữ nguyên định dạng .mov/.mp4)
-            var videoUrl = await UploadToCloudinaryAsync(videoTempPath);
+            Directory.CreateDirectory(_ffmpegDir);
+            await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official, _ffmpegDir);
+            if (File.Exists(ffmpegExe))
+            {
+                _logger.LogInformation("[AudioService] FFmpeg tải về thành công.");
+                return true;
+            }
+            _logger.LogError("[AudioService] FFmpeg tải về nhưng file không tồn tại.");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[AudioService] Không thể tải FFmpeg: {Message}", ex.Message);
+            return false;
+        }
+    }
 
-            // Cloudinary hỗ trợ trích audio từ video qua URL transformation:
-            //   /video/upload/sample.mp4  → video
-            //   /video/upload/sample.mp3  → audio (tự trích xuất)
-            // Chỉ cần thay đuôi file trong URL
-            var audioUrl = System.Text.RegularExpressions.Regex.Replace(
-                videoUrl, @"\.\w+$", ".mp3");
+    /// <summary>
+    /// Tìm ffmpeg trên system PATH. Trả về đường dẫn đầy đủ nếu tìm thấy, null nếu không.
+    /// </summary>
+    private static string? FindFFmpegOnPath()
+    {
+        var envPath = Environment.GetEnvironmentVariable("PATH") ?? "";
+        var paths = envPath.Split(Path.PathSeparator);
 
-            _logger.LogInformation("[AudioService] Video upload lên Cloudinary → Audio URL: {Url}", audioUrl);
+        foreach (var dir in paths)
+        {
+            var exe = Path.Combine(dir, "ffmpeg.exe");
+            if (File.Exists(exe)) return exe;
+
+            // Linux/Mac: không có .exe
+            var exeNoExt = Path.Combine(dir, "ffmpeg");
+            if (File.Exists(exeNoExt)) return exeNoExt;
+        }
+        return null;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // VIDEO — FFmpeg tách âm → Upload .mp3 lên Cloudinary
+    // ══════════════════════════════════════════════════════════════════════════
+
+    private async Task<string> HandleVideoAsync(string videoTempPath)
+    {
+        var mp3TempPath = Path.Combine(
+            Path.GetDirectoryName(videoTempPath)!,
+            $"{Guid.NewGuid()}.mp3"
+        );
+
+        try
+        {
+            // Bước A: FFmpeg tách âm từ video → file .mp3 tạm
+            var inputSize = new FileInfo(videoTempPath).Length;
+            _logger.LogInformation("[AudioService] Bắt đầu xử lý video: {Path} ({Size}MB)",
+                videoTempPath, inputSize / 1024 / 1024);
+
+            await ExtractAudioToPathAsync(videoTempPath, mp3TempPath);
+
+            // Kiểm tra file .mp3 đã được tạo chưa
+            if (!File.Exists(mp3TempPath))
+                throw new InvalidOperationException("FFmpeg không tạo được file .mp3 đầu ra.");
+
+            var outputSize = new FileInfo(mp3TempPath).Length;
+            _logger.LogInformation("[AudioService] FFmpeg tách âm thành công → {Path} ({Size}MB)",
+                mp3TempPath, outputSize / 1024 / 1024);
+
+            // Bước B: Upload file .mp3 lên Cloudinary (KHÔNG BAO GIỜ upload video)
+            var audioUrl = await UploadToCloudinaryAsync(mp3TempPath);
+
+            _logger.LogInformation("[AudioService] Video xử lý xong → Cloudinary URL: {Url}", audioUrl);
             return audioUrl;
         }
         finally
         {
-            // Dọn file tạm trên server (không cần giữ video gốc)
             DeleteIfExists(videoTempPath);
+            DeleteIfExists(mp3TempPath);
         }
     }
 
+    /// <summary>
+    /// FFmpeg tách âm thanh từ video, xuất ra .mp3.
+    /// </summary>
+    private async Task ExtractAudioToPathAsync(string videoPath, string outputMp3Path)
+    {
+        var conversion = FFmpeg.Conversions.New()
+            .AddParameter($"-i \"{videoPath}\"")
+            .AddParameter("-vn")           // bỏ qua stream video
+            .AddParameter("-acodec mp3")   // encode thành mp3
+            .AddParameter("-q:a 2")        // chất lượng VBR ~190kbps
+            .SetOutput(outputMp3Path);
+
+        _logger.LogInformation("[AudioService] FFmpeg tách âm: {Input} → {Output}", videoPath, outputMp3Path);
+        await conversion.Start();
+        _logger.LogInformation("[AudioService] FFmpeg hoàn tất tách âm.");
+    }
+
     // ══════════════════════════════════════════════════════════════════════════
-    // PRIVATE — Luồng AUDIO: Lưu local (convert sang .mp3 nếu cần)
+    // AUDIO — Lưu local (convert sang .mp3 nếu cần)
     // ══════════════════════════════════════════════════════════════════════════
 
-    /// <summary>
-    /// Xử lý file audio: move hoặc convert sang .mp3, lưu vào wwwroot/uploads/soundtests.
-    /// Trả về đường dẫn tương đối "/uploads/soundtests/xxx.mp3".
-    /// </summary>
     private async Task<string> HandleAudioAsync(string tempFilePath, string ext)
     {
-        var uploadDir    = Path.Combine(_env.WebRootPath, UploadSubPath);
+        var uploadDir = Path.Combine(_env.WebRootPath, UploadSubPath);
         Directory.CreateDirectory(uploadDir);
 
         var outputFileName = $"{Guid.NewGuid()}.mp3";
@@ -159,30 +229,26 @@ public class AudioService : IAudioService
 
         if (ext == ".mp3")
         {
-            // .mp3 gốc: move thẳng, không cần re-encode
             File.Move(tempFilePath, outputPath);
             _logger.LogInformation("[AudioService] .mp3 gốc → move vào uploads: {Name}", outputFileName);
         }
         else
         {
-            // .wav / .flac / .ogg: convert sang .mp3 bằng FFmpeg
+            // .wav / .flac / .ogg / .m4a / .aac / .aiff: convert sang .mp3 bằng FFmpeg
+            var ffmpegReady = await EnsureFFmpegAvailableAsync();
+            if (!ffmpegReady)
+                throw new InvalidOperationException(
+                    "Không thể convert audio: FFmpeg chưa sẵn sàng. " +
+                    "Vui lòng upload file .mp3 thay vì .wav/.flac/.ogg/.m4a/.aac/.aiff.");
+
             await ConvertAudioToPathAsync(tempFilePath, outputPath);
-            DeleteIfExists(tempFilePath); // Xóa file tạm sau khi convert xong
+            DeleteIfExists(tempFilePath);
             _logger.LogInformation("[AudioService] Audio convert xong → {Name}", outputFileName);
         }
 
-        // Trả về đường dẫn tương đối để lưu DB (giống cách cũ)
         return $"/uploads/soundtests/{outputFileName}";
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
-    // PRIVATE — FFmpeg Helpers (chỉ dùng cho convert audio: wav/flac/ogg → mp3)
-    // ══════════════════════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// Dùng FFmpeg convert file audio sang .mp3 tại đường dẫn chỉ định.
-    /// Dùng cho: .wav / .flac / .ogg → .mp3
-    /// </summary>
     private async Task ConvertAudioToPathAsync(string inputPath, string outputMp3Path)
     {
         var conversion = FFmpeg.Conversions.New()
@@ -196,51 +262,37 @@ public class AudioService : IAudioService
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // PRIVATE — Cloudinary Helper
+    // Cloudinary Helper
     // ══════════════════════════════════════════════════════════════════════════
 
-    /// <summary>
-    /// Upload file .mp3 lên Cloudinary trong folder "BPCVN_Soundtests".
-    /// ResourceType = "video" vì Cloudinary phân loại audio vào nhóm này.
-    /// Trả về SecureUrl (https://...) để lưu thẳng vào Database.
-    /// </summary>
     private async Task<string> UploadToCloudinaryAsync(string mp3FilePath)
     {
+        // Safety check: CHỈ upload file .mp3, KHÔNG BAO GIỜ upload video
+        var ext = Path.GetExtension(mp3FilePath).ToLowerInvariant();
+        if (ext != ".mp3")
+            throw new InvalidOperationException(
+                $"[AudioService] An toàn: từ chối upload file {ext} lên Cloudinary. Chỉ chấp nhận .mp3.");
+
         var uploadParams = new VideoUploadParams
         {
-            // Đường dẫn file local cần upload
             File = new FileDescription(mp3FilePath),
-
-            // Đặt vào folder riêng trên Cloudinary để dễ quản lý
             Folder = CloudinaryFolder,
-
-            // "auto" để Cloudinary tự phát hiện là audio
-            // Dùng RawUploadParams thay VideoUploadParams để tương thích tốt hơn với .mp3
         };
 
-        _logger.LogInformation("[AudioService] Đang upload lên Cloudinary folder: {Folder}", CloudinaryFolder);
-
+        _logger.LogInformation("[AudioService] Đang upload lên Cloudinary: {Path}", mp3FilePath);
         var result = await _cloudinary.UploadAsync(uploadParams);
 
-        // Kiểm tra lỗi từ Cloudinary
         if (result.Error != null)
-        {
             throw new Exception($"Cloudinary upload thất bại: {result.Error.Message}");
-        }
 
         _logger.LogInformation("[AudioService] Cloudinary upload thành công: {Url}", result.SecureUrl);
-
-        // Trả về URL tuyệt đối HTTPS (SecureUrl)
         return result.SecureUrl.ToString();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // PRIVATE — Utility
+    // Utility
     // ══════════════════════════════════════════════════════════════════════════
 
-    /// <summary>
-    /// Xóa file nếu tồn tại (an toàn, không ném exception nếu file đã bị xóa).
-    /// </summary>
     private static void DeleteIfExists(string? path)
     {
         if (!string.IsNullOrEmpty(path) && File.Exists(path))
