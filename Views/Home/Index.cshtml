@@ -3,13 +3,7 @@
     ViewData["Title"] = "Trang chủ";
 }
 
-<!-- 1. HÀO QUANG VÔ CỰC (PHÁ CONTAINER BẰNG CSS MỚI) -->
-<div class="brand-aura-wrapper">
-    <img src="~/icons/Logo-BPCVN-removebg.png" class="brand-aura-img" alt="Brand Aura" />
-</div>
 
-<!-- 2. NỘI DUNG CHÍNH NỔI LÊN TRÊN -->
-<div class="position-relative" style="z-index: 1;">
 
     <!-- ── Hero Section ──────────────────────────────────────────────────────── -->
     <div class="hero-section mb-5 text-center" style="padding: 80px 0;">
@@ -37,7 +31,7 @@
             </div>
         </div>
         <div class="col-4">
-            <div class="stat-card">
+            <div class="stat-card card-featured">
                 <div class="stat-value">@ViewBag.SwitchCount</div>
                 <div class="stat-label">Switches</div>
             </div>
@@ -173,7 +167,7 @@
         </div>
     }
 
-</div> <!-- Kết thúc lớp nội dung nổi -->
+
 
 @section Scripts {
     <script>

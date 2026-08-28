@@ -1,0 +1,80 @@
+@model (List<BPCVN.Models.Entities.PendingItem> Items, string Type)
+@{
+    var items = Model.Items;
+    var type  = Model.Type;
+}
+
+@if (!items.Any())
+{
+    <div class="text-center py-4 text-muted">
+        <i class="bi bi-check-circle-fill text-success fs-4 d-block mb-2"></i>
+        Không có @type nào đang chờ duyệt.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Tên @type</th>
+                    <th>Người submit</th>
+                    <th>Thời gian</th>
+                    <th class="text-end">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in items)
+                {
+                    <tr>
+                        <td><code>@item.Id</code></td>
+                        <td>
+                            <strong>@item.Name</strong>
+                            <br><small class="text-muted">EntityId: @(item.EntityId?.ToString() ?? "—")</small>
+                        </td>
+                        <td>
+                            <i class="bi bi-person me-1"></i>@item.SubmittedBy?.Username
+                        </td>
+                        <td>
+                            <span title="@item.SubmittedAt.ToString("dd/MM/yyyy HH:mm:ss") UTC">
+                                @item.SubmittedAt.ToString("dd/MM/yyyy HH:mm")
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <div class="d-flex gap-2 justify-content-end flex-wrap">
+                            @* Nút Approve *@
+                            <form method="post"
+                                  action="/Admin/Approve/@item.Id">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-success btn-sm"
+                                        onclick="return confirm('Duyệt @Html.Raw(type) này?')">
+                                    <i class="bi bi-check-lg me-1"></i>Duyệt
+                                </button>
+                            </form>
+
+                            @* Nút Merge — mở modal *@
+                            <button class="btn btn-warning btn-sm"
+                                    data-merge-id="@item.Id"
+                                    data-merge-name="@item.Name"
+                                    data-merge-type="@type">
+                                <i class="bi bi-git me-1"></i>Merge
+                            </button>
+
+                            @* Nút Reject *@
+                            <form method="post"
+                                  action="/Admin/Reject/@item.Id">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-danger btn-sm"
+                                        onclick="return confirm('Từ chối item này? Entity sẽ bị xóa, các build liên quan dùng tên tạm.')">
+                                    <i class="bi bi-x-lg me-1"></i>Từ chối
+                                </button>
+                            </form>
+                        </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

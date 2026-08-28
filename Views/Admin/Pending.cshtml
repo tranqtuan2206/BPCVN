@@ -1,0 +1,157 @@
+@model IEnumerable<BPCVN.Models.Entities.PendingItem>
+@{
+    ViewData["Title"] = "Duyệt Master Data";
+    var kits     = Model.Where(p => p.Type == "Kit").ToList();
+    var switches = Model.Where(p => p.Type == "Switch").ToList();
+    var keycaps  = Model.Where(p => p.Type == "Keycap").ToList();
+}
+
+<div class="container py-4">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <i class="bi bi-clipboard2-check fs-2 text-warning"></i>
+        <div>
+            <h1 class="h3 mb-0">Queue Duyệt Master Data</h1>
+            <small class="text-muted">Các Kit / Switch / Keycap do user tự tạo, chưa được duyệt</small>
+        </div>
+        @if (!Model.Any())
+        {
+            <span class="badge bg-success ms-auto fs-6">Không có gì cần duyệt ✓</span>
+        }
+        else
+        {
+            <span class="badge bg-warning text-dark ms-auto fs-6">@Model.Count() items đang chờ</span>
+        }
+    </div>
+
+    @* Toast thông báo *@
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+            Queue trống — mọi master data đều đã được duyệt!
+        </div>
+    }
+    else
+    {
+        @* Tab navigation *@
+        <ul class="nav nav-tabs mb-4" id="pendingTabs">
+            <li class="nav-item">
+                <a class="nav-link @(switches.Any() ? "active" : "")" data-bs-toggle="tab" href="#tab-switch">
+                    <img src="~/icons/switch-removebg.png" style="height:20px" class="me-1" alt="" />
+                    Switches <span class="badge bg-danger ms-1">@switches.Count</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(!switches.Any() && kits.Any() ? "active" : "")" data-bs-toggle="tab" href="#tab-kit">
+                    <img src="~/icons/kit-removebg.png" style="height:20px" class="me-1" alt="" />
+                    Kits <span class="badge bg-danger ms-1">@kits.Count</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(!switches.Any() && !kits.Any() && keycaps.Any() ? "active" : "")" data-bs-toggle="tab" href="#tab-keycap">
+                    <img src="~/icons/keycap-removebg.png" style="height:20px" class="me-1" alt="" />
+                    Keycaps <span class="badge bg-danger ms-1">@keycaps.Count</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            @* Tab Switches *@
+            <div class="tab-pane fade @(switches.Any() ? "show active" : "")" id="tab-switch">
+                @await Html.PartialAsync("_PendingTable", (switches, "Switch"))
+            </div>
+
+            @* Tab Kits *@
+            <div class="tab-pane fade @(!switches.Any() && kits.Any() ? "show active" : "")" id="tab-kit">
+                @await Html.PartialAsync("_PendingTable", (kits, "Kit"))
+            </div>
+
+            @* Tab Keycaps *@
+            <div class="tab-pane fade @(!switches.Any() && !kits.Any() && keycaps.Any() ? "show active" : "")" id="tab-keycap">
+                @await Html.PartialAsync("_PendingTable", (keycaps, "Keycap"))
+            </div>
+        </div>
+    }
+</div>
+
+@* Modal Merge *@
+<div class="modal fade" id="mergeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-git me-2"></i>Merge vào entity chuẩn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">
+                    Gộp "<strong id="mergeSourceName"></strong>" vào entity nào?
+                    <br><small class="text-muted">Tất cả Build dùng item này sẽ được cập nhật sang entity bạn chọn.</small>
+                </p>
+                <select class="form-select" id="mergeTargetSelect">
+                    <option value="">-- Đang tải... --</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form id="mergeForm" method="post" asp-controller="Admin" asp-action="Merge">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="mergeItemId" />
+                    <input type="hidden" name="targetId" id="mergeTargetId" />
+                    <button type="submit" class="btn btn-primary" id="mergeConfirmBtn" disabled>
+                        <i class="bi bi-git me-1"></i>Xác nhận Merge
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // Khi click nút Merge → load danh sách entity chuẩn qua AJAX
+    document.addEventListener('click', async function (e) {
+        const btn = e.target.closest('[data-merge-id]');
+        if (!btn) return;
+
+        const pendingId   = btn.dataset.mergeId;
+        const pendingName = btn.dataset.mergeName;
+        const type        = btn.dataset.mergeType;
+
+        document.getElementById('mergeItemId').value   = pendingId;
+        document.getElementById('mergeSourceName').textContent = pendingName;
+        document.getElementById('mergeConfirmBtn').disabled    = true;
+        document.getElementById('mergeTargetSelect').innerHTML = '<option>Đang tải...</option>';
+
+        // Load danh sách entity approved cùng type
+        const res  = await fetch(`/Admin/MergeTargets?type=${type}`);
+        const list = await res.json();
+
+        const sel = document.getElementById('mergeTargetSelect');
+        sel.innerHTML = '<option value="">-- Chọn entity chuẩn --</option>' +
+            list.map(x => `<option value="${x.id}">${x.name}</option>`).join('');
+
+        sel.addEventListener('change', function () {
+            const targetId = this.value;
+            document.getElementById('mergeTargetId').value = targetId;
+            document.getElementById('mergeConfirmBtn').disabled = !targetId;
+        });
+
+        new bootstrap.Modal(document.getElementById('mergeModal')).show();
+    });
+</script>
+}

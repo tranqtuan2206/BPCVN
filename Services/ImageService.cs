@@ -7,10 +7,9 @@ namespace BPCVN.Services;
 /// Xử lý upload ảnh lên Cloudinary cho tính năng multi-image của Kit.
 /// Upload vào folder "BPCVN_KitImages", ResourceType = Image.
 /// </summary>
-public class ImageService : IImageService
+public class ImageService
 {
     private const string CloudinaryFolder = "BPCVN_KitImages";
-    private const string TempSubPath = "temp";
 
     private readonly IWebHostEnvironment _env;
     private readonly ILogger<ImageService> _logger;
@@ -42,49 +41,27 @@ public class ImageService : IImageService
 
     public async Task<string> UploadImageAsync(IFormFile file)
     {
-        // Tạo thư mục tạm nếu chưa có
-        var tempDir = Path.Combine(_env.WebRootPath, TempSubPath);
-        Directory.CreateDirectory(tempDir);
+        // Upload trực tiếp từ stream lên Cloudinary thay vì tạo file tạm trên ổ cứng
+        await using var stream = file.OpenReadStream();
 
-        // Tên file tạm dùng GUID để tránh trùng lặp
-        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-        var tempFileName = $"{Guid.NewGuid()}{ext}";
-        var tempFilePath = Path.Combine(tempDir, tempFileName);
-
-        try
+        var uploadParams = new ImageUploadParams
         {
-            // Lưu file tạm từ upload stream
-            await using (var stream = new FileStream(tempFilePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
+            File = new FileDescription(file.FileName, stream),
+            Folder = CloudinaryFolder,
+            // Tự tối ưu kích thước ảnh (max 2000px, quality auto)
+            Transformation = new Transformation().Width(2000).Height(2000).Crop("limit").Quality("auto"),
+        };
 
-            // Upload lên Cloudinary — ResourceType.Image để Cloudinary xử lý đúng
-            var uploadParams = new ImageUploadParams
-            {
-                File = new FileDescription(tempFilePath),
-                Folder = CloudinaryFolder,
-                // Tự tối ưu kích thước ảnh (max 2000px, quality auto)
-                Transformation = new Transformation().Width(2000).Height(2000).Crop("limit").Quality("auto"),
-            };
+        _logger.LogInformation("[ImageService] Đang upload ảnh lên Cloudinary: {FileName}", file.FileName);
 
-            _logger.LogInformation("[ImageService] Đang upload ảnh lên Cloudinary: {FileName}", file.FileName);
+        var result = await _cloudinary.UploadAsync(uploadParams);
 
-            var result = await _cloudinary.UploadAsync(uploadParams);
+        if (result.Error != null)
+            throw new Exception($"Cloudinary upload thất bại: {result.Error.Message}");
 
-            if (result.Error != null)
-                throw new Exception($"Cloudinary upload thất bại: {result.Error.Message}");
+        _logger.LogInformation("[ImageService] Upload thành công: {Url}", result.SecureUrl);
 
-            _logger.LogInformation("[ImageService] Upload thành công: {Url}", result.SecureUrl);
-
-            return result.SecureUrl.ToString();
-        }
-        finally
-        {
-            // Dọn file tạm — luôn thực hiện dù upload thành công hay thất bại
-            if (File.Exists(tempFilePath))
-                File.Delete(tempFilePath);
-        }
+        return result.SecureUrl.ToString();
     }
 
     /// <summary>

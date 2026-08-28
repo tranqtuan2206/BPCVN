@@ -8,27 +8,19 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace BPCVN.Controllers;
 
 public class AuthController : Controller
 {
     private readonly AppDbContext    _db;
-    private readonly IEmailService   _emailService;
-    private readonly IMemoryCache    _cache;
+    private readonly EmailService   _emailService;
 
-    // Cấu hình rate-limit cho login
-    private const int    MaxLoginAttempts   = 5;                         // Số lần thử tối đa
-    private const int    LockoutMinutes     = 15;                        // Thời gian khóa (phút)
-    private const string LoginAttemptPrefix = "login_attempt:";          // Prefix cache key
-
-    // Inject IMemoryCache để track số lần login sai theo email
-    public AuthController(AppDbContext db, IEmailService emailService, IMemoryCache cache)
+    public AuthController(AppDbContext db, EmailService emailService)
     {
         _db           = db;
         _emailService = emailService;
-        _cache        = cache;
     }
 
     // ── REGISTER ──────────────────────────────────────────────────────────────
@@ -150,8 +142,11 @@ public class AuthController : Controller
     // ── LOGIN ─────────────────────────────────────────────────────────────────
 
     [HttpGet]
-    public IActionResult Login(string? returnUrl = null)
+    public IActionResult Login(string? returnUrl = null, bool locked = false)
     {
+        // Nhận cờ locked từ middleware RateLimiting
+        if (locked) TempData["Error"] = "toast.auth.login.locked";
+
         // Nếu đã đăng nhập rồi thì redirect về Home
         if (User.Identity?.IsAuthenticated == true)
             return RedirectToAction("Index", "Home");
@@ -162,24 +157,12 @@ public class AuthController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("LoginRateLimit")]
     public async Task<IActionResult> Login(LoginViewModel vm, string? returnUrl = null)
     {
         if (!ModelState.IsValid) return View(vm);
 
-        // ── Rate-limit: kiểm tra xem email có đang bị tạm khóa không ─────────
         var email      = vm.Email.Trim().ToLower();
-        var cacheKey   = LoginAttemptPrefix + email;
-        var attempts   = _cache.GetOrCreate(cacheKey, entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(LockoutMinutes);
-            return 0;
-        });
-
-        if (attempts >= MaxLoginAttempts)
-        {
-            TempData["Error"] = "toast.auth.login.locked";
-            return RedirectToAction("Login");
-        }
 
         var user = await _db.Users
                             .FirstOrDefaultAsync(u => u.Email == email);
@@ -187,12 +170,6 @@ public class AuthController : Controller
         // Kiểm tra user tồn tại và password đúng
         if (user == null || !BCrypt.Net.BCrypt.Verify(vm.Password, user.PasswordHash))
         {
-            // Tăng counter thất bại, giữ nguyên thời gian expire hiện tại
-            _cache.Set(cacheKey, attempts + 1, new MemoryCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(LockoutMinutes)
-            });
-
             // Thêm delay nhỏ để chống timing attack
             await Task.Delay(TimeSpan.FromMilliseconds(300));
 
@@ -205,9 +182,6 @@ public class AuthController : Controller
             TempData["Error"] = "toast.auth.login.unverified";
             return RedirectToAction("Login");
         }
-
-        // ── Login thành công → xóa counter để reset lockout ─────────────────
-        _cache.Remove(cacheKey);
 
         await SignInUser(user, isPersistent: vm.RememberMe);
 

@@ -7,7 +7,7 @@ namespace BPCVN.Services;
 /// Service gửi email qua SMTP (Gmail).
 /// Cấu hình đọc từ appsettings.json section "SmtpSettings".
 /// </summary>
-public class EmailService : IEmailService
+public class EmailService
 {
     private readonly IConfiguration _config;
 

@@ -11,9 +11,9 @@ namespace BPCVN.Controllers;
 public class KitController : Controller
 {
     private readonly AppDbContext _db;
-    private readonly IImageService _imageService;
+    private readonly ImageService _imageService;
 
-    public KitController(AppDbContext db, IImageService imageService)
+    public KitController(AppDbContext db, ImageService imageService)
     {
         _db = db;
         _imageService = imageService;

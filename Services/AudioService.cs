@@ -13,7 +13,7 @@ namespace BPCVN.Services;
 ///   - Video (.mp4, .mov, .webm) → FFmpeg tách âm → Upload .mp3 lên Cloudinary
 ///     (FFmpeg tự tải về wwwroot/FFmpeg/ nếu chưa có)
 /// </summary>
-public class AudioService : IAudioService
+public class AudioService
 {
     private static readonly HashSet<string> VideoExtensions =
         [".mp4", ".mov", ".mkv", ".webm", ".avi", ".wmv", ".mxf"];
@@ -103,16 +103,39 @@ public class AudioService : IAudioService
     /// </summary>
     private async Task<bool> EnsureFFmpegAvailableAsync()
     {
-        // 1. Check FFmpeg đã có trong wwwroot/FFmpeg/ chưa
-        var ffmpegExe = Path.Combine(_ffmpegDir, "ffmpeg.exe");
-        if (File.Exists(ffmpegExe)) return true;
+        // 1. Kiểm tra FFmpeg đi kèm (được copy vào thư mục build/publish)
+        var bundledDir = Path.Combine(AppContext.BaseDirectory, FFmpegSubPath);
+        if (File.Exists(Path.Combine(bundledDir, "ffmpeg.exe")) || File.Exists(Path.Combine(bundledDir, "ffmpeg")))
+        {
+            _logger.LogInformation("[AudioService] Tìm thấy FFmpeg đi kèm tại: {Path}", bundledDir);
+            FFmpeg.SetExecutablesPath(bundledDir);
+            return true;
+        }
 
-        // 2. Check FFmpeg trên system PATH (đã cài sẵn trên máy)
+        // 2. Kiểm tra FFmpeg ở thư mục gốc của project (lúc chạy debug local)
+        var contentDir = Path.Combine(_env.ContentRootPath, FFmpegSubPath);
+        if (File.Exists(Path.Combine(contentDir, "ffmpeg.exe")) || File.Exists(Path.Combine(contentDir, "ffmpeg")))
+        {
+            _logger.LogInformation("[AudioService] Tìm thấy FFmpeg tại thư mục gốc: {Path}", contentDir);
+            FFmpeg.SetExecutablesPath(contentDir);
+            return true;
+        }
+
+        // 3. Check FFmpeg đã có trong wwwroot/FFmpeg/ chưa (khi host trên IIS/shared host tải về)
+        var ffmpegExe = Path.Combine(_ffmpegDir, "ffmpeg.exe");
+        if (File.Exists(ffmpegExe) || File.Exists(Path.Combine(_ffmpegDir, "ffmpeg"))) 
+        {
+            FFmpeg.SetExecutablesPath(_ffmpegDir);
+            return true;
+        }
+
+        // 4. Check FFmpeg trên system PATH (đã cài sẵn trên máy)
         var systemFfmpeg = FindFFmpegOnPath();
         if (systemFfmpeg != null)
         {
-            _logger.LogInformation("[AudioService] Tìm thấy FFmpeg trên system: {Path}", systemFfmpeg);
-            FFmpeg.SetExecutablesPath(Path.GetDirectoryName(systemFfmpeg)!);
+            var systemDir = Path.GetDirectoryName(systemFfmpeg)!;
+            _logger.LogInformation("[AudioService] Tìm thấy FFmpeg trên system PATH: {Path}", systemDir);
+            FFmpeg.SetExecutablesPath(systemDir);
             return true;
         }
 
@@ -295,7 +318,7 @@ public class AudioService : IAudioService
 
     private static void DeleteIfExists(string? path)
     {
-        if (!string.IsNullOrEmpty(path) && File.Exists(path))
+        if (!string.IsNullOrEmpty(path))
             File.Delete(path);
     }
 }

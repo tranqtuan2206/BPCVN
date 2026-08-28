@@ -11,9 +11,9 @@ namespace BPCVN.Controllers;
 [Authorize]
 public class SoundTestController : Controller
 {
-    private readonly AppDbContext         _db;
+    private readonly AppDbContext _db;
+    private readonly AudioService _audioService;
     private readonly IWebHostEnvironment  _env;
-    private readonly IAudioService        _audioService;
     private readonly ILogger<SoundTestController> _logger;
 
     // Loại file được chấp nhận — audio lưu local, video qua FFmpeg → Cloudinary
@@ -26,7 +26,7 @@ public class SoundTestController : Controller
     private const long MaxVideoSizeBytes = 200 * 1024 * 1024;  // 200 MB — video từ iPhone
 
     public SoundTestController(AppDbContext db, IWebHostEnvironment env,
-        IAudioService audioService, ILogger<SoundTestController> logger)
+        AudioService audioService, ILogger<SoundTestController> logger)
     {
         _db           = db;
         _env          = env;
@@ -41,6 +41,7 @@ public class SoundTestController : Controller
     {
         // Kiểm tra spec tồn tại
         var spec = await _db.Specs
+                            .IgnoreQueryFilters()
                             .Include(s => s.Kit)
                             .AsNoTracking()
                             .FirstOrDefaultAsync(s => s.SpecId == specId);
@@ -64,6 +65,7 @@ public class SoundTestController : Controller
     {
         // Lấy lại spec để hiển thị nếu có lỗi
         var spec = await _db.Specs
+                            .IgnoreQueryFilters()
                             .Include(s => s.Kit)
                             .FirstOrDefaultAsync(s => s.SpecId == specId);
 

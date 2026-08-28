@@ -25,13 +25,14 @@
                 <input type="hidden" name="specId" value="@spec.SpecId" />
                 <input type="hidden" name="isAjax" value="true" />
                 <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
-                <div class="mb-3">
+                <div class="mb-3 p-3" id="dropzone" style="border: 2px dashed var(--color-border, #e5e7eb); border-radius: 8px; transition: all 0.2s ease; background: rgba(0,0,0,0.02);">
                     <label class="form-label-lovable">
                         <span data-i18n="upload.fileLabel">File âm thanh</span> <span style="color:#b91c1c">*</span>
                     </label>
-                    <input type="file" name="audioFile" class="form-control" id="audioFileInput"
+                    <input type="file" name="audioFile" class="form-control mb-2" id="audioFileInput"
                            accept=".mp3,.m4a,.aac,.flac,.ogg,.wav,.bwf,.aiff,.dsf,.dff,.alac,.mp4,.mov,.mkv,.webm,.avi,.wmv,.mxf,audio/*,video/*" required />
                     <div class="form-hint" data-i18n="upload.fileHint">
+                        💡 <strong>Mẹo:</strong> Bạn có thể kéo thả file trực tiếp vào ô này<br>
                         Audio: .mp3, .m4a, ... (tối đa 100MB)<br>
                         Video: .mp4, .mov, ... (tối đa 200MB)
                     </div>
@@ -95,6 +96,7 @@
     var progressBar  = document.getElementById('uploadProgressBar');
     var progressText = document.getElementById('uploadProgressText');
     var progressLabel = document.getElementById('uploadProgressLabel');
+    var dropzone    = document.getElementById('dropzone');
     var specId      = '@spec.SpecId';
 
     /* ── Lấy text i18n theo key ──────────────────────────── */
@@ -139,6 +141,69 @@
             progressBar.style.width = '0%';
         }
     }
+
+    /* ── Kéo thả file (Drag & Drop) ──────────────────────── */
+    var dragCounter = 0;
+
+    // Ngăn trình duyệt mở file mặc định trên toàn window
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(function(eventName) {
+        document.addEventListener(eventName, function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }, false);
+    });
+
+    // Bắt sự kiện khi kéo file vào toàn bộ trang web
+    document.addEventListener('dragenter', function(e) {
+        dragCounter++;
+        if (dragCounter === 1) {
+            // Khi kéo vào cửa sổ, đổi màu viền thành đỏ
+            dropzone.style.borderColor = '#ef4444';
+            dropzone.style.background = 'rgba(239, 68, 68, 0.05)';
+        }
+    }, false);
+
+    document.addEventListener('dragleave', function(e) {
+        dragCounter--;
+        if (dragCounter === 0) {
+            // Kéo ra khỏi cửa sổ, trả về bình thường
+            dropzone.style.borderColor = 'var(--color-border, #e5e7eb)';
+            dropzone.style.background = 'rgba(0,0,0,0.02)';
+        }
+    }, false);
+
+    document.addEventListener('drop', function(e) {
+        dragCounter = 0;
+        // Thả file ra (dù ở đâu), trả về bình thường
+        dropzone.style.borderColor = 'var(--color-border, #e5e7eb)';
+        dropzone.style.background = 'rgba(0,0,0,0.02)';
+    }, false);
+
+    // Bắt sự kiện khi kéo file ĐÚNG VÀO vùng dropzone
+    ['dragenter', 'dragover'].forEach(function(eventName) {
+        dropzone.addEventListener(eventName, function() {
+            dropzone.style.borderColor = '#16a34a'; // Xanh lá
+            dropzone.style.background = 'rgba(22, 163, 74, 0.05)';
+        }, false);
+    });
+
+    // Bắt sự kiện kéo ra khỏi vùng dropzone
+    dropzone.addEventListener('dragleave', function() {
+        if (dragCounter > 0) {
+            // Nếu vẫn còn kéo trong window thì quay về đỏ
+            dropzone.style.borderColor = '#ef4444';
+            dropzone.style.background = 'rgba(239, 68, 68, 0.05)';
+        }
+    }, false);
+
+    // Bắt sự kiện thả file vào dropzone
+    dropzone.addEventListener('drop', function(e) {
+        var dt = e.dataTransfer;
+        var files = dt.files;
+        if (files && files.length > 0) {
+            fileInput.files = files; // Gán file vào input
+        }
+    }, false);
 
     /* ── Chặn submit mặc định — dùng AJAX + theo dõi tiến trình ── */
     form.addEventListener('submit', function (e) {

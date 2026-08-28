@@ -2,6 +2,8 @@ using BPCVN.Data;
 using BPCVN.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,17 +30,32 @@ builder.Services.AddControllersWithViews()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
-// Đăng ký IMemoryCache (dùng cho rate-limit login)
-builder.Services.AddMemoryCache();
+// Cấu hình Rate Limiting (giới hạn số lần thử đăng nhập)
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("LoginRateLimit", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(15);
+        opt.PermitLimit = 5;
+        opt.QueueLimit = 0;
+    });
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        // Chuyển hướng tới trang Login với cờ locked=true để hiện thông báo
+        context.HttpContext.Response.Redirect("/Auth/Login?locked=true");
+        await Task.CompletedTask;
+    };
+});
 
 // Đăng ký dịch vụ gửi email (xác thực tài khoản)
-builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<EmailService>();
 
 // Đăng ký dịch vụ xử lý file âm thanh / tách âm từ video
-builder.Services.AddScoped<IAudioService, AudioService>();
+builder.Services.AddScoped<AudioService>();
 
 // Đăng ký dịch vụ upload ảnh lên Cloudinary
-builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<ImageService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -57,6 +74,9 @@ using (var scope = app.Services.CreateScope())
 {
     var db     = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+
+    // Tự động chạy migration mới khi deploy (thay cho dotnet ef database update thủ công)
+    await db.Database.MigrateAsync();
 
     // Khởi tạo DbSeeder với IConfiguration (không còn hardcode mật khẩu)
     var seeder = new DbSeeder(config);
@@ -98,6 +118,7 @@ app.Use(async (context, next) =>
 
 app.UseStaticFiles();
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

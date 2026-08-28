@@ -172,11 +172,11 @@ public class DbSeeder
                 // Generate random strong password và in ra console để admin biết
                 adminPassword = GenerateRandomPassword();
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("╔══════════════════════════════════════════════════════════╗");
-                Console.WriteLine("║  [SECURITY] Admin password tự động được tạo:            ║");
-                Console.WriteLine($"║  Password: {adminPassword,-46}║");
-                Console.WriteLine("║  Hãy đổi ngay sau lần đăng nhập đầu tiên!               ║");
-                Console.WriteLine("╚══════════════════════════════════════════════════════════╝");
+                Console.WriteLine(" ╔══════════════════════════════════════════════════════════╗");
+                Console.WriteLine(" ║  [SECURITY] Admin password tự động được tạo:             ║");
+                Console.WriteLine($"║  Password: {adminPassword,-46}                           ║");
+                Console.WriteLine(" ║  Hãy đổi ngay sau lần đăng nhập đầu tiên!                ║");
+                Console.WriteLine(" ╚══════════════════════════════════════════════════════════╝");
                 Console.ResetColor();
             }
 

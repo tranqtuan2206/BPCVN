@@ -7,15 +7,16 @@ public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-    public DbSet<User> Users { get; set; }
-    public DbSet<Kit> Kits { get; set; }
-    public DbSet<Switch> Switches { get; set; }
-    public DbSet<Keycap> Keycaps { get; set; }
-    public DbSet<Spec> Specs { get; set; }
-    public DbSet<SoundTest> SoundTests { get; set; }
-    public DbSet<SoundTestLike> SoundTestLikes { get; set; }
+    public DbSet<User>             Users             { get; set; }
+    public DbSet<Kit>              Kits              { get; set; }
+    public DbSet<Switch>           Switches          { get; set; }
+    public DbSet<Keycap>           Keycaps           { get; set; }
+    public DbSet<Spec>             Specs             { get; set; }
+    public DbSet<SoundTest>        SoundTests        { get; set; }
+    public DbSet<SoundTestLike>    SoundTestLikes    { get; set; }
     public DbSet<SoundTestComment> SoundTestComments { get; set; }
-    public DbSet<KitImage> KitImages { get; set; }
+    public DbSet<KitImage>         KitImages         { get; set; }
+    public DbSet<PendingItem>      PendingItems      { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -38,12 +39,12 @@ public class AppDbContext : DbContext
                   .HasDefaultValueSql("GETUTCDATE()");
         });
 
-        // ── Kit ──────────────────────────────────────────────────────────────
+        // ── Kit ────────────────────────────────────────────────────────────
         modelBuilder.Entity<Kit>(entity =>
         {
             entity.ToTable("Kits");
-            // Global Query Filter: tự động ẩn Kit đã bị xóa mềm
-            entity.HasQueryFilter(e => !e.IsDeleted);
+            // Ẩn Kit bị xóa mềm HOẶC chưa được Admin duyệt khỏi public pages
+            entity.HasQueryFilter(e => !e.IsDeleted && e.IsApproved);
         });
 
         // ── KitImage ────────────────────────────────────────────────────────
@@ -66,16 +67,16 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Switch>(entity =>
         {
             entity.ToTable("Switches");
-            // Global Query Filter: tự động ẩn Switch đã bị xóa mềm
-            entity.HasQueryFilter(e => !e.IsDeleted);
+            // Ẩn Switch bị xóa mềm HOẶC chưa được Admin duyệt khỏi public pages
+            entity.HasQueryFilter(e => !e.IsDeleted && e.IsApproved);
         });
 
         // ── Keycap ───────────────────────────────────────────────────────────
         modelBuilder.Entity<Keycap>(entity =>
         {
             entity.ToTable("Keycaps");
-            // Global Query Filter: tự động ẩn Keycap đã bị xóa mềm
-            entity.HasQueryFilter(e => !e.IsDeleted);
+            // Ẩn Keycap bị xóa mềm HOẶC chưa được Admin duyệt khỏi public pages
+            entity.HasQueryFilter(e => !e.IsDeleted && e.IsApproved);
         });
 
         // ── Spec ─────────────────────────────────────────────────────────────
@@ -173,6 +174,21 @@ public class AppDbContext : DbContext
                   .OnDelete(DeleteBehavior.Restrict); // Tránh cascade cycle trên SQL Server
 
             entity.Property(c => c.CreatedAt)
+                  .HasDefaultValueSql("GETUTCDATE()");
+        });
+
+        // ── PendingItem ───────────────────────────────────────────────────────
+        // Queue Admin duyệt Kit/Switch/Keycap mới do user tự tạo
+        modelBuilder.Entity<PendingItem>(entity =>
+        {
+            entity.ToTable("PendingItems");
+
+            entity.HasOne(p => p.SubmittedBy)
+                  .WithMany(u => u.PendingItems)
+                  .HasForeignKey(p => p.SubmittedByUserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Property(p => p.SubmittedAt)
                   .HasDefaultValueSql("GETUTCDATE()");
         });
     }

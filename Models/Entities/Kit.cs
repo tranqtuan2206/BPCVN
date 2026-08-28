@@ -32,6 +32,9 @@ public class Kit
     /// <summary>Cờ xóa mềm — true = đã bị ẩn khỏi hệ thống</summary>
     public bool IsDeleted { get; set; } = false;
 
+    /// <summary>Admin đã duyệt — false = chờ review (user tự tạo tên mới)</summary>
+    public bool IsApproved { get; set; } = true;
+
     // Navigation
     public ICollection<Spec> Specs { get; set; } = new List<Spec>();
     public ICollection<KitImage> KitImages { get; set; } = new List<KitImage>();

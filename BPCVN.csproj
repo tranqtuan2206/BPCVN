@@ -27,4 +27,9 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\temp\**" Watch="false" />
+    <Content Update="wwwroot\uploads\**" Watch="false" />
+  </ItemGroup>
+
 </Project>

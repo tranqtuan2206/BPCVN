@@ -12,7 +12,7 @@
     <!-- Google Font: Inter (Vietnamese subset) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=vietnamese"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap&subset=vietnamese"
         rel="stylesheet" />
 
     <!-- Bootstrap CSS + Icons -->
@@ -98,6 +98,13 @@
                                             <img src="~/icons/keycap-removebg.png" class="custom-nav-icon" alt="icon" /><span data-i18n="nav.keycaps">Keycaps</span>
                                         </a>
                                     </li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Admin" asp-action="Pending"
+                                            style="color:var(--color-charcoal)">
+                                            <i class="bi bi-clipboard2-check me-2 text-warning"></i>Pending Queue
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                     }
@@ -154,8 +161,7 @@
                             <span class="lang-flag" id="langFlag">VN</span>
                             <span class="lang-label" id="langLabel">VN</span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end"
-                            style="background:var(--color-cream);border-color:var(--border-light);min-width:180px">
+                        <ul class="dropdown-menu dropdown-menu-end" style="min-width:180px">
                             <li>
                                 <button class="dropdown-item lang-option" data-lang="en" onclick="setLang('en')"
                                     style="color:var(--color-charcoal)">
@@ -217,8 +223,7 @@
                                                 style="font-size:0.65rem;padding:2px 6px;margin-left:4px">Admin</span>
                                 }
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end"
-                                    style="background:var(--color-cream);border-color:var(--border-light)">
+                                <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
                                         <a class="dropdown-item" asp-controller="User" asp-action="Profile"
                                             style="color:var(--color-charcoal)">

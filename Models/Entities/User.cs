@@ -41,4 +41,7 @@ public class User
 
     /// <summary>Danh sách bình luận SoundTest của user</summary>
     public ICollection<SoundTestComment> SoundTestComments { get; set; } = new List<SoundTestComment>();
+
+    /// <summary>Các đề xuất Kit/Switch/Keycap mới đang chờ Admin duyệt</summary>
+    public ICollection<PendingItem> PendingItems { get; set; } = new List<PendingItem>();
 }
