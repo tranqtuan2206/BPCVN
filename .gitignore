@@ -19,6 +19,7 @@ wwwroot/uploads/
 
 ## Publish
 publish/
+publish_test/
 
 ## Node.js (dùng cho sync scripts)
 node_modules/
