@@ -27,22 +27,17 @@ node_modules/
 FFmpeg/
 
 ## Misc
-.claude
 .gemini
 .mimocode
-
-
+AllCode.txt
 AGENTS.md
+agents.md   
 DESIGN.md
-GEMINI.md
-
 skills/
 skills_UI/
-
-.aider*
-
-/graft/
-
+.claude/
+.mcp.json
+GEMINI.md
+graft/
 opencode.json
 skills-lock.json
-.mcp.json
