@@ -28,7 +28,11 @@ function scanDataI18nKeys(viewsDir) {
         const regex = /data-i18n="([^"]+)"/g;
         let match;
         while ((match = regex.exec(content)) !== null) {
-            keys.add(match[1]);
+            const key = match[1];
+            // Bỏ qua biểu thức Razor C# như @TempData[...]
+            if (!key.startsWith('@') && !key.includes('[')) {
+                keys.add(key);
+            }
         }
     }
 
