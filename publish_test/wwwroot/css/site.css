@@ -1,0 +1,1644 @@
+/*
+ * ============================================================================
+ * BPCVN — Lovable Design System
+ * ============================================================================
+ * Font: Inter (Google Fonts, Vietnamese subset)
+ * Background: #f7f4ed (warm cream)
+ * Text: #1c1c1c (charcoal) + opacity-based gray scale
+ * Borders: #eceae4 (passive), rgba(28,28,28,0.4) (interactive)
+ * ============================================================================
+ */
+
+/* ── 0. Font Pixel cục bộ ────────────────────────────────────────────── */
+/* Khai báo font Determination từ file .otf trong thư mục fonts */
+@font-face {
+    font-family: 'Determination';
+    src: url('../fonts/SVN-DeterminationSans.otf') format('opentype');
+    font-display: swap;
+}
+
+/* Utility class dùng font pixel — tắt anti-aliasing để giữ nét sắc, gai góc */
+.text-pixel {
+    font-family: 'Determination', sans-serif;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: grayscale;
+    font-smooth: never;
+}
+
+/* ── 1. CSS Custom Properties (Design Tokens) ───────────────────────────── */
+:root {
+    /* Primary */
+    --nb-bg: #FFFDF0;
+    --nb-ink: #1a1a1a;
+    --nb-accent: #FF66C4;
+    --nb-cta: #1a1a1a;
+
+    /* Semantic */
+    --color-muted: #5f5f5d;
+    --nb-badge-bg: rgba(26, 26, 26, 0.08);
+
+    /* Surface & Border */
+    --nb-border: 3px solid var(--nb-ink);
+    --nb-shadow: 4px 4px 0 var(--nb-ink);
+    --nb-shadow-hover: 2px 2px 0 var(--nb-ink);
+
+    /* Typography */
+    --font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+    /* Spacing (base 8px) */
+    --space-1: 8px;
+    --space-1-5: 12px;
+    --space-2: 16px;
+    --space-3: 24px;
+    --space-4: 32px;
+    --space-5: 40px;
+    --space-7: 56px;
+    --space-10: 80px;
+
+    /* Border Radius (cố định 0) */
+    --nb-radius: 0px;
+    --radius-micro: 0px;
+    --radius-standard: 0px;
+    --radius-comfortable: 0px;
+    --radius-card: 0px;
+    --radius-container: 0px;
+    --radius-pill: 0px;
+}
+
+
+/* ── 2. Base / Reset ─────────────────────────────────────────────────────── */
+body {
+    background-color: var(--nb-bg);
+    font-family: var(--font-family);
+    color: var(--nb-ink);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Sticky footer — đẩy footer xuống đáy khi nội dung ít */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Main content chiếm hết không gian còn lại → footer luôn dính đáy */
+main {
+    flex: 1 0 auto;
+}
+
+
+/* ── 3. Typography ───────────────────────────────────────────────────────── */
+
+/* Display Hero — 48px trở lên, weight 800, uppercase cho neo-brutalist */
+.text-display {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1.2px;
+    text-transform: uppercase;
+    color: var(--nb-ink);
+}
+
+/* Section Heading — 36px */
+.text-heading {
+    font-size: 2.25rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.9px;
+    color: var(--nb-ink);
+}
+
+/* Sub-heading — 24px */
+.text-subheading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    color: var(--nb-ink);
+}
+
+/* Card Title — 20px */
+.text-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--nb-ink);
+}
+
+/* Body Large — 18px */
+.text-body-lg {
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.38;
+    color: var(--nb-ink);
+}
+
+/* Body — 16px (default) */
+.text-body {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--nb-ink);
+}
+
+/* Caption — 14px */
+.text-caption {
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--color-muted);
+}
+
+/* Muted text helper */
+.text-warm-muted {
+    color: var(--color-muted) !important;
+}
+
+
+/* ── 4. Buttons ──────────────────────────────────────────────────────────── */
+
+/* Primary Dark — CTA chính (Neo-brutalist) */
+.btn-dark-lovable {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background-color: var(--nb-cta);
+    color: var(--nb-bg);
+    padding: 8px 16px;
+    border-radius: var(--nb-radius);
+    border: var(--nb-border);
+    font-family: var(--font-family);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.5;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: var(--nb-shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-dark-lovable:hover {
+    color: var(--nb-bg);
+    text-decoration: none;
+    transform: translate(2px, 2px);
+    box-shadow: var(--nb-shadow-hover);
+}
+
+.btn-dark-lovable:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
+}
+
+.btn-dark-lovable:focus-visible {
+    outline: 2px solid var(--nb-accent);
+    outline-offset: 2px;
+}
+
+/* Ghost / Outline — hành động phụ */
+.btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background-color: transparent;
+    color: var(--nb-ink);
+    padding: 8px 16px;
+    border-radius: var(--nb-radius);
+    border: var(--nb-border);
+    font-family: var(--font-family);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.5;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: var(--nb-shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.btn-ghost:hover {
+    color: var(--nb-ink);
+    background-color: var(--nb-accent);
+    text-decoration: none;
+    transform: translate(2px, 2px);
+    box-shadow: var(--nb-shadow-hover);
+}
+
+.btn-ghost:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
+}
+
+.btn-ghost:focus-visible {
+    outline: 2px solid var(--nb-accent);
+    outline-offset: 2px;
+}
+
+/* Cream Surface — toolbar / tertiary */
+.btn-cream {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background-color: var(--nb-bg);
+    color: var(--nb-ink);
+    padding: 8px 16px;
+    border-radius: var(--nb-radius);
+    border: var(--nb-border);
+    font-family: var(--font-family);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.5;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: var(--nb-shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.btn-cream:hover {
+    color: var(--nb-ink);
+    background-color: var(--nb-accent);
+    text-decoration: none;
+    transform: translate(2px, 2px);
+    box-shadow: var(--nb-shadow-hover);
+}
+
+.btn-cream:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
+}
+
+/* Pill / Small tag button */
+.btn-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: var(--nb-bg);
+    color: var(--nb-ink);
+    padding: 6px 14px;
+    border-radius: var(--nb-radius);
+    border: var(--nb-border);
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 var(--nb-ink);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.btn-pill:hover {
+    background-color: var(--nb-accent);
+    color: var(--nb-ink);
+    text-decoration: none;
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 var(--nb-ink);
+}
+
+.btn-pill:active {
+    transform: translate(3px, 3px);
+    box-shadow: none;
+}
+
+/* Small variant cho buttons */
+.btn-sm-lovable {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+}
+
+/* Full-width button helper */
+.btn-block {
+    width: 100%;
+}
+
+
+/* ── 5. Cards & Containers ───────────────────────────────────────────────── */
+
+/* Card chuẩn — neo-brutalist */
+.card-lovable {
+    background-color: var(--nb-bg);
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    overflow: hidden;
+    box-shadow: var(--nb-shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-lovable:hover {
+    transform: translate(2px, 2px);
+    box-shadow: var(--nb-shadow-hover);
+}
+
+/* Featured card — neo-brutalist */
+.card-featured {
+    background-color: var(--nb-accent);
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    overflow: hidden;
+    box-shadow: var(--nb-shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-featured:hover {
+    transform: translate(2px, 2px);
+    box-shadow: var(--nb-shadow-hover);
+}
+
+/* Compact card */
+.card-compact {
+    background-color: var(--nb-bg);
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    overflow: hidden;
+    box-shadow: var(--nb-shadow);
+}
+
+/* Card padding helper */
+.card-body-lovable {
+    padding: var(--space-3);
+}
+
+/* Inner info block (dùng trong Details) */
+.info-block {
+    background-color: var(--nb-badge-bg);
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    padding: var(--space-1-5) var(--space-2);
+}
+
+
+/* ── 6. Forms & Inputs ───────────────────────────────────────────────────── */
+
+/* Override Bootstrap form controls */
+.form-control-lovable,
+.form-select-lovable {
+    background-color: var(--nb-bg);
+    color: var(--nb-ink);
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    padding: 8px 12px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    transition: outline 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control-lovable::placeholder,
+.form-select-lovable::placeholder {
+    color: var(--color-muted);
+}
+
+.form-control-lovable:focus,
+.form-select-lovable:focus {
+    background-color: var(--nb-bg);
+    border-color: var(--nb-ink);
+    box-shadow: 4px 4px 0 var(--nb-accent);
+    outline: none;
+    color: var(--nb-ink);
+}
+
+/* Form label */
+.form-label-lovable {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-charcoal);
+    margin-bottom: 6px;
+}
+
+/* Form hint text */
+.form-hint {
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+    margin-top: 4px;
+}
+
+/* Validation errors */
+.field-validation-error,
+.text-danger {
+    color: #b91c1c !important;
+    font-size: 0.8125rem;
+}
+
+/* Validation summary */
+.validation-summary-lovable {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: var(--radius-standard);
+    color: #991b1b;
+    padding: 12px 16px;
+    font-size: 0.875rem;
+    margin-bottom: 16px;
+}
+
+/* Checkbox styling */
+.form-check-lovable .form-check-input {
+    border-color: var(--border-interactive);
+    border-radius: var(--radius-micro);
+}
+
+.form-check-lovable .form-check-input:checked {
+    background-color: var(--color-charcoal);
+    border-color: var(--color-charcoal);
+}
+
+
+/* ── 7. Navigation ───────────────────────────────────────────────────────── */
+.navbar-lovable {
+    background-color: var(--nb-bg) !important;
+    border-bottom: var(--nb-border);
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.navbar-lovable .navbar-brand {
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--nb-ink) !important;
+    letter-spacing: -0.5px;
+}
+
+.navbar-lovable .nav-link {
+    font-weight: 700;
+    color: var(--nb-ink) !important;
+    border-radius: var(--nb-radius);
+    padding: 6px 14px !important;
+    font-size: 0.9375rem;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    border: 2px solid transparent;
+}
+
+.navbar-lovable .nav-link:hover,
+.navbar-lovable .nav-link.active {
+    background-color: var(--nb-accent);
+    color: var(--nb-ink) !important;
+    border: 2px solid var(--nb-ink);
+}
+
+/* Navbar toggler (mobile hamburger) */
+.navbar-lovable .navbar-toggler {
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    padding: 6px 10px;
+    background-color: var(--nb-accent);
+    box-shadow: 2px 2px 0 var(--nb-ink);
+}
+
+/*
+ * ── Hover Dropdown trên Desktop (≥992px) ──────────────────────────────────
+ * Dùng visibility + opacity + pointer-events thay vì display:none/block
+ * Lý do: Bootstrap JS dùng class .show để toggle display, nếu ta dùng
+ * display:none thì sẽ bị Bootstrap JS override sau khi user click lần đầu.
+ * Dùng visibility/opacity tránh xung đột với cơ chế .show của Bootstrap.
+ */
+@media all and (min-width: 992px) {
+
+    /* Mặc định: ẩn dropdown bằng visibility (không xung đột Bootstrap JS) */
+    .navbar .dropdown>.dropdown-menu {
+        display: block !important;
+        /* Luôn giữ display:block để hover CSS hoạt động */
+        visibility: hidden;
+        /* Ẩn về mặt thị giác */
+        opacity: 0;
+        /* Mờ dần khi ẩn */
+        pointer-events: none;
+        /* Không cho click khi đang ẩn */
+        transform: translateY(4px);
+        /* Dịch xuống nhẹ để tạo hiệu ứng trượt */
+        transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+        margin-top: 0 !important;
+    }
+
+    /* Hover vào .dropdown => hiện menu con với animation */
+    .navbar .dropdown:hover>.dropdown-menu {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+
+    /* Trường hợp Bootstrap JS đã add class .show (do user click) — vẫn hiển thị bình thường */
+    .navbar .dropdown>.dropdown-menu.show {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+}
+
+/* Áp dụng riêng cho dropdown Linh Kiện để tự xổ khi di chuột vào (desktop) */
+@media all and (min-width: 992px) {
+    .hover-dropdown:hover .dropdown-menu {
+        display: block;
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        margin-top: 0;
+    }
+}
+
+/* Dropdown menu styling — đồng bộ với Design System */
+.navbar-lovable .dropdown-menu {
+    border-radius: var(--nb-radius);
+    border: var(--nb-border);
+    box-shadow: var(--nb-shadow);
+    padding: 6px;
+    background-color: var(--nb-bg);
+}
+
+.navbar-lovable .dropdown-item {
+    border-radius: var(--nb-radius);
+    padding: 8px 14px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--nb-ink);
+    transition: background-color 0.12s ease;
+    border: 2px solid transparent;
+}
+
+.navbar-lovable .dropdown-item:hover {
+    background-color: var(--nb-accent);
+    border: 2px solid var(--nb-ink);
+}
+
+
+/* ── 8. Badges ───────────────────────────────────────────────────────────── */
+.badge-warm {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: var(--nb-badge-bg);
+    color: var(--nb-ink);
+    border: 2px solid var(--nb-ink);
+    border-radius: var(--nb-radius);
+    padding: 4px 12px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    box-shadow: 2px 2px 0 var(--nb-ink);
+}
+
+/* Badge variants */
+.badge-warm.badge-kit {
+    background-color: var(--nb-accent);
+    color: var(--nb-ink);
+}
+
+.badge-warm.badge-switch {
+    background-color: var(--nb-bg);
+    color: var(--nb-ink);
+}
+
+.badge-warm.badge-type {
+    background-color: var(--nb-badge-bg);
+    color: var(--nb-ink);
+}
+
+/* Counter badge nhỏ */
+.badge-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: var(--nb-ink);
+    color: var(--nb-bg);
+    border-radius: var(--nb-radius);
+    padding: 2px 10px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+}
+
+
+/* ── 9. Toast Notifications ──────────────────────────────────────────────── */
+.toast-fixed {
+    position: fixed;
+    top: 72px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+}
+
+.toast-lovable {
+    background-color: var(--nb-bg);
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--nb-shadow);
+    font-size: 0.9375rem;
+    color: var(--nb-ink);
+    font-weight: 600;
+}
+
+/* Success toast */
+.toast-lovable.toast-success {
+    background-color: var(--nb-accent);
+}
+
+.toast-lovable.toast-success .toast-icon {
+    color: var(--nb-ink);
+}
+
+/* Error toast */
+.toast-lovable.toast-error {
+    background-color: #ff5252;
+    color: #fff;
+}
+
+.toast-lovable.toast-error .toast-icon {
+    color: #fff;
+}
+
+.toast-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--color-muted);
+    cursor: pointer;
+    padding: 4px;
+    font-size: 1rem;
+    line-height: 1;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+}
+
+.toast-close:hover {
+    opacity: 1;
+}
+
+
+/* ── 10. Footer ──────────────────────────────────────────────────────────── */
+.footer-lovable {
+    background-color: var(--nb-ink);
+    border-top: 3px solid var(--nb-ink);
+    padding: 32px 0;
+    text-align: center;
+    color: var(--nb-bg);
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.footer-lovable strong {
+    color: var(--nb-accent);
+    font-weight: 700;
+}
+
+
+/* ── 11. Audio Player Container ──────────────────────────────────────────── */
+.audio-container {
+    background-color: var(--color-charcoal-03);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-comfortable);
+    padding: var(--space-1-5);
+}
+
+.audio-container audio {
+    width: 100%;
+    height: 36px;
+}
+
+.audio-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-charcoal);
+    margin-bottom: 8px;
+}
+
+/* ── 11b. Waveform Audio Player (WaveSurfer.js) ─────────────────────────── */
+
+/* Container chính bao quanh nút Play + Waveform + thời gian */
+.waveform-player {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+/* Nút Play/Pause — chỉ hiển thị icon, không khung viền */
+.waveform-play-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: var(--color-charcoal);
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: color 0.15s ease, transform 0.15s ease;
+    box-shadow: none;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.waveform-play-btn:hover {
+    color: var(--nb-accent);
+    transform: scale(1.15);
+}
+
+.waveform-play-btn:active {
+    transform: scale(0.9);
+}
+
+/* Trạng thái đang phát */
+.waveform-play-btn.playing {
+    color: var(--nb-accent);
+}
+
+.waveform-play-btn.playing:hover {
+    color: #f97316;
+}
+
+/* Trạng thái disabled (đang loading) */
+.waveform-play-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Icon loading xoay tròn */
+.waveform-icon-loading {
+    animation: waveform-spin 1s linear infinite;
+}
+
+@keyframes waveform-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Vùng chứa sóng âm — chiếm hết không gian còn lại */
+.waveform {
+    flex: 1;
+    min-width: 0;
+    border-radius: var(--radius-standard);
+    overflow: hidden;
+    cursor: pointer;
+}
+
+/* Hiển thị thời gian (current / duration) */
+.waveform-time {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: 'Inter', monospace;
+    color: var(--color-muted);
+    white-space: nowrap;
+    min-width: 70px;
+    justify-content: flex-end;
+}
+
+.waveform-time-separator {
+    opacity: 0.4;
+}
+
+/* ── Waveform Dark Mode ─────────────────────────────────────────────────── */
+
+/* Dark mode: nút Play — icon sáng trên nền tối */
+html.dark .waveform-play-btn {
+    color: #f0ede6;
+}
+
+html.dark .waveform-play-btn:hover {
+    color: var(--nb-accent);
+}
+
+html.dark .waveform-play-btn.playing {
+    color: var(--nb-accent);
+}
+
+html.dark .waveform-play-btn.playing:hover {
+    color: #f97316;
+}
+
+/* Upvote button */
+.upvote-btn-lovable {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: var(--nb-badge-bg);
+    color: var(--nb-ink);
+    border: 2px solid var(--nb-ink);
+    border-radius: var(--nb-radius);
+    padding: 4px 12px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 var(--nb-ink);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.upvote-btn-lovable:hover {
+    background-color: var(--nb-accent);
+    color: var(--nb-ink);
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 var(--nb-ink);
+}
+
+/* Trạng thái đã upvote */
+.upvote-btn-lovable.upvoted {
+    background-color: var(--nb-accent);
+    color: var(--nb-ink);
+    border: 2px solid var(--nb-ink);
+    box-shadow: 2px 2px 0 var(--nb-ink);
+}
+
+
+/* ── 12. Avatar ──────────────────────────────────────────────────────────── */
+.avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--nb-radius);
+    border: 2px solid var(--nb-ink);
+    background-color: var(--nb-accent);
+    color: var(--nb-ink);
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.avatar-sm {
+    width: 30px;
+    height: 30px;
+    font-size: 0.8rem;
+}
+
+.avatar-md {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+}
+
+.avatar-lg {
+    width: 72px;
+    height: 72px;
+    font-size: 1.8rem;
+}
+
+
+/* ── 13. Hero Section ────────────────────────────────────────────────────── */
+.hero-section {
+    background-color: var(--nb-bg);
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    padding: 56px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--nb-shadow);
+}
+
+.hero-section > * {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* ── 14. Stats Bar ───────────────────────────────────────────────────────── */
+.stat-card {
+    background-color: var(--nb-bg);
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    padding: 20px 16px;
+    text-align: center;
+    box-shadow: var(--nb-shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card:hover {
+    transform: translate(2px, 2px);
+    box-shadow: var(--nb-shadow-hover);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--nb-ink);
+    letter-spacing: -0.5px;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--nb-ink);
+    margin-top: 4px;
+    text-transform: uppercase;
+}
+
+
+/* ── 15. Empty State ─────────────────────────────────────────────────────── */
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--color-muted);
+}
+
+.empty-state .empty-icon {
+    font-size: 3.5rem;
+    opacity: 0.2;
+    display: block;
+    margin-bottom: 12px;
+    color: var(--color-charcoal);
+}
+
+
+/* ── 16. Image Treatment ─────────────────────────────────────────────────── */
+.img-lovable {
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    object-fit: cover;
+}
+
+/* Placeholder khi không có ảnh */
+.img-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--nb-bg);
+    border-bottom: var(--nb-border);
+    color: var(--nb-ink);
+    font-weight: 700;
+}
+
+/* Ảnh dạng Card (Index) — lấp đầy khung, không méo, chiều cao đồng đều */
+.img-card-cover {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: var(--nb-radius);
+    border-bottom: var(--nb-border);
+}
+
+/* Ảnh trang Details — giữ nguyên tỷ lệ gốc, hiển thị toàn bộ chi tiết */
+.img-detail-contain {
+    width: 100%;
+    max-height: 450px;
+    object-fit: contain;
+    background-color: var(--nb-bg);
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+}
+
+
+/* ── 17. Divider ─────────────────────────────────────────────────────────── */
+.divider {
+    border: none;
+    border-top: 1px solid var(--border-light);
+    margin: 24px 0;
+}
+
+
+/* ── 18. Links ───────────────────────────────────────────────────────────── */
+.link-lovable {
+    color: var(--nb-ink);
+    text-decoration: underline;
+    font-weight: 700;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.link-lovable:hover {
+    background-color: var(--nb-accent);
+    color: var(--nb-ink);
+}
+
+/* Link muted (back links, secondary) */
+.link-muted {
+    color: var(--color-muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: color 0.15s ease;
+}
+
+.link-muted:hover {
+    color: var(--nb-ink);
+    text-decoration: underline;
+}
+
+
+/* ── 19. Page Sections ───────────────────────────────────────────────────── */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--nb-ink);
+    letter-spacing: -0.3px;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.section-subtitle {
+    color: var(--nb-ink);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    margin: 0;
+}
+
+
+/* ── 20. Responsive ──────────────────────────────────────────────────────── */
+
+/* Mobile: <768px */
+@media (max-width: 767.98px) {
+    .hero-section {
+        padding: 40px 20px;
+    }
+
+    .text-display {
+        font-size: 2.25rem;
+        letter-spacing: -0.9px;
+    }
+
+    .text-heading {
+        font-size: 1.75rem;
+        letter-spacing: -0.5px;
+    }
+
+    .card-body-lovable {
+        padding: var(--space-2);
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* Tablet: 768–1024px */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+    .hero-section {
+        padding: 48px 24px;
+    }
+}
+
+
+/* ── 21. Transition & Animation Helpers ──────────────────────────────────── */
+.transition-border {
+    transition: border-color 0.18s ease;
+}
+
+.transition-all {
+    transition: all 0.15s ease;
+}
+
+/* Smooth fade-in cho toast */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast-fixed .toast-lovable {
+    animation: slideInRight 0.3s ease-out;
+}
+
+
+/* ── 22. Bootstrap Overrides ─────────────────────────────────────────────── */
+
+/* Override Bootstrap card defaults */
+.card {
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
+    background-color: var(--color-cream);
+    box-shadow: none;
+}
+
+.card:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--border-interactive);
+}
+
+/* Override form-control */
+.form-control,
+.form-select {
+    background-color: var(--color-cream);
+    border-color: var(--border-light);
+    border-radius: var(--radius-standard);
+    color: var(--color-charcoal);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--color-cream);
+    border-color: var(--ring-blue);
+    box-shadow: 0 0 0 2px var(--ring-blue);
+    color: var(--color-charcoal);
+}
+
+.form-control::placeholder {
+    color: var(--color-muted);
+}
+
+/* Override alert */
+.alert {
+    border-radius: var(--radius-standard);
+}
+
+/* Keep Bootstrap grid and utilities functional */
+.shadow-sm {
+    box-shadow: none !important;
+}
+
+/* Container max-width ~1200px */
+.container {
+    max-width: 1200px;
+}
+
+
+/* ── 23. Navbar Logo Switch — nhấn chuột đổi ảnh mô phỏng switch cơ ────── */
+
+/* Trạng thái bình thường — ảnh hiển thị qua src, CSS chỉ quản lý kích thước */
+.navbar-logo-switch {
+    height: 34px;
+    /* Cùng kích thước với icon bàn phím viền hồng cũ (34px) */
+    width: auto;
+    cursor: pointer;
+    transition: transform 0.08s ease;
+}
+
+/* Trạng thái nhấn chuột — áp dụng khi bấm vào cả khu vực chứa logo và chữ BPCVN */
+.navbar-brand:active .navbar-logo-switch {
+    content: url('/icons/Logo-BPCVN-pressed-removebg.png');
+    transform: scale(0.96);
+    /* Thu nhẹ mô phỏng cảm giác nhấn */
+}
+
+
+/* ── 24. Dark/Light Mode Toggle Button ───────────────────────────────────── */
+
+/* Nút toggle cố định góc dưới bên phải */
+.theme-toggle {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid var(--border-light);
+    background-color: var(--color-cream);
+    color: var(--color-charcoal);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    border-color: var(--border-interactive);
+    transform: scale(1.05);
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+/* Light mode: hiển thị icon mặt trăng, ẩn mặt trời */
+.theme-icon-light {
+    display: none;
+}
+
+.theme-icon-dark {
+    display: inline;
+}
+
+/* Dark mode: hiển thị icon mặt trời, ẩn mặt trăng */
+html.dark .theme-icon-light {
+    display: inline;
+}
+
+html.dark .theme-icon-dark {
+    display: none;
+}
+
+
+/* ── 25. DARK MODE ───────────────────────────────────────────────────────── */
+html.dark {
+    /* Override CSS Variables cho neo-brutalist dark mode */
+    --nb-bg: #121212;
+    --nb-ink: #FFFDF0;
+    --nb-accent: #FF66C4;
+    --nb-cta: #FF66C4;
+    --nb-border: 3px solid var(--nb-ink);
+    --nb-shadow: 4px 4px 0 rgba(255, 253, 240, 0.3);
+    --nb-shadow-hover: 2px 2px 0 rgba(255, 253, 240, 0.3);
+    --nb-badge-bg: rgba(255, 253, 240, 0.08);
+
+    /* ── LEGACY TOKENS MAPPING (DARK) ── */
+    --color-charcoal: var(--nb-ink);
+    --color-cream: var(--nb-bg);
+    --color-off-white: var(--nb-bg);
+    --border-light: var(--nb-ink);
+
+    /* Semantic */
+    --color-muted: #9a9a97;
+}
+
+/* Các override cũ đã được thay thế bằng CSS Tokens `--nb-*` ở trên */
+
+
+
+/* ── 26. Language Switcher ────────────────────────────────────────────────── */
+
+/* Container — nằm trong navbar, position relative để dropdown mở từ đây */
+.lang-switcher {
+    position: relative;
+    z-index: 100;
+}
+
+/* Text label bên cạnh flag (VN / EN) */
+.lang-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-charcoal);
+}
+
+/* Nút toggle chính — hiển thị flag ngôn ngữ hiện tại */
+.lang-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--nb-bg);
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    padding: 6px 14px;
+    cursor: pointer;
+    font-family: var(--font-family);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--nb-ink);
+    box-shadow: 2px 2px 0 var(--nb-ink);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.lang-toggle:hover {
+    background-color: var(--nb-accent);
+    box-shadow: 1px 1px 0 var(--nb-ink);
+    transform: translate(1px, 1px);
+}
+
+/* Flag text label (VN, GB, EN) */
+.lang-flag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 20px;
+    border-radius: 4px;
+    background-color: var(--nb-accent);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Dropdown menu — mở xuống dưới */
+.lang-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 180px;
+    background-color: var(--nb-bg);
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    box-shadow: var(--nb-shadow);
+    padding: 6px;
+    display: none;
+    /* ẩn mặc định */
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Hiển thị dropdown khi có class "show" */
+.lang-dropdown.show {
+    display: flex;
+}
+
+/* Mỗi option trong dropdown */
+.lang-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid transparent;
+    background: transparent;
+    border-radius: var(--nb-radius);
+    cursor: pointer;
+    font-family: var(--font-family);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--nb-ink);
+    transition: background-color 0.12s ease;
+    text-align: left;
+}
+
+.lang-option:hover {
+    background-color: var(--nb-accent);
+    border: 2px solid var(--nb-ink);
+}
+
+/* Dấu check — hiển thị cho ngôn ngữ đang chọn */
+.lang-check {
+    margin-left: auto;
+    color: var(--nb-accent);
+    font-size: 1rem;
+    display: none;
+    /* JS sẽ toggle */
+}
+
+
+/* ── Language Switcher Dark Mode ─────────────────────────────────────────── */
+/* Handled by neo-brutalist CSS tokens */
+
+/* Custom Nav Icon for Dropdown */
+.custom-nav-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    vertical-align: middle;
+    margin-right: 6px;
+    margin-bottom: 2px;
+}
+
+/* ── 27. Brand Aura Tràn Viền (Đã Xóa) ────────── */
+.brand-aura-wrapper {
+    display: none !important;
+}
+
+/* ── 28. Custom Scrollbar — Tàng hình bình thường, hiện khi hover ──────── */
+
+/* Kích thước rãnh scrollbar (track) — trong suốt hoàn toàn khi nghỉ */
+::-webkit-scrollbar {
+    width: 8px;
+    background-color: transparent;
+}
+
+/* Phần tay cầm scrollbar — cũng trong suốt khi nghỉ */
+::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 10px;
+    /* Transition để hiệu ứng mượt khi hiện/ẩn */
+    transition: background-color 0.3s ease;
+}
+
+/* Khi hover vào vùng cuộn (mép phải trang) — tay cầm hiện ra màu xám */
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(150, 150, 150, 0.8);
+}
+
+/* Track cũng nhẹ nhàng hiện nền khi hover để user biết vùng tương tác */
+::-webkit-scrollbar-track:hover {
+    background-color: rgba(150, 150, 150, 0.08);
+}
+
+/* ── 29. Game FAB & Modal ─────────────────────────────────────────────────── */
+
+/* ─── Nút FAB (Floating Action Button) mở game ─────────────────────────── */
+.game-fab {
+    position: fixed;
+    bottom: 82px;
+    /* Nằm ngay trên nút theme-toggle (24px + 48px + 10px gap) */
+    right: 24px;
+    z-index: 9998;
+    /* Ngay dưới theme-toggle (9999) */
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    /* Màu hồng brand — đồng bộ với progressColor waveform */
+    background: linear-gradient(135deg, var(--nb-accent), #d946c8);
+    color: #fff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(251, 122, 236, 0.45);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Hover: phóng to nhẹ và tăng glow hồng */
+.game-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 24px rgba(251, 122, 236, 0.7);
+}
+
+.game-fab:active {
+    transform: scale(0.95);
+}
+
+/* ─── Overlay nền tối ────────────────────────────────────────────────────── */
+.game-overlay {
+    display: none;
+    /* Ẩn mặc định */
+    position: fixed;
+    inset: 0;
+    /* Phủ toàn màn hình */
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.82);
+    /* Backdrop blur để nền mờ đẹp */
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+    /* Animation fade-in */
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+/* Class .active được JS thêm khi mở */
+.game-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+/* ─── Container chứa game (glassmorphism) ────────────────────────────────── */
+.game-container {
+    position: relative;
+    width: min(960px, 92vw);
+    /* Tối đa 960px, co lại trên màn nhỏ */
+    aspect-ratio: 16 / 9;
+    /* Tỉ lệ chuẩn 16:9 cho game */
+    border-radius: 16px;
+    overflow: hidden;
+    /* Kính mờ */
+    background: rgba(20, 20, 25, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 24px 64px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(251, 122, 236, 0.15);
+    /* Viền hồng nhẹ theo brand */
+    /* Animation scale-in khi xuất hiện */
+    animation: gameContainerIn 0.25s ease forwards;
+}
+
+@keyframes gameContainerIn {
+    from {
+        transform: scale(0.93);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ─── Nút X đóng modal ────────────────────────────────────────────────────── */
+.game-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10001;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.game-close-btn:hover {
+    background: rgba(220, 50, 50, 0.75);
+    transform: scale(1.1);
+}
+
+/* ─── Iframe game chiếm toàn bộ container ────────────────────────────────── */
+.game-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+/* ─── Dark mode: FAB giữ nguyên màu hồng (không cần override) ───────────── */
+html.dark .game-fab {
+    box-shadow: 0 4px 20px rgba(251, 122, 236, 0.6);
+}
+
+/* -- 30. Nested Comment Tree Line UI --------------------------------------- */
+.comment-item {
+    position: relative;
+}
+
+/* �u?ng k? d?c cho comment c� reply */
+
+/* �u?ng r? nh�nh ngang (g�c L) n?i t? du?ng k? d?c sang comment con */
+.comment-item-child::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    /* K�o d�i l�n tr�n d? n?i v?i du?ng k? d?c c?a cha */
+    left: -17px;
+    /* Canh d�ng v?i t?a d? left c?a ::before b�n tr�n */
+    width: 14px;
+    height: 32px;
+    /* K�o d�i g�c cong xu?ng gi?a comment box hi?n t?i */
+    border-left: 2px solid var(--border-light);
+    border-bottom: 2px solid var(--border-light);
+    border-bottom-left-radius: 8px;
+    /* T?o g�c bo nh? */
+    z-index: 0;
+}
+
+/* Fix CSS d� l�n th? g?c d? tr�nh background che m?t line */
+.comment-item-box {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* -- 31. Comment Section --------------------------------------------------- */
+.comment-section {
+    border-top: 1px solid var(--border-light);
+    padding-top: 12px;
+}
+
+.comment-input,
+.reply-input {
+    border-radius: 8px;
+    resize: none;
+    min-height: 36px;
+    max-height: 120px;
+    font-size: 0.9rem;
+}
+
+.comment-submit-btn,
+.reply-submit {
+    align-self: flex-end;
+    padding: 6px 12px;
+}
+
+.reply-btn:hover,
+.delete-btn:hover {
+    text-decoration: underline;
+}
+
+.comment-children {
+    border-left: none;
+}
+
+/* Dark mode: nút Trả lời / Xóa nổi trên nền đen */
+html.dark .comment-item-box .reply-btn {
+    color: var(--color-charcoal) !important;
+    background: none !important;
+    text-decoration: none !important;
+}
+html.dark .comment-item-box .reply-btn:hover {
+    color: var(--color-muted) !important;
+}
+html.dark .comment-item-box .delete-btn {
+    color: #fca5a5 !important;
+    background: none !important;
+    text-decoration: none !important;
+}
+html.dark .comment-item-box .delete-btn:hover {
+    color: #f87171 !important;
+}
+
+/* Dark mode: Nút Sửa không viền trắng */
+html.dark .comment-item-box .edit-btn {
+    color: var(--color-charcoal) !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+html.dark .comment-item-box .edit-btn:hover {
+    color: var(--color-muted) !important;
+}

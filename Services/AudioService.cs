@@ -112,8 +112,17 @@ public class AudioService
             return true;
         }
 
-        // 2. Kiểm tra FFmpeg ở thư mục gốc của project (lúc chạy debug local)
+        // 2. Kiểm tra FFmpeg ở thư mục gốc của project (lúc chạy debug local hoặc up lên share host)
         var contentDir = Path.Combine(_env.ContentRootPath, FFmpegSubPath);
+        
+        // Hỗ trợ trường hợp user đổi tên ffmpeg.exe thành custom.exe để lách luật SmarterASP
+        if (File.Exists(Path.Combine(contentDir, "custom.exe")))
+        {
+            _logger.LogInformation("[AudioService] Tìm thấy custom.exe tại thư mục gốc: {Path}", contentDir);
+            FFmpeg.SetExecutablesPath(contentDir, "custom", "ffprobe");
+            return true;
+        }
+        
         if (File.Exists(Path.Combine(contentDir, "ffmpeg.exe")) || File.Exists(Path.Combine(contentDir, "ffmpeg")))
         {
             _logger.LogInformation("[AudioService] Tìm thấy FFmpeg tại thư mục gốc: {Path}", contentDir);
