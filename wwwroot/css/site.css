@@ -844,12 +844,18 @@ html.dark .waveform-play-btn.playing:hover {
     box-shadow: 1px 1px 0 var(--nb-ink);
 }
 
-/* Trạng thái đã upvote */
-.upvote-btn-lovable.upvoted {
-    background-color: var(--nb-accent);
-    color: var(--nb-ink);
-    border: 2px solid var(--nb-ink);
-    box-shadow: 2px 2px 0 var(--nb-ink);
+/* Trạng thái đã upvote - chỉ tim thành hồng, khung giữ màu cũ */
+.upvote-btn-lovable.upvoted .bi-heart {
+    color: #e91e63;
+}
+.upvote-btn-lovable.upvoted .bi-heart-fill {
+    display: inline-block;
+}
+.upvote-btn-lovable.upvoted .bi-heart {
+    display: none;
+}
+.upvote-btn-lovable .bi-heart-fill {
+    display: none;
 }
 
 

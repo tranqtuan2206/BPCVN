@@ -177,26 +177,39 @@
         })();
 
         /* ── Upvote handler ── */
-        function handleUpvote(btn) {
-            var testId = btn.dataset.testId;
+        async function handleUpvote(btn) {
+            const testId = btn.dataset.testId;
+            if (!testId) return;
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
             btn.disabled = true;
-            var tokenEl = document.querySelector('input[name="__RequestVerificationToken"]');
-            var token = tokenEl ? tokenEl.value : '';
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/SoundTest/Upvote', true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.setRequestHeader('RequestVerificationToken', token);
-            xhr.onload = function () {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    var data = JSON.parse(xhr.responseText);
-                    if (data.success) {
-                        btn.querySelector('.upvote-count').textContent = data.newCount;
+
+            try {
+                const res = await fetch('/SoundTest/Upvote', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify({ testId })
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+
+                if (data.success) {
+                    btn.querySelector('.upvote-count').textContent = data.newCount;
+                    // Dùng data.liked từ server để toggle class đúng
+                    if (data.liked) {
                         btn.classList.add('upvoted');
-                    } else { btn.disabled = false; }
-                } else { btn.disabled = false; }
-            };
-            xhr.onerror = function () { btn.disabled = false; };
-            xhr.send(JSON.stringify({ testId: testId }));
+                    } else {
+                        btn.classList.remove('upvoted');
+                    }
+                }
+            } catch (err) {
+                console.error('Upvote error:', err);
+            } finally {
+                btn.disabled = false;
+            }
         }
     </script>
 }

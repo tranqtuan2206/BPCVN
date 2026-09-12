@@ -1,4 +1,5 @@
 @model IEnumerable<BPCVN.Models.Entities.Spec>
+@using System.Security.Claims
 @{
     ViewData["Title"] = "Trang chủ";
 }
@@ -117,15 +118,19 @@
                         @if (spec.SoundTests.Any())
                         {
                             var topAudio = spec.SoundTests.OrderByDescending(st => st.Upvotes).First();
+                            var isLiked = User.Identity?.IsAuthenticated == true
+                                && topAudio.Likes.Any(l => l.UserId.ToString() == User.FindFirstValue(ClaimTypes.NameIdentifier));
                             <div class="px-4 pb-3">
                                 <div class="audio-container">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <span class="audio-label">
                                             <i class="bi bi-soundwave me-1"></i>Sound Test
                                         </span>
-                                        <button class="upvote-btn-lovable upvote-btn" data-test-id="@topAudio.TestId"
-                                            onclick="handleUpvote(this)">
+                                        <button class="upvote-btn-lovable upvote-btn @(isLiked ? "upvoted" : "")" data-test-id="@topAudio.TestId"
+                                            onclick="handleUpvote(this)"
+                                            @(User.Identity?.IsAuthenticated != true ? "disabled title=\"Đăng nhập để like\"" : "")>
                                             <i class="bi bi-heart"></i>
+                                            <i class="bi bi-heart-fill"></i>
                                             <span class="upvote-count">@topAudio.Upvotes</span>
                                         </button>
                                     </div>
@@ -173,8 +178,11 @@
     <script>
         async function handleUpvote(btn) {
             const testId = btn.dataset.testId;
-            btn.disabled = true;
+            if (!testId) return;
+
             const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+            btn.disabled = true;
+
             try {
                 const res = await fetch('/SoundTest/Upvote', {
                     method: 'POST',
@@ -182,18 +190,23 @@
                         'Content-Type': 'application/json',
                         'RequestVerificationToken': token
                     },
-                    body: JSON.stringify({ testId: testId })
+                    body: JSON.stringify({ testId })
                 });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
+
                 if (data.success) {
                     btn.querySelector('.upvote-count').textContent = data.newCount;
-                    btn.classList.add('upvoted');
-                } else {
-                    btn.disabled = false;
+                    // Dùng data.liked từ server để toggle class đúng
+                    if (data.liked) {
+                        btn.classList.add('upvoted');
+                    } else {
+                        btn.classList.remove('upvoted');
+                    }
                 }
             } catch (err) {
                 console.error('Upvote error:', err);
+            } finally {
                 btn.disabled = false;
             }
         }

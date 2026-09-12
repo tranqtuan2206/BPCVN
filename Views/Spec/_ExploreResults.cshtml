@@ -4,6 +4,7 @@
     Được trả về qua AJAX khi user search/filter, tránh reload toàn trang.
 *@
 @model IEnumerable<BPCVN.Models.Entities.Spec>
+@using System.Security.Claims
 
 @if (!Model.Any())
 {
@@ -42,13 +43,17 @@ else
                     @if (spec.SoundTests.Any())
                     {
                         var top = spec.SoundTests.OrderByDescending(st => st.Upvotes).First();
+                        var isLiked = User.Identity?.IsAuthenticated == true
+                            && top.Likes.Any(l => l.UserId.ToString() == User.FindFirstValue(ClaimTypes.NameIdentifier));
                         <div class="px-4 pb-3">
                             <div class="audio-container">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
                                     <span class="audio-label"><i class="bi bi-soundwave me-1"></i>Sound Test</span>
-                                    <button class="upvote-btn-lovable upvote-btn"
-                                        data-test-id="@top.TestId" onclick="handleUpvote(this)">
+                                    <button class="upvote-btn-lovable upvote-btn @(isLiked ? "upvoted" : "")"
+                                        data-test-id="@top.TestId" onclick="handleUpvote(this)"
+                                        @(User.Identity?.IsAuthenticated != true ? "disabled title=\"Đăng nhập để like\"" : "")>
                                         <i class="bi bi-heart"></i>
+                                        <i class="bi bi-heart-fill"></i>
                                         <span class="upvote-count">@top.Upvotes</span>
                                     </button>
                                 </div>

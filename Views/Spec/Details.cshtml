@@ -183,9 +183,18 @@
                             <span class="text-caption ms-2">@st.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="badge-count">
-                                <i class="bi bi-hand-thumbs-up me-1"></i>@st.Upvotes
-                            </span>
+                            @{
+                                var isLiked = User.Identity?.IsAuthenticated == true
+                                    && st.Likes.Any(l => l.UserId.ToString() == currentUserId);
+                            }
+                            <button class="upvote-btn-lovable upvote-btn @(isLiked ? "upvoted" : "")"
+                                    data-test-id="@st.TestId"
+                                    onclick="handleUpvote(this)"
+                                    @(User.Identity?.IsAuthenticated != true ? "disabled title=\"Đăng nhập để like\"" : "")>
+                                <i class="bi bi-heart"></i>
+                                <i class="bi bi-heart-fill"></i>
+                                <span class="upvote-count">@st.Upvotes</span>
+                            </button>
                             @if (isOwner || isAdmin)
                             {
                                 <!-- Nút xóa Sound Test — owner hoặc Admin -->
@@ -638,5 +647,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// UPVOTE / UNLIKE — AJAX
+// ═══════════════════════════════════════════════════════════════════
+
+async function handleUpvote(btn) {
+    const testId = btn.dataset.testId;
+    if (!testId) return;
+
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch('/SoundTest/Upvote', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': token
+            },
+            body: JSON.stringify({ testId })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        if (data.success) {
+            btn.querySelector('.upvote-count').textContent = data.newCount;
+            // Dùng data.liked từ server để toggle class đúng (like=true → add, unlike=false → remove)
+            if (data.liked) {
+                btn.classList.add('upvoted');
+            } else {
+                btn.classList.remove('upvoted');
+            }
+        }
+    } catch (err) {
+        console.error('Upvote error:', err);
+    } finally {
+        btn.disabled = false;
+    }
+}
 </script>
 }
