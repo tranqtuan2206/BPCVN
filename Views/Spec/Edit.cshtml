@@ -56,12 +56,18 @@
                     <input asp-for="KeycapName" class="form-control" placeholder="VD: GMK Nord, EPBT BoW..." data-i18n-placeholder="spec.edit.keycapPlaceholder" />
                 </div>
 
-                <!-- Plate + Foam -->
+                <!-- Plate + Stab + Foam -->
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
                         <label asp-for="PlateMaterial" class="form-label-lovable"></label>
                         <input asp-for="PlateMaterial" class="form-control" placeholder="VD: Aluminium, PC, FR4..." data-i18n-placeholder="spec.edit.platePlaceholder" />
                     </div>
+                    <div class="col-md-6">
+                        <label asp-for="Stab" class="form-label-lovable" data-i18n="create.stab">Stab</label>
+                        <input asp-for="Stab" class="form-control" placeholder="VD: Durock V2, GMK Screw-in..." data-i18n-placeholder="spec.edit.stabPlaceholder" />
+                    </div>
+                </div>
+                <div class="row g-3 mb-3">
                     <div class="col-md-6">
                         <label asp-for="FoamSetup" class="form-label-lovable"></label>
                         <input asp-for="FoamSetup" class="form-control" placeholder="VD: Case foam + PE foam..." data-i18n-placeholder="spec.edit.foamPlaceholder" />

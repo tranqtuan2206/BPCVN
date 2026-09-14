@@ -92,6 +92,7 @@ const translations = {
         'create.switchLabel': 'Switch',
         'create.keycapName': 'Keycap (optional)',
         'create.plateMaterial': 'Plate Material',
+        'create.stab': 'Stab',
         'create.foamSetup': 'Foam Setup',
         'create.mods': 'Mods',
 
@@ -366,6 +367,7 @@ const translations = {
         'spec.details.soundTests': 'Sound Tests',
         'spec.details.unknownMic': 'Unknown mic',
         'spec.details.plate': 'Plate',
+        'spec.details.stab': 'Stab',
         'spec.details.foamSetup': 'Foam Setup',
         'spec.details.mods': 'Mods',
         'spec.details.pcbType': 'PCB Type',
@@ -397,6 +399,7 @@ const translations = {
         'spec.edit.switchPlaceholder': 'Select or enter switch name...',
         'spec.edit.keycapPlaceholder': 'e.g. GMK Nord, EPBT BoW...',
         'spec.edit.platePlaceholder': 'e.g. Aluminium, PC, FR4...',
+        'spec.edit.stabPlaceholder': 'e.g. Durock V2, GMK Screw-in...',
         'spec.edit.foamPlaceholder': 'e.g. Case foam + PE foam',
         'spec.edit.modsPlaceholder': 'e.g. Tape mod, tempest mod, switch film...',
 
@@ -435,7 +438,7 @@ const translations = {
         'nav.keycaps': 'Keycaps',
         'nav.management': 'Quản lý',
         'nav.parts': 'Đồ Chơi',
-        'footer.text': 'Cộng đồng Bàn Phím Cơ Việt Nam',
+        'footer.text': 'Bàn Phím Cơ Việt Nam',
 
         /* ── Typing Test ─── */
         'typing.title': 'Gõ Phím',
@@ -448,8 +451,8 @@ const translations = {
         'typing.time': 'thời gian',
 
         /* ── Home ─── */
-        'home.title': 'Cộng đồng Bàn Phím Cơ Việt Nam',
-        'home.subtitle': 'Khám phá, lắng nghe và chia sẻ trải nghiệm của bạn.',
+        'home.title': 'Bàn Phím Cơ Việt Nam',
+        'home.subtitle': 'Chơi theo chính mình',
         'home.btnKit': 'Kit Catalog',
         'home.btnExplore': 'Khám phá Build',
         'home.feedTitle': 'Mới nhất từ cộng đồng',
@@ -509,10 +512,11 @@ const translations = {
         'create.buildName': 'Tên build',
         'create.kitName': 'Kit',
         'create.switchLabel': 'Switch',
-        'create.keycapName': 'Keycap (tùy chọn)',
-        'create.plateMaterial': 'Vật liệu plate',
-        'create.foamSetup': 'Foam setup',
-        'create.mods': 'Các mod đã thực hiện',
+        'create.keycapName': 'Keycap',
+        'create.plateMaterial': 'Chất liệu plate',
+        'create.stab': 'Stab',
+        'create.foamSetup': 'Foam',
+        'create.mods': 'Bài mod',
 
         /* ── Details ─── */
         'details.specTitle': 'Thông số cấu hình',
@@ -536,7 +540,7 @@ const translations = {
         'upload.backTo': 'Quay về',
         'upload.title': 'Upload Sound Test',
         'upload.fileLabel': 'File âm thanh',
-        'upload.fileHint': 'Audio: .mp3, .m4a, .aac, .flac, .ogg, .wav, .bwf, .aiff, .dsf, .dff, .alac (tối đa 100MB) | Video: .mp4, .mov, .mkv, .webm, .avi, .wmv, .mxf (tối đa 200MB)',
+        'upload.fileHint': 'Audio: .mp3, .flac, .... (tối đa 100MB) | Video: .mp4, .mov, ....(tối đa 200MB)',
         'upload.micLabel': 'Microphone sử dụng',
         'upload.submit': 'Upload',
         'upload.processing': 'Đang xử lý...',
@@ -785,6 +789,7 @@ const translations = {
         'spec.details.soundTests': 'Sound Tests',
         'spec.details.unknownMic': 'Không rõ mic',
         'spec.details.plate': 'Plate',
+        'spec.details.stab': 'Stab',
         'spec.details.foamSetup': 'Foam Setup',
         'spec.details.mods': 'Mods',
         'spec.details.pcbType': 'PCB Type',
@@ -810,14 +815,15 @@ const translations = {
         'keycap.index.allMaterials': '-- Tất cả --',
         'keycap.list.empty': 'Không tìm thấy keycap nào phù hợp.',
         'spec.edit.subtitle': 'Cập nhật thông tin cấu hình của bạn',
-        'spec.edit.namePlaceholder': 'VD: Neo65 Endgame Build...',
-        'spec.edit.kitPlaceholder': 'VD: Neo65, QK75, Zoom65 V2...',
+        'spec.edit.namePlaceholder': 'VD: Endgame Build...',
+        'spec.edit.kitPlaceholder': 'VD: Neo65, QK75, QK65...',
         'spec.edit.switchLabel': 'Switch',
         'spec.edit.switchPlaceholder': 'Chọn hoặc nhập tên switch...',
         'spec.edit.keycapPlaceholder': 'VD: GMK Nord, EPBT BoW...',
-        'spec.edit.platePlaceholder': 'VD: Aluminium, PC, FR4...',
+        'spec.edit.platePlaceholder': 'VD: Alu, PC, FR4...',
+        'spec.edit.stabPlaceholder': 'VD: Staebies, TypePlus...',
         'spec.edit.foamPlaceholder': 'VD: Case foam + PE foam',
-        'spec.edit.modsPlaceholder': 'VD: Tape mod, tempest mod, switch film...',
+        'spec.edit.modsPlaceholder': 'VD: Tape mod, force break...',
 
         /* ── Comment ─── */
         'comment.title': 'Bình luận',

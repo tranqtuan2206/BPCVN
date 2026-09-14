@@ -39,6 +39,14 @@ else
                         {
                             <span class="badge-warm badge-type">@spec.Switch.Type</span>
                         }
+                        @if (!string.IsNullOrEmpty(spec.PlateMaterial))
+                        {
+                            <span class="badge-warm badge-type"><i class="bi bi-layers"></i>@spec.PlateMaterial</span>
+                        }
+                        @if (!string.IsNullOrEmpty(spec.Stab))
+                        {
+                            <span class="badge-warm badge-type"><i class="bi bi-diagram-3"></i>@spec.Stab</span>
+                        }
                     </div>
                     @if (spec.SoundTests.Any())
                     {

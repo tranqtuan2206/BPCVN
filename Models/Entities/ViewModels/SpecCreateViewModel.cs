@@ -24,18 +24,22 @@ public class SpecCreateViewModel
     public string? SwitchName { get; set; }
 
     [StringLength(100)]
-    [Display(Name = "Keycap (tuỳ chọn)")]
+    [Display(Name = "Keycap")]
     public string? KeycapName { get; set; }
 
     [StringLength(100)]
-    [Display(Name = "Vật liệu plate")]
+    [Display(Name = "Chất liệu plate")]
     public string? PlateMaterial { get; set; }
+
+    [StringLength(100)]
+    [Display(Name = "Stab")]
+    public string? Stab { get; set; }
 
     [StringLength(200)]
     [Display(Name = "Foam setup")]
     public string? FoamSetup { get; set; }
 
     [StringLength(500)]
-    [Display(Name = "Các mod đã thực hiện")]
+    [Display(Name = "Các bài mod")]
     public string? Mods { get; set; }
 }

@@ -309,20 +309,16 @@
         @RenderBody()
     </main>
 
-<!-- ── Nút FAB mở Game — nằm phía trên nút Dark/Light Mode ───────────── -->
+<!-- ── Typing Defense Game (prototype) — ẩn tạm thời, có thể bật lại sau ──
     <button id="gameFab" class="game-fab" title="Chơi Typing Defense!" onclick="openGameModal()">
         <i class="bi bi-controller"></i>
     </button>
 
-    <!-- ── Game Modal Overlay — ẩn mặc định, hiện khi click FAB ─────────── -->
     <div id="gameOverlay" class="game-overlay" onclick="handleOverlayClick(event)">
         <div class="game-container">
-            <!-- Nút X đóng modal — góc trên phải container -->
             <button class="game-close-btn" title="Đóng game" onclick="closeGameModal()">
                 <i class="bi bi-x-lg"></i>
             </button>
-            <!-- Iframe nhúng game Unity WebGL —
-                 src được set khi mở và xóa khi đóng để tránh game chạy ngầm -->
             <iframe id="gameFrame"
                     src=""
                     frameborder="0"
@@ -331,6 +327,7 @@
             </iframe>
         </div>
     </div>
+-->
 
     <!-- ── Dark/Light Mode Toggle — góc dưới bên phải ────────────────────── -->
     <button id="themeToggle" class="theme-toggle" title="Chuyển chế độ sáng/tối" onclick="toggleTheme()">
@@ -534,40 +531,37 @@
     <!-- WaveSurfer.js — Waveform Audio Player -->
     <script type="module" src="~/js/waveform-setup.js"></script>
 
-    <!-- ── Game Modal Script ──────────────────────────────────────────────── -->
+    <!-- ── Game Modal Script (prototype) — ẩn tạm thời, có thể bật lại sau ──
     <script>
         var GAME_URL = 'https://tranqtuan2206.github.io/Typing-Defense/';
 
-        /* Mở modal: hiện overlay + nạp game vào iframe */
         function openGameModal() {
             var overlay = document.getElementById('gameOverlay');
             var frame   = document.getElementById('gameFrame');
-            frame.src = GAME_URL;          // Bắt đầu load game khi mở
+            frame.src = GAME_URL;
             overlay.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Chặn cuộn trang khi đang chơi
+            document.body.style.overflow = 'hidden';
         }
 
-        /* Đóng modal: ẩn overlay + xóa src để dừng game, giải phóng tài nguyên */
         function closeGameModal() {
             var overlay = document.getElementById('gameOverlay');
             var frame   = document.getElementById('gameFrame');
             overlay.classList.remove('active');
-            frame.src = '';                // Dừng game, không để chạy ngầm
-            document.body.style.overflow = ''; // Mở lại cuộn trang
+            frame.src = '';
+            document.body.style.overflow = '';
         }
 
-        /* Click ra ngoài vùng container (vào vùng mờ) → đóng modal */
         function handleOverlayClick(e) {
             if (e.target === document.getElementById('gameOverlay')) {
                 closeGameModal();
             }
         }
 
-        /* Phím Escape cũng đóng modal */
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') closeGameModal();
         });
     </script>
+-->
 
     @await RenderSectionAsync("Scripts", required: false)
 

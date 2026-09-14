@@ -116,6 +116,7 @@ public class SpecController : Controller
             SwitchId      = switchId,
             KeycapId      = keycapId,
             PlateMaterial = vm.PlateMaterial?.Trim(),
+            Stab          = vm.Stab?.Trim(),
             FoamSetup     = vm.FoamSetup?.Trim(),
             Mods          = vm.Mods?.Trim(),
             CreatedAt     = DateTime.UtcNow
@@ -180,6 +181,7 @@ public class SpecController : Controller
             SwitchName       = spec.Switch?.Name ?? spec.CustomSwitchName,
             KeycapName       = spec.Keycap?.Name,
             PlateMaterial    = spec.PlateMaterial,
+            Stab             = spec.Stab,
             FoamSetup        = spec.FoamSetup,
             Mods             = spec.Mods
         };
@@ -234,6 +236,7 @@ public class SpecController : Controller
         spec.SwitchId      = switchId;
         spec.KeycapId      = keycapId;
         spec.PlateMaterial = vm.PlateMaterial?.Trim();
+        spec.Stab          = vm.Stab?.Trim();
         spec.FoamSetup     = vm.FoamSetup?.Trim();
         spec.Mods          = vm.Mods?.Trim();
 

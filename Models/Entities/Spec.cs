@@ -31,6 +31,10 @@ public class Spec
     [StringLength(100)]
     public string? PlateMaterial { get; set; }
 
+    /// <summary>Stabilizer (Stab) — ví dụ: "Staebies", "Knight", "TypePlus"</summary>
+    [StringLength(100)]
+    public string? Stab { get; set; }
+
     /// <summary>Ví dụ: "Case foam + PCB foam + PE foam"</summary>
     [StringLength(200)]
     public string? FoamSetup { get; set; }

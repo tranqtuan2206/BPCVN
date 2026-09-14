@@ -21,7 +21,7 @@ wwwroot/uploads/
 publish/
 publish_test/
 
-## Node.js (dùng cho sync scripts)
+## Node.js
 node_modules/
 
 ## Media binaries

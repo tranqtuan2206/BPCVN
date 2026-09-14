@@ -50,21 +50,27 @@
                     </div>
                 </div>
                 <div class="mb-3">
-                    <label asp-for="KeycapName" class="form-label-lovable" data-i18n="create.keycapName">Keycap (tùy chọn)</label>
+                    <label asp-for="KeycapName" class="form-label-lovable" data-i18n="create.keycapName">Keycap</label>
                     <input asp-for="KeycapName" class="form-control" placeholder="VD: GMK Nord, EPBT BoW..." data-i18n-placeholder="spec.edit.keycapPlaceholder" />
                 </div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label asp-for="PlateMaterial" class="form-label-lovable" data-i18n="create.plateMaterial">Vật liệu plate</label>
+                        <label asp-for="PlateMaterial" class="form-label-lovable" data-i18n="create.plateMaterial">Chất liệu plate</label>
                         <input asp-for="PlateMaterial" class="form-control" placeholder="VD: Aluminium, PC, FR4..." data-i18n-placeholder="spec.edit.platePlaceholder" />
                     </div>
                     <div class="col-md-6">
-                        <label asp-for="FoamSetup" class="form-label-lovable" data-i18n="create.foamSetup">Foam setup</label>
+                        <label asp-for="Stab" class="form-label-lovable" data-i18n="create.stab">Stab</label>
+                        <input asp-for="Stab" class="form-control" placeholder="VD: Durock V2, GMK Screw-in..." data-i18n-placeholder="spec.edit.stabPlaceholder" />
+                    </div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="FoamSetup" class="form-label-lovable" data-i18n="create.foamSetup">Foam</label>
                         <input asp-for="FoamSetup" class="form-control" placeholder="VD: Case foam + PE foam..." data-i18n-placeholder="spec.edit.foamPlaceholder" />
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label asp-for="Mods" class="form-label-lovable" data-i18n="create.mods">Các mod đã thực hiện</label>
+                    <label asp-for="Mods" class="form-label-lovable" data-i18n="create.mods">Bài mod</label>
                     <textarea asp-for="Mods" class="form-control" rows="3"
                         placeholder="VD: Tape mod, tempest mod, switch film..." data-i18n-placeholder="spec.edit.modsPlaceholder"></textarea>
                 </div>

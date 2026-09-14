@@ -10,7 +10,7 @@
     <div class="hero-section mb-5 text-center" style="padding: 80px 0;">
         <i class="bi bi-keyboard d-block mb-3" style="font-size:3rem;color:var(--color-charcoal);opacity:0.7"></i>
         <h1 class="text-display mb-2" data-i18n="home.title">
-            Cộng đồng Bàn Phím Cơ Việt Nam
+            Bàn Phím Cơ Việt Nam
         </h1>
         <p class="text-body-lg mb-4" data-i18n="home.subtitle">Khám phá, lắng nghe và chia sẻ trải nghiệm của bạn.</p>
         <div class="d-flex justify-content-center gap-3 flex-wrap">
@@ -110,6 +110,12 @@
                             {
                                 <span class="badge-warm badge-type">
                                     <i class="bi bi-layers"></i>@spec.PlateMaterial
+                                </span>
+                            }
+                            @if (!string.IsNullOrEmpty(spec.Stab))
+                            {
+                                <span class="badge-warm badge-type">
+                                    <i class="bi bi-diagram-3"></i>@spec.Stab
                                 </span>
                             }
                         </div>
