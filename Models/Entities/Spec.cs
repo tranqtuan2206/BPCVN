@@ -35,6 +35,10 @@ public class Spec
     [StringLength(100)]
     public string? Stab { get; set; }
 
+    /// <summary>Keycap Space — ví dụ: "GMK", "SASP", "EPBT"</summary>
+    [StringLength(100)]
+    public string? Space { get; set; }
+
     /// <summary>Ví dụ: "Case foam + PCB foam + PE foam"</summary>
     [StringLength(200)]
     public string? FoamSetup { get; set; }

@@ -117,6 +117,7 @@ public class SpecController : Controller
             KeycapId      = keycapId,
             PlateMaterial = vm.PlateMaterial?.Trim(),
             Stab          = vm.Stab?.Trim(),
+            Space         = vm.Space?.Trim(),
             FoamSetup     = vm.FoamSetup?.Trim(),
             Mods          = vm.Mods?.Trim(),
             CreatedAt     = DateTime.UtcNow
@@ -182,6 +183,7 @@ public class SpecController : Controller
             KeycapName       = spec.Keycap?.Name,
             PlateMaterial    = spec.PlateMaterial,
             Stab             = spec.Stab,
+            Space            = spec.Space,
             FoamSetup        = spec.FoamSetup,
             Mods             = spec.Mods
         };
@@ -237,6 +239,7 @@ public class SpecController : Controller
         spec.KeycapId      = keycapId;
         spec.PlateMaterial = vm.PlateMaterial?.Trim();
         spec.Stab          = vm.Stab?.Trim();
+        spec.Space         = vm.Space?.Trim();
         spec.FoamSetup     = vm.FoamSetup?.Trim();
         spec.Mods          = vm.Mods?.Trim();
 

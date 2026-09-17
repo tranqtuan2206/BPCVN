@@ -35,6 +35,10 @@ public class SpecCreateViewModel
     [Display(Name = "Stab")]
     public string? Stab { get; set; }
 
+    [StringLength(100)]
+    [Display(Name = "Space")]
+    public string? Space { get; set; }
+
     [StringLength(200)]
     [Display(Name = "Foam setup")]
     public string? FoamSetup { get; set; }
