@@ -49,111 +49,106 @@
 <!-- Thông số build -->
 <div class="card-lovable card-body-lovable mb-4">
     <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:16px">
-        <i class="bi bi-sliders me-2" style="opacity:0.5"></i><span data-i18n="details.specTitle">Thông số cấu
-            hình</span>
+        <i class="bi bi-sliders me-2" style="opacity:0.5"></i><span data-i18n="details.specTitle">Thông số cấu hình</span>
     </h5>
-    <div class="row g-3">
-        <div class="col-md-4">
-            <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-cpu me-1"></i>Kit</div>
-                <div style="font-weight:600;color:var(--color-charcoal)">@Model.Kit.Name</div>
-                <div class="text-caption">@Model.Kit.Brand · @Model.Kit.Layout</div>
-            </div>
+    @*
+        Layout 3 hàng: 3 cột → 4 cột → full width.
+        Row 1: Kit, Switch, Keycap
+        Row 2: Plate, Stab, Foam, Space
+        Row 3: Mods (full width)
+    *@
+    <style>
+        .spec-row { display: grid; gap: 1rem; margin-bottom: 1rem; }
+        .spec-row-3 { grid-template-columns: repeat(3, 1fr); }
+        .spec-row-4 { grid-template-columns: repeat(4, 1fr); }
+        .spec-row .info-block { height: 100%; box-sizing: border-box; }
+    </style>
+
+    <!-- Row 1: Kit, Switch, Keycap — luôn 3 ô -->
+    <div class="spec-row spec-row-3">
+        <div class="info-block">
+            <div class="text-caption mb-1"><i class="bi bi-cpu me-1"></i>Kit</div>
+            <div style="font-weight:600;color:var(--color-charcoal)">@Model.Kit.Name</div>
+            <div class="text-caption">@Model.Kit.Brand · @Model.Kit.Layout</div>
         </div>
-        <div class="col-md-4">
-            <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-toggles me-1"></i>Switch</div>
-                @if (Model.Switch != null)
-
-                {
-                    @* Switch từ Master Data — hiển thị đầy đủ thông tin *@
-                    <div style="font-weight:600;color:var(--color-charcoal)">@Model.Switch.Name</div>
-                    <div class="text-caption">@Model.Switch.Brand · @Model.Switch.Type</div>
-                }
-
-                else if (!string.IsNullOrEmpty(Model.CustomSwitchName))
-
-                {
-                    @* Custom switch do user tự nhập — chỉ hiển thị tên *@
-                    <div style="font-weight:600;color:var(--color-charcoal)">@Model.CustomSwitchName</div>
-                    <div class="text-caption" style="font-style:italic" data-i18n="spec.details.customSwitch">Custom switch</div>
-                }
-
-                else
-
-                {
-                    <div class="text-caption" style="font-style:italic" data-i18n="spec.details.unknown">Không rõ</div>
-                }
-            </div>
+        <div class="info-block">
+            <div class="text-caption mb-1"><i class="bi bi-toggles me-1"></i>Switch</div>
+            @if (Model.Switch != null)
+            {
+                <div style="font-weight:600;color:var(--color-charcoal)">@Model.Switch.Name</div>
+                <div class="text-caption">@Model.Switch.Brand · @Model.Switch.Type</div>
+            }
+            else if (!string.IsNullOrEmpty(Model.CustomSwitchName))
+            {
+                <div style="font-weight:600;color:var(--color-charcoal)">@Model.CustomSwitchName</div>
+                <div class="text-caption" style="font-style:italic" data-i18n="spec.details.customSwitch">Custom switch</div>
+            }
+            else
+            {
+                <div class="text-caption" style="font-style:italic" data-i18n="spec.details.unknown">Không rõ</div>
+            }
         </div>
-        <div class="col-md-4">
-            <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-grid me-1"></i>Keycap</div>
-                @if (Model.Keycap != null)
-
-                {
-                    <div style="font-weight:600;color:var(--color-charcoal)">@Model.Keycap.Name</div>
-                    <div class="text-caption">@Model.Keycap.Brand · @Model.Keycap.Profile</div>
-                }
-
-                else
-
-                {
-                    <div class="text-caption" style="font-style:italic" data-i18n="details.none">Không có</div>
-                }
-            </div>
+        <div class="info-block">
+            <div class="text-caption mb-1"><i class="bi bi-grid me-1"></i>Keycap</div>
+            @if (Model.Keycap != null)
+            {
+                <div style="font-weight:600;color:var(--color-charcoal)">@Model.Keycap.Name</div>
+                <div class="text-caption">@Model.Keycap.Brand · @Model.Keycap.Profile</div>
+            }
+            else
+            {
+                <div class="text-caption" style="font-style:italic" data-i18n="details.none">Không có</div>
+            }
         </div>
-        @if (!string.IsNullOrEmpty(Model.PlateMaterial))
+    </div>
 
-        {
-            <div class="col-md-4">
+    @*
+        Row 2: Plate, Stab, Foam, Space — 4 ô ngang hàng.
+        Chỉ render row nếu có ít nhất 1 field trong row này.
+    *@
+    @if (!string.IsNullOrEmpty(Model.PlateMaterial) || !string.IsNullOrEmpty(Model.Stab)
+        || !string.IsNullOrEmpty(Model.FoamSetup) || !string.IsNullOrEmpty(Model.Space))
+    {
+        <div class="spec-row spec-row-4">
+            @if (!string.IsNullOrEmpty(Model.PlateMaterial))
+            {
                 <div class="info-block">
                     <div class="text-caption mb-1"><i class="bi bi-layers me-1"></i><span data-i18n="spec.details.plate">Plate</span></div>
                     <div style="font-weight:600;color:var(--color-charcoal)">@Model.PlateMaterial</div>
                 </div>
-            </div>
-        }
-        @if (!string.IsNullOrEmpty(Model.Stab))
-
-        {
-            <div class="col-md-4">
+            }
+            @if (!string.IsNullOrEmpty(Model.Stab))
+            {
                 <div class="info-block">
                     <div class="text-caption mb-1"><i class="bi bi-diagram-3 me-1"></i><span data-i18n="spec.details.stab">Stab</span></div>
                     <div style="font-weight:600;color:var(--color-charcoal)">@Model.Stab</div>
                 </div>
-            </div>
-        }
-        @if (!string.IsNullOrEmpty(Model.FoamSetup))
-
-        {
-            <div class="col-md-4">
-                <div class="info-block">
-                    <div class="text-caption mb-1"><i class="bi bi-stack me-1"></i><span data-i18n="spec.details.foamSetup">Foam Setup</span></div>
-                    <div style="font-weight:600;color:var(--color-charcoal)">@Model.FoamSetup</div>
-                </div>
-            </div>
-        }
-        @if (!string.IsNullOrEmpty(Model.Space))
-
-        {
-            <div class="col-md-4">
+            }
+            @if (!string.IsNullOrEmpty(Model.Space))
+            {
                 <div class="info-block">
                     <div class="text-caption mb-1"><i class="bi bi-keyboard me-1"></i><span data-i18n="spec.details.space">Space</span></div>
                     <div style="font-weight:600;color:var(--color-charcoal)">@Model.Space</div>
                 </div>
-            </div>
-        }
-        @if (!string.IsNullOrEmpty(Model.Mods))
-
-        {
-            <div class="col-12">
+            }
+            @if (!string.IsNullOrEmpty(Model.FoamSetup))
+            {
                 <div class="info-block">
-                    <div class="text-caption mb-1"><i class="bi bi-tools me-1"></i><span data-i18n="spec.details.mods">Mods</span></div>
-                    <div style="font-weight:600;color:var(--color-charcoal)">@Model.Mods</div>
+                    <div class="text-caption mb-1"><i class="bi bi-stack me-1"></i><span data-i18n="spec.details.foamSetup">Foam Setup</span></div>
+                    <div style="font-weight:600;color:var(--color-charcoal)">@Model.FoamSetup</div>
                 </div>
-            </div>
-        }
-    </div>
+            }
+        </div>
+    }
+
+    <!-- Row 3: Mods — full width, nội dung dài cũng không bị vỡ layout -->
+    @if (!string.IsNullOrEmpty(Model.Mods))
+    {
+        <div class="info-block">
+            <div class="text-caption mb-1"><i class="bi bi-tools me-1"></i><span data-i18n="spec.details.mods">Mods</span></div>
+            <div style="font-weight:600;color:var(--color-charcoal);word-break:break-word">@Model.Mods</div>
+        </div>
+    }
 </div>
 
 <!-- Sound Tests -->

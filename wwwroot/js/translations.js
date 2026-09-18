@@ -795,7 +795,7 @@ const translations = {
         'spec.details.unknownMic': 'Không rõ mic',
         'spec.details.plate': 'Plate',
         'spec.details.stab': 'Stab',
-        'spec.details.foamSetup': 'Foam Setup',
+        'spec.details.foamSetup': 'Foam',
         'spec.details.space': 'Space',
         'spec.details.headphoneHint': 'Đeo tai nghe để có trải nghiệm tốt nhất',
         'spec.details.mods': 'Mods',
