@@ -87,6 +87,9 @@
 (function () {
     'use strict';
 
+    /* ── Hằng số ─────────────────────────────────────────── */
+    var CHUNK_SIZE = 18 * 1024 * 1024; // 18MB mỗi chunk
+
     /* ── DOM refs ─────────────────────────────────────────── */
     var form        = document.getElementById('uploadForm');
     var submitBtn   = document.getElementById('uploadBtn');
@@ -99,13 +102,19 @@
     var dropzone    = document.getElementById('dropzone');
     var specId      = '@spec.SpecId';
 
+    /* ── Anti-forgery token ──────────────────────────────── */
+    function getAntiForgeryToken() {
+        var el = document.querySelector('input[name="__RequestVerificationToken"]');
+        return el ? el.value : '';
+    }
+
     /* ── Lấy text i18n theo key ──────────────────────────── */
     function t(key) {
         var lang = localStorage.getItem('bpcvn-lang') || 'vi';
         return (translations[lang] && translations[lang][key]) || key;
     }
 
-    /* ── Hiển thị Toast thủ công (clone cấu trúc từ _Layout) ── */
+    /* ── Hiển thị Toast ──────────────────────────────────── */
     function showToast(type, msg) {
         var isSuccess = type === 'success';
         var wrap = document.createElement('div');
@@ -142,10 +151,17 @@
         }
     }
 
+    /* ── Cập nhật progress bar (tính theo tổng bytes đã upload) ── */
+    function updateProgress(loadedBytes, totalBytes) {
+        var pct = Math.round((loadedBytes / totalBytes) * 100);
+        progressBar.style.width = pct + '%';
+        progressText.textContent = pct + '%';
+        progressLabel.textContent = t('upload.uploadingPercent').replace('{0}', pct);
+    }
+
     /* ── Kéo thả file (Drag & Drop) ──────────────────────── */
     var dragCounter = 0;
 
-    // Ngăn trình duyệt mở file mặc định trên toàn window
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(function(eventName) {
         document.addEventListener(eventName, function(e) {
             e.preventDefault();
@@ -153,11 +169,9 @@
         }, false);
     });
 
-    // Bắt sự kiện khi kéo file vào toàn bộ trang web
     document.addEventListener('dragenter', function(e) {
         dragCounter++;
         if (dragCounter === 1) {
-            // Khi kéo vào cửa sổ, đổi màu viền thành đỏ
             dropzone.style.borderColor = '#ef4444';
             dropzone.style.background = 'rgba(239, 68, 68, 0.05)';
         }
@@ -166,7 +180,6 @@
     document.addEventListener('dragleave', function(e) {
         dragCounter--;
         if (dragCounter === 0) {
-            // Kéo ra khỏi cửa sổ, trả về bình thường
             dropzone.style.borderColor = 'var(--color-border, #e5e7eb)';
             dropzone.style.background = 'rgba(0,0,0,0.02)';
         }
@@ -174,139 +187,232 @@
 
     document.addEventListener('drop', function(e) {
         dragCounter = 0;
-        // Thả file ra (dù ở đâu), trả về bình thường
         dropzone.style.borderColor = 'var(--color-border, #e5e7eb)';
         dropzone.style.background = 'rgba(0,0,0,0.02)';
     }, false);
 
-    // Bắt sự kiện khi kéo file ĐÚNG VÀO vùng dropzone
     ['dragenter', 'dragover'].forEach(function(eventName) {
         dropzone.addEventListener(eventName, function() {
-            dropzone.style.borderColor = '#16a34a'; // Xanh lá
+            dropzone.style.borderColor = '#16a34a';
             dropzone.style.background = 'rgba(22, 163, 74, 0.05)';
         }, false);
     });
 
-    // Bắt sự kiện kéo ra khỏi vùng dropzone
     dropzone.addEventListener('dragleave', function() {
         if (dragCounter > 0) {
-            // Nếu vẫn còn kéo trong window thì quay về đỏ
             dropzone.style.borderColor = '#ef4444';
             dropzone.style.background = 'rgba(239, 68, 68, 0.05)';
         }
     }, false);
 
-    // Bắt sự kiện thả file vào dropzone
     dropzone.addEventListener('drop', function(e) {
         var dt = e.dataTransfer;
         var files = dt.files;
         if (files && files.length > 0) {
-            fileInput.files = files; // Gán file vào input
+            fileInput.files = files;
         }
     }, false);
 
-    /* ── Chặn submit mặc định — dùng AJAX + theo dõi tiến trình ── */
+    /* ── Gửi 1 chunk lên server, trả về Promise ─────────────── */
+    function uploadChunk(uploadId, chunkIndex, totalChunks, micUsed, chunkBlob) {
+        return new Promise(function (resolve, reject) {
+            var fd = new FormData();
+            fd.append('uploadId', uploadId);
+            fd.append('chunkIndex', chunkIndex);
+            fd.append('totalChunks', totalChunks);
+            fd.append('specId', specId);
+            fd.append('micUsed', micUsed || '');
+            fd.append('chunk', chunkBlob, 'chunk');
+            fd.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            var xhr = new XMLHttpRequest();
+            xhr.timeout = 2 * 60 * 1000; // 2 phút mỗi chunk
+            xhr.open('POST', '/SoundTest/UploadChunk');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+            xhr.addEventListener('load', function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        var resp = JSON.parse(xhr.responseText);
+                        if (resp.success) resolve(resp);
+                        else reject(new Error(resp.message || 'Chunk upload failed'));
+                    } catch (_) {
+                        reject(new Error('Invalid response from server'));
+                    }
+                } else {
+                    reject(new Error('HTTP ' + xhr.status));
+                }
+            });
+
+            xhr.addEventListener('error', function () { reject(new Error('Network error')); });
+            xhr.addEventListener('timeout', function () { reject(new Error('Timeout')); });
+            xhr.send(fd);
+        });
+    }
+
+    /* ── Gọi server ghép file + xử lý FFmpeg + lưu DB ──────── */
+    function finalizeUpload(uploadId, originalFileName, totalChunks, micUsed) {
+        return new Promise(function (resolve, reject) {
+            var fd = new FormData();
+            fd.append('uploadId', uploadId);
+            fd.append('specId', specId);
+            fd.append('micUsed', micUsed || '');
+            fd.append('originalFileName', originalFileName);
+            fd.append('totalChunks', totalChunks);
+            fd.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            var xhr = new XMLHttpRequest();
+            xhr.timeout = 5 * 60 * 1000; // 5 phút — FFmpeg tách âm có thể mất thời gian
+            xhr.open('POST', '/SoundTest/FinalizeUpload');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+            xhr.addEventListener('load', function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        var resp = JSON.parse(xhr.responseText);
+                        if (resp.success) resolve(resp);
+                        else reject(new Error(resp.message || 'Finalize failed'));
+                    } catch (_) {
+                        reject(new Error('Invalid response from server'));
+                    }
+                } else {
+                    reject(new Error('HTTP ' + xhr.status));
+                }
+            });
+
+            xhr.addEventListener('error', function () { reject(new Error('Network error')); });
+            xhr.addEventListener('timeout', function () { reject(new Error('Server processing timeout')); });
+            xhr.send(fd);
+        });
+    }
+
+    /* ── Chia file thành nhiều Blob chunks ─────────────────── */
+    function splitFileIntoChunks(file) {
+        var chunks = [];
+        var offset = 0;
+        while (offset < file.size) {
+            var end = Math.min(offset + CHUNK_SIZE, file.size);
+            chunks.push(file.slice(offset, end));
+            offset = end;
+        }
+        return chunks;
+    }
+
+    /* ── Upload client nhỏ (< CHUNK_SIZE) — gửi 1 lần, không cần chunk ── */
+    function uploadSmallFile(file, micUsed) {
+        return new Promise(function (resolve, reject) {
+            var fd = new FormData(form);
+            fd.set('audioFile', file);
+            fd.delete('isAjax'); // Không cần field này nữa
+
+            var xhr = new XMLHttpRequest();
+            xhr.timeout = 5 * 60 * 1000;
+            xhr.open('POST', '/SoundTest/Upload');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+            xhr.upload.addEventListener('progress', function (ev) {
+                if (ev.lengthComputable) updateProgress(ev.loaded, ev.total);
+            });
+
+            xhr.addEventListener('load', function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        var resp = JSON.parse(xhr.responseText);
+                        if (resp.success) resolve(resp);
+                        else reject(new Error(resp.message || 'Upload failed'));
+                    } catch (_) {
+                        reject(new Error('Invalid response'));
+                    }
+                } else {
+                    reject(new Error('HTTP ' + xhr.status));
+                }
+            });
+
+            xhr.addEventListener('error', function () { reject(new Error('Network error')); });
+            xhr.addEventListener('timeout', function () { reject(new Error('Timeout')); });
+            xhr.send(fd);
+        });
+    }
+
+    /* ── Submit handler — phân phối: nhỏ gửi thẳng, lớn dùng chunked ── */
     form.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        /* Validate client-side: bắt buộc phải chọn file */
+        /* Validate client-side */
         if (!fileInput.files || !fileInput.files.length) {
             showToast('error', t('upload.toastNoFile'));
             return;
         }
 
+        var file = fileInput.files[0];
+        var micUsed = document.getElementById('micUsedInput').value;
+
         setLoading(true);
 
-        var fd = new FormData(form);
-        var xhr = new XMLHttpRequest();
-
-        /* Timeout 5 phút — video lớn từ điện thoại có thể mất thời gian xử lý (FFmpeg, Cloudinary) */
-        xhr.timeout = 5 * 60 * 1000;
-
-        /* Theo dõi % file được đẩy lên server (upload phase) */
-        xhr.upload.addEventListener('progress', function (ev) {
-            if (ev.lengthComputable) {
-                var pct = Math.round((ev.loaded / ev.total) * 100);
-                progressBar.style.width = pct + '%';
-                progressText.textContent = pct + '%';
-                progressLabel.textContent = t('upload.uploadingPercent').replace('{0}', pct);
-            }
-        });
-
-        /* Xử lý khi request hoàn tất (server đã trả về response) */
-        xhr.addEventListener('load', function () {
-            /* Server trả JSON (AJAX mode) — xử lý theo JSON response */
-            var isJson = xhr.getResponseHeader('content-type') &&
-                         xhr.getResponseHeader('content-type').indexOf('application/json') !== -1;
-
-            if (isJson) {
-                var resp;
-                try { resp = JSON.parse(xhr.responseText); } catch (_) { resp = null; }
-
-                if (resp && resp.success) {
-                    /* Thành công — hiện toast rồi redirect */
-                    submitBtn.disabled = true;
-                    submitBtn.style.background = '#16a34a';
-                    submitBtn.style.borderColor = '#16a34a';
-                    submitBtn.innerHTML = '<i class="bi bi-check-circle"></i>' +
-                        '<span data-i18n="upload.successBtn">' + t('upload.successBtn') + '</span>';
-                    overlay.style.display = 'none';
-                    progressWrap.style.display = 'none';
-                    showToast('success', t('upload.toastSuccess'));
-                    setTimeout(function () { window.location.href = resp.redirectUrl; }, 2000);
-                } else {
-                    /* Lỗi từ server — hiện thông báo cụ thể */
+        /* File nhỏ hơn CHUNK_SIZE → gửi trực tiếp (nhanh, không cần chunk) */
+        if (file.size <= CHUNK_SIZE) {
+            uploadSmallFile(file, micUsed)
+                .then(function (resp) {
+                    onUploadSuccess(resp);
+                })
+                .catch(function (err) {
                     setLoading(false);
-                    showToast('error', (resp && resp.message) || t('upload.toastError'));
-                }
+                    showToast('error', err.message || t('upload.toastError'));
+                });
+            return;
+        }
+
+        /* File lớn → chunked upload */
+        var chunks = splitFileIntoChunks(file);
+        var totalChunks = chunks.length;
+        var uploadId = crypto.randomUUID ? crypto.randomUUID() : ('upload-' + Date.now() + '-' + Math.random().toString(36).slice(2));
+        var uploadedBytes = 0;
+
+        /* Upload tuần tự từng chunk */
+        (function uploadNextChunk(index) {
+            if (index >= totalChunks) {
+                /* Hết chunk → gọi server ghép file + xử lý */
+                progressLabel.textContent = t('upload.processing');
+
+                finalizeUpload(uploadId, file.name, totalChunks, micUsed)
+                    .then(function (resp) {
+                        onUploadSuccess(resp);
+                    })
+                    .catch(function (err) {
+                        setLoading(false);
+                        showToast('error', err.message || t('upload.toastError'));
+                    });
                 return;
             }
 
-            /* Fallback: server trả HTML (không phải AJAX request) — kiểm tra theo URL */
-            var finalUrl = xhr.responseURL || '';
-            var isOnUploadPage = finalUrl.indexOf('SoundTest/Upload') !== -1;
+            /* Upload chunk hiện tại */
+            uploadChunk(uploadId, index, totalChunks, micUsed, chunks[index])
+                .then(function () {
+                    /* Cập nhật progress sau mỗi chunk */
+                    uploadedBytes += chunks[index].size;
+                    updateProgress(uploadedBytes, file.size);
 
-            if (xhr.status >= 200 && xhr.status < 400 && !isOnUploadPage) {
-                submitBtn.disabled = true;
-                submitBtn.style.background = '#16a34a';
-                submitBtn.style.borderColor = '#16a34a';
-                submitBtn.innerHTML = '<i class="bi bi-check-circle"></i>' +
-                    '<span data-i18n="upload.successBtn">' + t('upload.successBtn') + '</span>';
-                overlay.style.display = 'none';
-                progressWrap.style.display = 'none';
-                showToast('success', t('upload.toastSuccess'));
-                setTimeout(function () { window.location.href = finalUrl; }, 2000);
-            } else {
-                setLoading(false);
-                showToast('error', t('upload.toastError'));
-            }
-        });
-
-        /* Lỗi mạng / CORS */
-        xhr.addEventListener('error', function () {
-            setLoading(false);
-            showToast('error', t('upload.toastError'));
-        });
-
-        /* Request hết thời gian chờ (video lớn, server xử lý chậm) */
-        xhr.addEventListener('timeout', function () {
-            setLoading(false);
-            showToast('error', 'Upload hết thời gian chờ. File có thể quá lớn, vui lòng thử lại.');
-        });
-
-        /* User bấm Cancel trên browser (hiếm gặp) */
-        xhr.addEventListener('abort', function () {
-            setLoading(false);
-        });
-
-        /* Gửi AJAX POST kèm Anti-forgery token */
-        xhr.open('POST', '/SoundTest/Upload');
-        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        var afToken = document.querySelector('input[name="__RequestVerificationToken"]');
-        if (afToken) {
-            xhr.setRequestHeader('RequestVerificationToken', afToken.value);
-        }
-        xhr.send(fd);
+                    /* Chunk tiếp theo */
+                    uploadNextChunk(index + 1);
+                })
+                .catch(function (err) {
+                    setLoading(false);
+                    showToast('error', err.message || t('upload.toastError'));
+                });
+        })(0);
     });
+
+    /* ── Xử lý sau khi upload thành công ─────────────────── */
+    function onUploadSuccess(resp) {
+        submitBtn.disabled = true;
+        submitBtn.style.background = '#16a34a';
+        submitBtn.style.borderColor = '#16a34a';
+        submitBtn.innerHTML = '<i class="bi bi-check-circle"></i>' +
+            '<span data-i18n="upload.successBtn">' + t('upload.successBtn') + '</span>';
+        overlay.style.display = 'none';
+        progressWrap.style.display = 'none';
+        showToast('success', t('upload.toastSuccess'));
+        setTimeout(function () { window.location.href = resp.redirectUrl; }, 2000);
+    }
 })();
 </script>

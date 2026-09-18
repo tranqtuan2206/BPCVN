@@ -150,6 +150,145 @@ public class SoundTestController : Controller
         return RedirectToAction("Details", "Spec", new { id = specId });
     }
 
+    // ── CHUNKED UPLOAD — Fix iOS Safari upload file lớn ──────────────────────
+    // Chia file thành chunks 18MB trên client, gửi từng chunk lên server,
+    // server ghép lại rồi xử lý bằng FFmpeg như cũ.
+
+    private const long ChunkSizeBytes = 18 * 1024 * 1024; // 18MB mỗi chunk
+    private const string ChunkTempSubPath = "temp/chunks";
+
+    /// <summary>
+    /// Nhận 1 chunk file-upload từ client. Lưu vào temp/chunks/{uploadId}/chunk_{index}.
+    /// Client gọi endpoint này nhiều lần cho đến khi hết chunk.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [RequestSizeLimit(20 * 1024 * 1024)] // 20MB — cho phép chunk 18MB + overhead
+    public async Task<IActionResult> UploadChunk(
+        Guid uploadId, int chunkIndex, int totalChunks,
+        Guid specId, string? micUsed, IFormFile chunk)
+    {
+        // Xác thực spec tồn tại + quyền sở hữu
+        var spec = await _db.Specs.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(s => s.SpecId == specId);
+        if (spec == null) return NotFound();
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (spec.UserId.ToString() != userId) return Forbid();
+
+        // Validate chunk
+        if (chunk == null || chunk.Length == 0)
+            return Json(new { success = false, message = "Chunk trống." });
+
+        // Tạo thư mục tạm cho upload session này
+        var sessionDir = Path.Combine(_env.WebRootPath, ChunkTempSubPath, uploadId.ToString());
+        Directory.CreateDirectory(sessionDir);
+
+        // Lưu chunk vào file tạm
+        var chunkPath = Path.Combine(sessionDir, $"chunk_{chunkIndex}");
+        await using (var stream = new FileStream(chunkPath, FileMode.Create))
+        {
+            await chunk.CopyToAsync(stream);
+        }
+
+        _logger.LogInformation("[ChunkedUpload] Đã nhận chunk {Index}/{Total} cho upload {UploadId}",
+            chunkIndex + 1, totalChunks, uploadId);
+
+        // Trả về số chunk đã nhận — client dùng để cập nhật progress
+        return Json(new { success = true, receivedChunks = chunkIndex + 1, totalChunks });
+    }
+
+    /// <summary>
+    /// Ghép tất cả chunks lại thành file hoàn chỉnh, rồi xử lý bằng AudioService.
+    /// Client gọi endpoint này SAU KHI đã upload hết tất cả chunks.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> FinalizeUpload(
+        Guid uploadId, Guid specId, string? micUsed,
+        string originalFileName, int totalChunks)
+    {
+        // Xác thực spec + quyền
+        var spec = await _db.Specs.IgnoreQueryFilters()
+            .Include(s => s.Kit)
+            .FirstOrDefaultAsync(s => s.SpecId == specId);
+        if (spec == null) return NotFound();
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (spec.UserId.ToString() != userId) return Forbid();
+
+        var sessionDir = Path.Combine(_env.WebRootPath, ChunkTempSubPath, uploadId.ToString());
+
+        // Kiểm tra đủ số chunk
+        if (!Directory.Exists(sessionDir))
+            return Json(new { success = false, message = "Không tìm thấy session upload." });
+
+        var ext = Path.GetExtension(originalFileName).ToLowerInvariant();
+        var mergedPath = Path.Combine(sessionDir, $"merged{ext}");
+
+        try
+        {
+            // Ghép chunks theo thứ tự chunk_0, chunk_1, chunk_2...
+            await using (var mergedStream = new FileStream(mergedPath, FileMode.Create))
+            {
+                for (int i = 0; i < totalChunks; i++)
+                {
+                    var chunkPath = Path.Combine(sessionDir, $"chunk_{i}");
+                    if (!System.IO.File.Exists(chunkPath))
+                        return Json(new { success = false, message = $"Thiếu chunk {i + 1}/{totalChunks}." });
+
+                    await using var chunkStream = new FileStream(chunkPath, FileMode.Open, FileAccess.Read);
+                    await chunkStream.CopyToAsync(mergedStream);
+                }
+            }
+
+            var mergedSize = new FileInfo(mergedPath).Length;
+            _logger.LogInformation("[ChunkedUpload] Ghép xong {Chunks} chunk → {Path} ({Size}MB)",
+                totalChunks, mergedPath, mergedSize / 1024 / 1024);
+
+            // Xử lý file hoàn chỉnh qua AudioService (giống flow cũ)
+            string audioUrl;
+            await using (var stream = new FileStream(mergedPath, FileMode.Open, FileAccess.Read))
+            {
+                // Tạo IFormFile tạm từ stream đã ghép
+                var tempFormFile = new FormFile(stream, 0, mergedSize, "audioFile", originalFileName);
+                audioUrl = await _audioService.ProcessAndSaveAsync(tempFormFile);
+            }
+
+            // Lưu vào DB
+            var soundTest = new SoundTest
+            {
+                SpecId   = specId,
+                MicUsed  = micUsed?.Trim(),
+                AudioUrl = audioUrl,
+                CreatedAt = DateTime.UtcNow
+            };
+            _db.SoundTests.Add(soundTest);
+            await _db.SaveChangesAsync();
+
+            _logger.LogInformation("[ChunkedUpload] Upload hoàn tất → {Url}", audioUrl);
+
+            return Json(new
+            {
+                success = true,
+                redirectUrl = Url.Action("Details", "Spec", new { id = specId })
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[ChunkedUpload] Lỗi xử lý upload {UploadId}", uploadId);
+            return Json(new { success = false, message = $"Lỗi xử lý file: {ex.Message}" });
+        }
+        finally
+        {
+            // Dọn dẹp: xóa thư mục chunk tạm
+            try { Directory.Delete(sessionDir, recursive: true); }
+            catch (Exception ex) { _logger.LogWarning(ex, "Không thể xóa temp chunks: {Dir}", sessionDir); }
+            try { if (System.IO.File.Exists(mergedPath)) System.IO.File.Delete(mergedPath); }
+            catch { }
+        }
+    }
+
     // ── DELETE POST ───────────────────────────────────────────────────────────
     // Xóa một SoundTest — owner của Spec HOẶC Admin
 
