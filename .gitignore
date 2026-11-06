@@ -16,6 +16,7 @@ logs/
 
 ## Uploads
 wwwroot/uploads/
+wwwroot/temp/
 
 ## Publish
 publish/
@@ -36,9 +37,13 @@ agents.md
 DESIGN.md
 skills/
 skills_UI/
+skill_UI/
 .claude/
+.agents/
 .mcp.json
 GEMINI.md
 graft/
 opencode.json
 skills-lock.json
+DESIGN.md
+
