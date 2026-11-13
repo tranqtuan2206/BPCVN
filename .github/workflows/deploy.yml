@@ -26,7 +26,7 @@ jobs:
 
       - name: Publish Project
         # Chỉ định file project cụ thể để tránh cảnh báo NETSDK1194.
-        run: dotnet publish BPCVN.csproj -c Release -o ./publish
+        run: dotnet publish BPCVN.csproj -c Release -r win-x64 --self-contained false -o ./publish
 
       # BƯỚC 1: Tạo và tải lên file ẩn web để giải phóng file bị khóa
       - name: Turn off App (App Offline)
