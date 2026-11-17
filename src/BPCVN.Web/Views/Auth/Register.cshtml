@@ -1,0 +1,52 @@
+@model BPCVN.Application.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "ÄÄƒng kÃ½";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card-lovable card-body-lovable mt-3">
+            <div class="text-center mb-4">
+                <i class="bi bi-person-plus-fill" style="font-size:2.5rem;color:var(--color-charcoal)"></i>
+                <h3 class="text-subheading mt-2" data-i18n="register.title">Táº¡o tÃ i khoáº£n</h3>
+                <p class="text-caption" data-i18n="register.subtitle">Tham gia cá»™ng Ä‘á»“ng BPCVN ngay hÃ´m nay</p>
+            </div>
+            <form asp-action="Register" method="post">
+                <div asp-validation-summary="ModelOnly" class="validation-summary-lovable" style="display:none"></div>
+                <div class="mb-3">
+                    <label asp-for="Username" class="form-label-lovable" data-i18n="register.usernameLabel">TÃªn ngÆ°á»i dÃ¹ng</label>
+                    <input asp-for="Username" class="form-control" placeholder="Nháº­p username..." data-i18n-placeholder="register.usernamePlaceholder" />
+                    <span asp-validation-for="Username" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label-lovable">Email</label>
+                    <input asp-for="Email" class="form-control" placeholder="example@email.com" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label-lovable" data-i18n="register.passwordLabel">Máº­t kháº©u</label>
+                    <input asp-for="Password" class="form-control" placeholder="Tá»‘i thiá»ƒu 6 kÃ½ tá»±" data-i18n-placeholder="register.passwordPlaceholder" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="ConfirmPassword" class="form-label-lovable" data-i18n="register.confirmLabel">XÃ¡c nháº­n máº­t kháº©u</label>
+                    <input asp-for="ConfirmPassword" class="form-control" placeholder="Nháº­p láº¡i máº­t kháº©u" data-i18n-placeholder="register.confirmPlaceholder" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                </div>
+                <button type="submit" class="btn-dark-lovable btn-block py-2">
+                    <i class="bi bi-person-check"></i><span data-i18n="register.submit">ÄÄƒng kÃ½</span>
+                </button>
+            </form>
+            <hr class="divider">
+            <p class="text-center text-caption mb-0">
+                <span data-i18n="register.hasAccount">ÄÃ£ cÃ³ tÃ i khoáº£n?</span>
+                <a asp-controller="Auth" asp-action="Login" class="link-lovable" style="font-weight:600"
+                    data-i18n="register.loginLink">ÄÄƒng nháº­p</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

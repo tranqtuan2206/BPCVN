@@ -1,0 +1,160 @@
+@model IEnumerable<BPCVN.Domain.Entities.Kit>
+@{
+    ViewData["Title"] = "Kit Catalog";
+
+    // Danh sÃ¡ch unique brand & layout tá»« Controller cho dropdown filter
+    var brands = ViewBag.Brands as List<string> ?? new();
+    var layouts = ViewBag.Layouts as List<string> ?? new();
+}
+
+<!-- â”€â”€ Page header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<div class="section-header">
+    <div>
+        <h2 class="section-title">
+            <i class="bi bi-cpu me-2" style="opacity:0.5"></i>Kit Catalog
+        </h2>
+        <p class="section-subtitle">
+            <span id="kitCount">@Model.Count()</span> <span data-i18n="kit.countSuffix">kits trong cÆ¡ sá»Ÿ dá»¯ liá»‡u</span>
+        </p>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-controller="Kit" asp-action="Create" class="btn-dark-lovable">
+                <i class="bi bi-plus-circle"></i>ThÃªm Kit
+            </a>
+        }
+        <span class="badge-count" id="kitBadge" style="font-size:0.9375rem;padding:6px 16px">
+            @Model.Count() Kits
+        </span>
+    </div>
+</div>
+
+<!-- â”€â”€ Bá»™ lá»c & Live Search â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<div class="card-lovable card-body-lovable mb-4">
+    <div class="row g-3 align-items-end">
+        <!-- Ã” tÃ¬m kiáº¿m -->
+        <div class="col-12 col-md-5">
+            <label class="form-label-lovable">
+                <i class="bi bi-search me-1"></i><span data-i18n="kit.searchLabel">TÃ¬m kiáº¿m</span>
+            </label>
+            <input type="text" id="searchInput" class="form-control"
+                placeholder="Nháº­p tÃªn kit hoáº·c brand..." data-i18n-placeholder="kit.index.searchPlaceholder" autocomplete="off" />
+        </div>
+
+        <!-- Dropdown Brand -->
+        <div class="col-6 col-md-3">
+            <label class="form-label-lovable">
+                <i class="bi bi-building me-1"></i>Brand
+            </label>
+            <select id="filterBrand" class="form-select">
+                <option value="" data-i18n="kit.index.allBrands">-- Táº¥t cáº£ --</option>
+                @foreach (var b in brands)
+                {
+                    <option value="@b">@b</option>
+                }
+            </select>
+        </div>
+
+        <!-- Dropdown Layout -->
+        <div class="col-6 col-md-3">
+            <label class="form-label-lovable">
+                <i class="bi bi-grid me-1"></i>Layout
+            </label>
+            <select id="filterLayout" class="form-select">
+                <option value="" data-i18n="kit.index.allLayouts">-- Táº¥t cáº£ --</option>
+                @foreach (var l in layouts)
+                {
+                    <option value="@l">@l</option>
+                }
+            </select>
+        </div>
+
+        <!-- NÃºt xÃ³a bá»™ lá»c -->
+        <div class="col-12 col-md-1 d-flex">
+            <button type="button" id="clearFilters" class="btn-ghost flex-grow-1" title="XÃ³a bá»™ lá»c">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- â”€â”€ Container danh sÃ¡ch Kit â€” ná»™i dung Ä‘Æ°á»£c thay báº±ng AJAX â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<div id="kit-list-container">
+    <partial name="_KitListPartial" model="Model" />
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            'use strict';
+
+            // â”€â”€ Debounce â€” trÃ¬ hoÃ£n gá»i hÃ m cho Ä‘áº¿n khi user ngá»«ng gÃµ â”€â”€
+            // delay: thá»i gian chá» (ms) ká»ƒ tá»« láº§n nháº¥n phÃ­m cuá»‘i
+            function debounce(func, delay) {
+                let timerId;
+                return function (...args) {
+                    clearTimeout(timerId);
+                    timerId = setTimeout(() => func.apply(this, args), delay);
+                };
+            }
+
+            // â”€â”€ Tham chiáº¿u DOM â”€â”€
+            const searchInput = document.getElementById('searchInput');
+            const filterBrand = document.getElementById('filterBrand');
+            const filterLayout = document.getElementById('filterLayout');
+            const clearBtn = document.getElementById('clearFilters');
+            const container = document.getElementById('kit-list-container');
+            const kitCount = document.getElementById('kitCount');
+            const kitBadge = document.getElementById('kitBadge');
+
+            // â”€â”€ Gá»i API láº¥y danh sÃ¡ch Kit Ä‘Ã£ lá»c â”€â”€
+            async function fetchKits() {
+                // GhÃ©p táº¥t cáº£ filter thÃ nh query string
+                const params = new URLSearchParams();
+                const search = searchInput.value.trim();
+                const brand = filterBrand.value;
+                const layout = filterLayout.value;
+
+                if (search) params.set('searchQuery', search);
+                if (brand) params.set('brand', brand);
+                if (layout) params.set('layout', layout);
+
+                try {
+                    const res = await fetch(`/Kit/Index?${params.toString()}`, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                    // GÃ¡n HTML partial vÃ o container
+                    const html = await res.text();
+                    container.innerHTML = html;
+
+                    // Cáº­p nháº­t bá»™ Ä‘áº¿m â€” Ä‘áº¿m sá»‘ card hiá»‡n táº¡i
+                    const count = container.querySelectorAll('.col').length;
+                    kitCount.textContent = count;
+                    kitBadge.textContent = count + ' Kits';
+                } catch (err) {
+                    console.error('Fetch kits error:', err);
+                }
+            }
+
+            // â”€â”€ Gáº¯n sá»± kiá»‡n â”€â”€
+            // Live search â€” debounce 350ms Ä‘á»ƒ trÃ¡nh spam request
+            searchInput.addEventListener('input', debounce(fetchKits, 350));
+
+            // Dropdown filter â€” gá»i ngay khi thay Ä‘á»•i
+            filterBrand.addEventListener('change', fetchKits);
+            filterLayout.addEventListener('change', fetchKits);
+
+            // NÃºt xÃ³a bá»™ lá»c â€” reset táº¥t cáº£ input/select rá»“i fetch láº¡i
+            clearBtn.addEventListener('click', function () {
+                searchInput.value = '';
+                filterBrand.value = '';
+                filterLayout.value = '';
+                fetchKits();
+            });
+        })();
+    </script>
+}

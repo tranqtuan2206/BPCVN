@@ -1,0 +1,413 @@
+@model BPCVN.Application.ViewModels.KitCreateViewModel
+@{
+    ViewData["Title"] = "ThÃªm Kit má»›i";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+
+        @* â”€â”€ Header trang â”€â”€ *@
+        <div class="mb-4">
+            <h2 class="section-title">
+                <i class="bi bi-plus-circle me-2" style="opacity:0.5"></i>ThÃªm Kit má»›i
+            </h2>
+            <p class="section-subtitle" data-i18n="kit.create.addDesc">Äiá»n Ä‘áº§y Ä‘á»§ thÃ´ng tin Ä‘á»ƒ thÃªm má»™t kit vÃ o há»‡ thá»‘ng.</p>
+        </div>
+
+        @* â”€â”€ Form Card â”€â”€ *@
+        <div class="card-lovable card-body-lovable">
+            <form asp-action="Create" method="post" enctype="multipart/form-data" id="kitForm">
+
+                <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
+
+                @* â”€â”€ TÃªn Kit â”€â”€ *@
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label-lovable" data-i18n="kit.create.nameLabel">TÃªn Kit *</label>
+                    <input asp-for="Name" class="form-control" placeholder="VD: Neo65, QK75, Zoom65 V2..." />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                @* â”€â”€ HÃ£ng + Layout â”€â”€ *@
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Brand" class="form-label-lovable" data-i18n="kit.create.brandLabel">HÃ£ng (Brand)</label>
+                        <input asp-for="Brand" class="form-control" placeholder="VD: Qwertykeys, Mode, KBDFans..." />
+                        <span asp-validation-for="Brand" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Layout" class="form-label-lovable" data-i18n="kit.create.layoutLabel">Layout</label>
+                        <select asp-for="Layout" class="form-select">
+                            <option value="" data-i18n="kit.create.selectLayout">â€” Chá»n layout â€”</option>
+                            <option value="40%" data-i18n="kit.create.layout40">40%</option>
+                            <option value="60%" data-i18n="kit.create.layout60">60%</option>
+                            <option value="65%" data-i18n="kit.create.layout65">65%</option>
+                            <option value="Alice" data-i18n="kit.create.layoutAlice">Alice</option>
+                            <option value="70% - FRL" data-i18n="kit.create.layout70Frl">70% - FRL</option>
+                            <option value="75%" data-i18n="kit.create.layout75">75%</option>
+                            <option value="TKL" data-i18n="kit.create.layoutTkl">TKL</option>
+                            <option value="98% - Full-size" data-i18n="kit.create.layout98Fullsize">98% - Full-size</option>
+                            <option value="Numpad" data-i18n="kit.create.layoutNumpad">Numpad</option>
+                            <option value="Other" data-i18n="kit.create.other">KhÃ¡c</option>
+                        </select>
+                        <span asp-validation-for="Layout" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                @* â”€â”€ Mount Type + PCB Type â”€â”€ *@
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="MountType" class="form-label-lovable" data-i18n="kit.create.mountTypeLabel">Mount Type</label>
+                        <select asp-for="MountType" class="form-select">
+                            <option value="" data-i18n="kit.create.selectMount">â€” Chá»n mount â€”</option>
+                            <option value="Gasket Mount" data-i18n="kit.create.gasketMount">Gasket Mount</option>
+                            <option value="Oring" data-i18n="kit.create.oring">Oring</option>
+                            <option value="Oringless" data-i18n="kit.create.oringless">Oringless</option>
+                            <option value="Top Mount" data-i18n="kit.create.topMount">Top Mount</option>
+                            <option value="Tray Mount" data-i18n="kit.create.trayMount">Tray Mount</option>
+                            <option value="Sandwich Mount" data-i18n="kit.create.sandwichMount">Sandwich Mount</option>
+                            <option value="Plateless" data-i18n="kit.create.plateless">Plateless</option>
+                            <option value="Other" data-i18n="kit.create.otherMount">KhÃ¡c</option>
+                        </select>
+                        <span asp-validation-for="MountType" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="PcbType" class="form-label-lovable" data-i18n="kit.create.pcbTypeLabel">PCB Type</label>
+                        <select asp-for="PcbType" class="form-select">
+                            <option value="" data-i18n="kit.create.selectPcb">â€” Chá»n loáº¡i PCB â€”</option>
+                            <option value="Hotswap" data-i18n="kit.create.hotswap">Hotswap</option>
+                            <option value="Soldered" data-i18n="kit.create.soldered">Soldered</option>
+                            <option value="Hotswap + Soldered" data-i18n="kit.create.hotswapSoldered">Hotswap + Soldered</option>
+                        </select>
+                        <span asp-validation-for="PcbType" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                @* â”€â”€ PHáº¦N áº¢NH KIT (kÃ©o tháº£ + chá»n mÃ u) â”€â”€ *@
+                <div class="mb-4 p-3" style="border:1px dashed var(--border-interactive);border-radius:var(--radius-comfortable);background:var(--color-off-white)">
+                    <h6 style="font-weight:600;color:var(--color-charcoal);margin-bottom:12px">
+                        <i class="bi bi-images me-2" style="opacity:0.5"></i>áº¢nh Kit
+                        <small class="text-muted fw-normal ms-2">(KÃ©o tháº£ Ä‘á»ƒ sáº¯p xáº¿p thá»© tá»±)</small>
+                    </h6>
+
+                    @* Container chá»©a táº¥t cáº£ áº£nh (upload + URL) â€” SortableJS sáº½ kÃ©o tháº£ trong nÃ y *@
+                    <div id="imageSortableList" class="d-flex flex-wrap gap-2 mb-3" style="min-height:40px"></div>
+
+                    @* Ã” Upload file (áº©n â€” trigger bá»Ÿi nÃºt) *@
+                    <input type="file" asp-for="UploadImages" multiple accept="image/*"
+                           class="d-none" id="kitFileInput" />
+
+                    @* Ã” nháº­p URL áº©n (sáº½ append row má»›i khi nháº­p) *@
+                    <div id="externalUrlContainer" class="d-none"></div>
+
+                    @* NÃºt thÃªm áº£nh *@
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-ghost btn-sm" id="triggerFileBtn">
+                            <i class="bi bi-upload me-1"></i>Upload áº£nh
+                        </button>
+                        <button type="button" class="btn btn-ghost btn-sm" id="addUrlBtn">
+                            <i class="bi bi-link-45deg me-1"></i>ThÃªm link URL
+                        </button>
+                    </div>
+                </div>
+
+                @* â”€â”€ NÃºt hÃ nh Ä‘á»™ng â”€â”€ *@
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn-dark-lovable px-4 py-2">
+                        <i class="bi bi-plus-circle"></i>ThÃªm Kit
+                    </button>
+                    <a asp-controller="Kit" asp-action="Index" class="btn-ghost px-4 py-2">
+                        <i class="bi bi-x-lg"></i>Huá»·
+                    </a>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    @* SortableJS CDN â€” kÃ©o tháº£ sáº¯p xáº¿p áº£nh *@
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+
+    <script>
+        (function () {
+            var sortableList = document.getElementById('imageSortableList');
+            var fileInput = document.getElementById('kitFileInput');
+            var triggerFileBtn = document.getElementById('triggerFileBtn');
+            var addUrlBtn = document.getElementById('addUrlBtn');
+            var form = document.getElementById('kitForm');
+
+            // Máº£ng lÆ°u File objects â€” gáº¯n vÃ o card Ä‘á»ƒ biáº¿t cÃ¡i nÃ o lÃ  file nÃ o
+            // Key: card element, Value: File object
+            var fileMap = new WeakMap();
+
+            // â”€â”€ KÃ­ch hoáº¡t SortableJS (kÃ©o cáº£ card, khÃ´ng cáº§n nÃºt grip) â”€â”€
+            new Sortable(sortableList, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                onEnd: updateCoverBadge
+            });
+
+            // â”€â”€ Cáº­p nháº­t badge "áº¢nh Ä‘áº¡i diá»‡n" â€” card Ä‘áº§u tiÃªn luÃ´n cÃ³ badge â”€â”€
+            function updateCoverBadge() {
+                // XÃ³a táº¥t cáº£ badge cÅ©
+                sortableList.querySelectorAll('.img-cover-badge').forEach(function (b) { b.remove(); });
+                // ThÃªm badge vÃ o card Ä‘áº§u tiÃªn
+                var firstCard = sortableList.querySelector('.img-sortable-card');
+                if (firstCard) {
+                    var badge = document.createElement('span');
+                    badge.className = 'img-cover-badge';
+                    badge.textContent = 'áº¢nh Ä‘áº¡i diá»‡n';
+                    firstCard.style.position = 'relative';
+                    firstCard.appendChild(badge);
+                }
+            }
+
+            // â”€â”€ Trigger upload file â”€â”€
+            triggerFileBtn.addEventListener('click', function () { fileInput.click(); });
+
+            // â”€â”€ Khi chá»n file â†’ render preview + lÆ°u File vÃ o map â”€â”€
+            fileInput.addEventListener('change', function () {
+                var files = Array.from(this.files);
+                files.forEach(function (file) {
+                    if (!file.type.startsWith('image/')) return;
+                    var card = addImageCard('upload', file.name, URL.createObjectURL(file));
+                    fileMap.set(card, file); // LÆ°u File object kÃ¨m card
+                });
+                this.value = ''; // OK vÃ¬ File Ä‘Ã£ lÆ°u trong fileMap
+            });
+
+            // â”€â”€ ThÃªm link URL má»›i â”€â”€
+            addUrlBtn.addEventListener('click', function () {
+                var url = prompt('DÃ¡n link áº£nh vÃ o Ä‘Ã¢y:');
+                if (!url || !url.trim()) return;
+                addImageCard('url', url.trim(), url.trim());
+            });
+
+            // â”€â”€ Táº¡o tháº» áº£nh trong sortable list, tráº£ vá» card element â”€â”€
+            function addImageCard(type, name, previewSrc) {
+                var card = document.createElement('div');
+                card.className = 'img-sortable-card';
+                card.setAttribute('data-type', type);
+
+                var handle = document.createElement('div');
+                handle.className = 'img-drag-handle';
+                handle.innerHTML = '<i class="bi bi-grip-vertical"></i>';
+                handle.title = 'KÃ©o Ä‘á»ƒ sáº¯p xáº¿p';
+
+                var imgWrap = document.createElement('div');
+                imgWrap.style.cssText = 'width:70px;height:70px;border-radius:var(--radius-micro);overflow:hidden;flex-shrink:0;background:#f0f0f0';
+                var img = document.createElement('img');
+                img.src = previewSrc;
+                img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+                imgWrap.appendChild(img);
+
+                var label = document.createElement('div');
+                label.className = 'img-card-label';
+                label.textContent = name.length > 20 ? name.substring(0, 20) + '...' : name;
+                label.title = name;
+
+                var colorWrap = document.createElement('div');
+                colorWrap.className = 'img-card-color';
+                var colorInput = document.createElement('input');
+                colorInput.type = 'color';
+                colorInput.value = '#1c1c1c';
+                colorInput.title = 'Chá»n mÃ u';
+                colorInput.className = 'img-color-picker';
+                var noColorLabel = document.createElement('label');
+                noColorLabel.className = 'img-no-color-label';
+                var noColorCheck = document.createElement('input');
+                noColorCheck.type = 'checkbox';
+                noColorCheck.className = 'no-color-checkbox';
+                noColorCheck.checked = true;
+                noColorCheck.addEventListener('change', function () {
+                    colorInput.disabled = this.checked;
+                    if (this.checked) {
+                        colorInput.value = '#1c1c1c';
+                        colorWrap.classList.add('no-color-active');
+                    } else {
+                        colorWrap.classList.remove('no-color-active');
+                    }
+                });
+                colorInput.disabled = true;
+                colorWrap.classList.add('no-color-active');
+                noColorLabel.appendChild(noColorCheck);
+                noColorLabel.appendChild(document.createTextNode(' KhÃ´ng mÃ u'));
+                colorWrap.appendChild(colorInput);
+                colorWrap.appendChild(noColorLabel);
+
+                var removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'img-card-remove';
+                removeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
+                removeBtn.title = 'XÃ³a áº£nh nÃ y';
+                removeBtn.addEventListener('click', function () {
+                    fileMap.delete(card); // XÃ³a file khá»i map khi remove card
+                    card.remove();
+                });
+
+                card.appendChild(handle);
+                card.appendChild(imgWrap);
+                card.appendChild(label);
+                card.appendChild(colorWrap);
+                card.appendChild(removeBtn);
+                sortableList.appendChild(card);
+
+                return card;
+            }
+
+            // â”€â”€ Submit: build FormData theo Ä‘Ãºng thá»© tá»± kÃ©o tháº£ â”€â”€
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                var fd = new FormData();
+
+                // Copy cÃ¡c field bÃ¬nh thÆ°á»ng (Name, Brand, Layout...) tá»« form
+                var inputs = form.querySelectorAll('input, select, textarea');
+                inputs.forEach(function (el) {
+                    if (el.name && el.type !== 'file' && el.type !== 'hidden' && el.type !== 'submit') {
+                        fd.append(el.name, el.value);
+                    }
+                });
+
+                // Duyá»‡t sortable list theo Ä‘Ãºng thá»© tá»± DOM
+                var cards = sortableList.querySelectorAll('.img-sortable-card');
+                cards.forEach(function (card) {
+                    var type = card.getAttribute('data-type');
+                    var colorPicker = card.querySelector('.img-color-picker');
+                    var noColorCheck = card.querySelector('.no-color-checkbox');
+                    var color = (noColorCheck && noColorCheck.checked) ? '' : (colorPicker ? colorPicker.value : '');
+
+                    if (type === 'upload') {
+                        // File upload: append file + color vÃ o FormData
+                        var file = fileMap.get(card);
+                        if (file) {
+                            fd.append('UploadImages', file, file.name);
+                            fd.append('UploadImageColors', color);
+                        }
+                    } else if (type === 'url') {
+                        // URL: append url + color
+                        var label = card.querySelector('.img-card-label');
+                        fd.append('ExternalImageUrls', label ? label.title : '');
+                        fd.append('ExternalImageColors', color);
+                    }
+                });
+
+                // Gá»­i AJAX
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', form.action, true);
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+                // CSRF token
+                var token = form.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) fd.append('__RequestVerificationToken', token.value);
+
+                xhr.onload = function () {
+                    if (xhr.status === 200 || xhr.status === 302) {
+                        // ThÃ nh cÃ´ng â†’ redirect vá» trang Details
+                        window.location.href = xhr.responseURL || '/Kit';
+                    } else {
+                        alert('CÃ³ lá»—i xáº£y ra, vui lÃ²ng thá»­ láº¡i.');
+                    }
+                };
+                xhr.onerror = function () {
+                    alert('Lá»—i káº¿t ná»‘i, vui lÃ²ng thá»­ láº¡i.');
+                };
+                xhr.send(fd);
+            });
+        })();
+    </script>
+
+    <style>
+        /* â”€â”€ Sortable card styles â”€â”€ */
+        .img-sortable-card {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 8px;
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-standard);
+            position: relative;
+            transition: box-shadow 0.2s ease;
+            cursor: grab;
+        }
+        .img-sortable-card:active { cursor: grabbing; }
+        .img-sortable-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .img-drag-handle {
+            cursor: grab;
+            color: var(--color-charcoal-40);
+            font-size: 1rem;
+            flex-shrink: 0;
+            padding: 0 2px;
+        }
+        .img-drag-handle:active { cursor: grabbing; }
+        .img-card-label {
+            font-size: 11px;
+            color: var(--color-muted);
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .img-card-color {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .img-color-picker {
+            width: 26px;
+            height: 26px;
+            padding: 1px;
+            cursor: pointer;
+            border-radius: var(--radius-micro);
+            border: 1px solid var(--border-light);
+        }
+        .img-no-color-label {
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+            white-space: nowrap;
+            color: var(--color-muted);
+        }
+        .img-card-remove {
+            background: none;
+            border: none;
+            color: #b91c1c;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+        .img-card-remove:hover {
+            background: rgba(185,28,28,0.1);
+        }
+        /* Hiá»‡u á»©ng khi kÃ©o */
+        .sortable-ghost { opacity: 0.4; }
+        .sortable-chosen { box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+        /* Badge áº£nh Ä‘áº¡i diá»‡n trÃªn card Ä‘áº§u tiÃªn */
+        .img-cover-badge {
+            position: absolute; top: -6px; left: -6px;
+            background: var(--color-charcoal); color: #fff;
+            font-size: 9px; padding: 1px 5px; border-radius: var(--radius-pill);
+            white-space: nowrap; pointer-events: none; z-index: 1;
+        }
+        /* Liquid glass effect khi "KhÃ´ng mÃ u" Ä‘Æ°á»£c tick */
+        .img-card-color.no-color-active .img-color-picker {
+            background: repeating-conic-gradient(rgba(0,0,0,0.06) 0% 25%, transparent 0% 50%) 50% / 10px 10px;
+            border: 1px dashed var(--color-charcoal-40);
+            opacity: 0.5;
+        }
+    </style>
+}

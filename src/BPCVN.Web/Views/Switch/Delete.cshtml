@@ -1,0 +1,75 @@
+@model BPCVN.Domain.Entities.Switch
+@{
+    ViewData["Title"] = "XÃ³a " + Model.Name;
+
+    // XÃ¡c Ä‘á»‹nh icon dá»±a trÃªn loáº¡i Switch
+    string iconClass;
+    if (Model.Type == "Linear") { iconClass = "bi-arrow-down"; }
+    else if (Model.Type == "Tactile") { iconClass = "bi-arrow-down-up"; }
+    else if (Model.Type == "Clicky") { iconClass = "bi-volume-up"; }
+    else { iconClass = "bi-question-circle"; }
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+
+        <!-- Header cáº£nh bÃ¡o -->
+        <div class="mb-4">
+            <h2 class="section-title" style="color:#b91c1c">
+                <i class="bi bi-exclamation-triangle me-2"></i><span data-i18n="switch.delete.title">XÃ¡c nháº­n xÃ³a Switch</span>
+            </h2>
+            <p class="section-subtitle">HÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoÃ n tÃ¡c.</p>
+        </div>
+
+        <!-- ThÃ´ng tin Switch sáº½ bá»‹ xÃ³a -->
+        <div class="card-lovable card-body-lovable mb-4">
+            <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:16px">
+                <i class="bi bi-toggles me-2" style="opacity:0.5"></i>@Model.Name
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="info-block">
+                        <div class="text-caption mb-1"><i class="bi bi-building me-1"></i><span data-i18n="common.brand">HÃ£ng</span></div>
+                        <div style="font-weight:600;color:var(--color-charcoal)">
+                            @(Model.Brand ?? "â€”")
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-block">
+                        <div class="text-caption mb-1"><i class="bi @iconClass me-1"></i><span data-i18n="common.type">Loáº¡i</span></div>
+                        <div style="font-weight:600;color:var(--color-charcoal)">
+                            @(Model.Type ?? "â€”")
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-block">
+                        <div class="text-caption mb-1"><i class="bi bi-speedometer2 me-1"></i><span data-i18n="switch.details.actuationForce">Lá»±c nháº¥n</span></div>
+                        <div style="font-weight:600;color:var(--color-charcoal)">
+                            @(Model.ActuationForce ?? "â€”")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form xÃ¡c nháº­n xÃ³a -->
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="SwitchId" />
+            <div class="d-flex gap-2">
+                <!-- NÃºt XÃ³a â€” mÃ u Ä‘á» cáº£nh bÃ¡o -->
+                <button type="submit" class="btn-dark-lovable px-4 py-2"
+                        style="background-color:#b91c1c">
+                    <i class="bi bi-trash"></i><span data-i18n="common.deletePermanently">XÃ³a vÄ©nh viá»…n</span>
+                </button>
+                <!-- NÃºt Huá»· â€” quay vá» Details -->
+                <a asp-controller="Switch" asp-action="Details" asp-route-id="@Model.SwitchId"
+                    class="btn-ghost px-4 py-2">
+                    <i class="bi bi-x-lg"></i><span data-i18n="common.cancel">Huá»·</span>
+                </a>
+            </div>
+        </form>
+
+    </div>
+</div>

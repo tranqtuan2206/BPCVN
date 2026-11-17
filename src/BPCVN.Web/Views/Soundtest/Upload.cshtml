@@ -1,0 +1,418 @@
+@{
+    ViewData["Title"] = "Upload Sound Test";
+
+    var spec = ViewBag.Spec as BPCVN.Domain.Entities.Spec;
+
+    if (spec == null) { return; }
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="mb-4">
+            <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId" class="link-muted">
+                <i class="bi bi-arrow-left me-1"></i><span data-i18n="upload.backTo">Quay vá»</span> @spec.BuildName
+            </a>
+        </div>
+        <div class="card-lovable card-body-lovable" id="uploadCard" style="position:relative">
+            <div class="text-center mb-4">
+                <i class="bi bi-cloud-upload" style="font-size:2.5rem;color:var(--color-charcoal)"></i>
+                <h4 class="text-subheading mt-2" style="font-size:1.3rem" data-i18n="upload.title">Upload Sound Test</h4>
+                <p class="text-caption mb-0">
+                    Build: <strong>@spec.BuildName</strong>
+                </p>
+            </div>
+            <form asp-action="Upload" method="post" enctype="multipart/form-data" id="uploadForm">
+                <input type="hidden" name="specId" value="@spec.SpecId" />
+                <input type="hidden" name="isAjax" value="true" />
+                <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
+                <div class="mb-3 p-3" id="dropzone" style="border: 2px dashed var(--color-border, #e5e7eb); border-radius: 8px; transition: all 0.2s ease; background: rgba(0,0,0,0.02);">
+                    <label class="form-label-lovable">
+                        <span data-i18n="upload.fileLabel">File Ã¢m thanh</span> <span style="color:#b91c1c">*</span>
+                    </label>
+                    <input type="file" name="audioFile" class="form-control mb-2" id="audioFileInput"
+                           accept=".mp3,.m4a,.aac,.flac,.ogg,.wav,.bwf,.aiff,.dsf,.dff,.alac,.mp4,.mov,.mkv,.webm,.avi,.wmv,.mxf,audio/*,video/*" required />
+                    <div class="form-hint" data-i18n="upload.fileHint">
+                        ðŸ’¡ <strong>Máº¹o:</strong> Báº¡n cÃ³ thá»ƒ kÃ©o tháº£ file trá»±c tiáº¿p vÃ o Ã´ nÃ y<br>
+                        Audio: .mp3, .m4a, ... (tá»‘i Ä‘a 100MB)<br>
+                        Video: .mp4, .mov, ... (tá»‘i Ä‘a 200MB)
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-lovable" data-i18n="upload.micLabel">Microphone sá»­ dá»¥ng</label>
+                    <input type="text" name="micUsed" class="form-control" id="micUsedInput"
+                        placeholder="VD: Blue Yeti, Rode NT-USB, Ä‘iá»‡n thoáº¡i..." />
+                </div>
+
+                <!-- Thanh tiáº¿n trÃ¬nh â€” áº©n máº·c Ä‘á»‹nh, hiá»‡n khi upload -->
+                <div class="mb-4" id="uploadProgressWrap" style="display:none">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-caption" id="uploadProgressLabel"></small>
+                        <small class="text-caption fw-bold" id="uploadProgressText">0%</small>
+                    </div>
+                    <div style="height:8px;border-radius:99px;background:var(--color-border,#e5e7eb);overflow:hidden">
+                        <div id="uploadProgressBar" role="progressbar"
+                             style="width:0%;height:100%;background:var(--color-charcoal);border-radius:99px;transition:width .25s ease">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn-dark-lovable px-4 py-2" id="uploadBtn">
+                        <i class="bi bi-cloud-upload"></i><span data-i18n="upload.submit">Upload</span>
+                    </button>
+                    <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId"
+                        class="btn-ghost px-4 py-2" data-i18n="common.cancel">Huá»·</a>
+                </div>
+            </form>
+
+            <!-- Overlay má» â€” khÃ³a tÆ°Æ¡ng tÃ¡c form khi Ä‘ang upload/xá»­ lÃ½ -->
+            <div id="uploadOverlay" style="display:none;position:absolute;inset:0;
+                 background:rgba(0,0,0,.5);border-radius:inherit;z-index:10;cursor:not-allowed"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Spinner xoay cho nÃºt submit */
+    @@keyframes spin { to { transform: rotate(360deg); } }
+    .btn-spinner {
+        display:inline-block; width:1rem; height:1rem;
+        border:2px solid currentColor; border-right-color:transparent;
+        border-radius:50%; animation:spin .6s linear infinite;
+        vertical-align:middle; margin-right:.4rem;
+    }
+</style>
+
+<script>
+(function () {
+    'use strict';
+
+    /* â”€â”€ Háº±ng sá»‘ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    var CHUNK_SIZE = 18 * 1024 * 1024; // 18MB má»—i chunk
+
+    /* â”€â”€ DOM refs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    var form        = document.getElementById('uploadForm');
+    var submitBtn   = document.getElementById('uploadBtn');
+    var fileInput   = document.getElementById('audioFileInput');
+    var overlay     = document.getElementById('uploadOverlay');
+    var progressWrap = document.getElementById('uploadProgressWrap');
+    var progressBar  = document.getElementById('uploadProgressBar');
+    var progressText = document.getElementById('uploadProgressText');
+    var progressLabel = document.getElementById('uploadProgressLabel');
+    var dropzone    = document.getElementById('dropzone');
+    var specId      = '@spec.SpecId';
+
+    /* â”€â”€ Anti-forgery token â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    function getAntiForgeryToken() {
+        var el = document.querySelector('input[name="__RequestVerificationToken"]');
+        return el ? el.value : '';
+    }
+
+    /* â”€â”€ Láº¥y text i18n theo key â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    function t(key) {
+        var lang = localStorage.getItem('bpcvn-lang') || 'vi';
+        return (translations[lang] && translations[lang][key]) || key;
+    }
+
+    /* â”€â”€ Hiá»ƒn thá»‹ Toast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    function showToast(type, msg) {
+        var isSuccess = type === 'success';
+        var wrap = document.createElement('div');
+        wrap.className = 'toast-fixed';
+        wrap.innerHTML =
+            '<div class="toast-lovable ' + (isSuccess ? 'toast-success' : 'toast-error') + '">' +
+                '<i class="bi bi-' + (isSuccess ? 'check-circle-fill' : 'exclamation-circle-fill') + ' toast-icon"></i>' +
+                '<span>' + msg + '</span>' +
+                '<button type="button" class="toast-close" onclick="this.closest(\'.toast-fixed\').remove()">' +
+                    '<i class="bi bi-x-lg"></i>' +
+                '</button>' +
+            '</div>';
+        document.body.appendChild(wrap);
+        setTimeout(function () { wrap.remove(); }, 4000);
+    }
+
+    /* â”€â”€ Báº­t/táº¯t tráº¡ng thÃ¡i Loading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    function setLoading(on) {
+        submitBtn.disabled = on;
+        if (on) {
+            submitBtn.innerHTML = '<span class="btn-spinner"></span>' +
+                '<span data-i18n="upload.processing">' + t('upload.processing') + '</span>';
+            overlay.style.display = 'block';
+            progressWrap.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressText.textContent = '0%';
+            progressLabel.textContent = t('upload.uploadingPercent').replace('{0}', '0');
+        } else {
+            submitBtn.innerHTML = '<i class="bi bi-cloud-upload"></i>' +
+                '<span data-i18n="upload.submit">' + t('upload.submit') + '</span>';
+            overlay.style.display = 'none';
+            progressWrap.style.display = 'none';
+            progressBar.style.width = '0%';
+        }
+    }
+
+    /* â”€â”€ Cáº­p nháº­t progress bar (tÃ­nh theo tá»•ng bytes Ä‘Ã£ upload) â”€â”€ */
+    function updateProgress(loadedBytes, totalBytes) {
+        var pct = Math.round((loadedBytes / totalBytes) * 100);
+        progressBar.style.width = pct + '%';
+        progressText.textContent = pct + '%';
+        progressLabel.textContent = t('upload.uploadingPercent').replace('{0}', pct);
+    }
+
+    /* â”€â”€ KÃ©o tháº£ file (Drag & Drop) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    var dragCounter = 0;
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(function(eventName) {
+        document.addEventListener(eventName, function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }, false);
+    });
+
+    document.addEventListener('dragenter', function(e) {
+        dragCounter++;
+        if (dragCounter === 1) {
+            dropzone.style.borderColor = '#ef4444';
+            dropzone.style.background = 'rgba(239, 68, 68, 0.05)';
+        }
+    }, false);
+
+    document.addEventListener('dragleave', function(e) {
+        dragCounter--;
+        if (dragCounter === 0) {
+            dropzone.style.borderColor = 'var(--color-border, #e5e7eb)';
+            dropzone.style.background = 'rgba(0,0,0,0.02)';
+        }
+    }, false);
+
+    document.addEventListener('drop', function(e) {
+        dragCounter = 0;
+        dropzone.style.borderColor = 'var(--color-border, #e5e7eb)';
+        dropzone.style.background = 'rgba(0,0,0,0.02)';
+    }, false);
+
+    ['dragenter', 'dragover'].forEach(function(eventName) {
+        dropzone.addEventListener(eventName, function() {
+            dropzone.style.borderColor = '#16a34a';
+            dropzone.style.background = 'rgba(22, 163, 74, 0.05)';
+        }, false);
+    });
+
+    dropzone.addEventListener('dragleave', function() {
+        if (dragCounter > 0) {
+            dropzone.style.borderColor = '#ef4444';
+            dropzone.style.background = 'rgba(239, 68, 68, 0.05)';
+        }
+    }, false);
+
+    dropzone.addEventListener('drop', function(e) {
+        var dt = e.dataTransfer;
+        var files = dt.files;
+        if (files && files.length > 0) {
+            fileInput.files = files;
+        }
+    }, false);
+
+    /* â”€â”€ Gá»­i 1 chunk lÃªn server, tráº£ vá» Promise â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    function uploadChunk(uploadId, chunkIndex, totalChunks, micUsed, chunkBlob) {
+        return new Promise(function (resolve, reject) {
+            var fd = new FormData();
+            fd.append('uploadId', uploadId);
+            fd.append('chunkIndex', chunkIndex);
+            fd.append('totalChunks', totalChunks);
+            fd.append('specId', specId);
+            fd.append('micUsed', micUsed || '');
+            fd.append('chunk', chunkBlob, 'chunk');
+            fd.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            var xhr = new XMLHttpRequest();
+            xhr.timeout = 2 * 60 * 1000; // 2 phÃºt má»—i chunk
+            xhr.open('POST', '/SoundTest/UploadChunk');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+            xhr.addEventListener('load', function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        var resp = JSON.parse(xhr.responseText);
+                        if (resp.success) resolve(resp);
+                        else reject(new Error(resp.message || 'Chunk upload failed'));
+                    } catch (_) {
+                        reject(new Error('Invalid response from server'));
+                    }
+                } else {
+                    reject(new Error('HTTP ' + xhr.status));
+                }
+            });
+
+            xhr.addEventListener('error', function () { reject(new Error('Network error')); });
+            xhr.addEventListener('timeout', function () { reject(new Error('Timeout')); });
+            xhr.send(fd);
+        });
+    }
+
+    /* â”€â”€ Gá»i server ghÃ©p file + xá»­ lÃ½ FFmpeg + lÆ°u DB â”€â”€â”€â”€â”€â”€â”€â”€ */
+    function finalizeUpload(uploadId, originalFileName, totalChunks, micUsed) {
+        return new Promise(function (resolve, reject) {
+            var fd = new FormData();
+            fd.append('uploadId', uploadId);
+            fd.append('specId', specId);
+            fd.append('micUsed', micUsed || '');
+            fd.append('originalFileName', originalFileName);
+            fd.append('totalChunks', totalChunks);
+            fd.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            var xhr = new XMLHttpRequest();
+            xhr.timeout = 5 * 60 * 1000; // 5 phÃºt â€” FFmpeg tÃ¡ch Ã¢m cÃ³ thá»ƒ máº¥t thá»i gian
+            xhr.open('POST', '/SoundTest/FinalizeUpload');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+            xhr.addEventListener('load', function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        var resp = JSON.parse(xhr.responseText);
+                        if (resp.success) resolve(resp);
+                        else reject(new Error(resp.message || 'Finalize failed'));
+                    } catch (_) {
+                        reject(new Error('Invalid response from server'));
+                    }
+                } else {
+                    reject(new Error('HTTP ' + xhr.status));
+                }
+            });
+
+            xhr.addEventListener('error', function () { reject(new Error('Network error')); });
+            xhr.addEventListener('timeout', function () { reject(new Error('Server processing timeout')); });
+            xhr.send(fd);
+        });
+    }
+
+    /* â”€â”€ Chia file thÃ nh nhiá»u Blob chunks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    function splitFileIntoChunks(file) {
+        var chunks = [];
+        var offset = 0;
+        while (offset < file.size) {
+            var end = Math.min(offset + CHUNK_SIZE, file.size);
+            chunks.push(file.slice(offset, end));
+            offset = end;
+        }
+        return chunks;
+    }
+
+    /* â”€â”€ Upload client nhá» (< CHUNK_SIZE) â€” gá»­i 1 láº§n, khÃ´ng cáº§n chunk â”€â”€ */
+    function uploadSmallFile(file, micUsed) {
+        return new Promise(function (resolve, reject) {
+            var fd = new FormData(form);
+            fd.set('audioFile', file);
+            fd.delete('isAjax'); // KhÃ´ng cáº§n field nÃ y ná»¯a
+
+            var xhr = new XMLHttpRequest();
+            xhr.timeout = 5 * 60 * 1000;
+            xhr.open('POST', '/SoundTest/Upload');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+            xhr.upload.addEventListener('progress', function (ev) {
+                if (ev.lengthComputable) updateProgress(ev.loaded, ev.total);
+            });
+
+            xhr.addEventListener('load', function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        var resp = JSON.parse(xhr.responseText);
+                        if (resp.success) resolve(resp);
+                        else reject(new Error(resp.message || 'Upload failed'));
+                    } catch (_) {
+                        reject(new Error('Invalid response'));
+                    }
+                } else {
+                    reject(new Error('HTTP ' + xhr.status));
+                }
+            });
+
+            xhr.addEventListener('error', function () { reject(new Error('Network error')); });
+            xhr.addEventListener('timeout', function () { reject(new Error('Timeout')); });
+            xhr.send(fd);
+        });
+    }
+
+    /* â”€â”€ Submit handler â€” phÃ¢n phá»‘i: nhá» gá»­i tháº³ng, lá»›n dÃ¹ng chunked â”€â”€ */
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        /* Validate client-side */
+        if (!fileInput.files || !fileInput.files.length) {
+            showToast('error', t('upload.toastNoFile'));
+            return;
+        }
+
+        var file = fileInput.files[0];
+        var micUsed = document.getElementById('micUsedInput').value;
+
+        setLoading(true);
+
+        /* File nhá» hÆ¡n CHUNK_SIZE â†’ gá»­i trá»±c tiáº¿p (nhanh, khÃ´ng cáº§n chunk) */
+        if (file.size <= CHUNK_SIZE) {
+            uploadSmallFile(file, micUsed)
+                .then(function (resp) {
+                    onUploadSuccess(resp);
+                })
+                .catch(function (err) {
+                    setLoading(false);
+                    showToast('error', err.message || t('upload.toastError'));
+                });
+            return;
+        }
+
+        /* File lá»›n â†’ chunked upload */
+        var chunks = splitFileIntoChunks(file);
+        var totalChunks = chunks.length;
+        var uploadId = crypto.randomUUID ? crypto.randomUUID() : ('upload-' + Date.now() + '-' + Math.random().toString(36).slice(2));
+        var uploadedBytes = 0;
+
+        /* Upload tuáº§n tá»± tá»«ng chunk */
+        (function uploadNextChunk(index) {
+            if (index >= totalChunks) {
+                /* Háº¿t chunk â†’ gá»i server ghÃ©p file + xá»­ lÃ½ */
+                progressLabel.textContent = t('upload.processing');
+
+                finalizeUpload(uploadId, file.name, totalChunks, micUsed)
+                    .then(function (resp) {
+                        onUploadSuccess(resp);
+                    })
+                    .catch(function (err) {
+                        setLoading(false);
+                        showToast('error', err.message || t('upload.toastError'));
+                    });
+                return;
+            }
+
+            /* Upload chunk hiá»‡n táº¡i */
+            uploadChunk(uploadId, index, totalChunks, micUsed, chunks[index])
+                .then(function () {
+                    /* Cáº­p nháº­t progress sau má»—i chunk */
+                    uploadedBytes += chunks[index].size;
+                    updateProgress(uploadedBytes, file.size);
+
+                    /* Chunk tiáº¿p theo */
+                    uploadNextChunk(index + 1);
+                })
+                .catch(function (err) {
+                    setLoading(false);
+                    showToast('error', err.message || t('upload.toastError'));
+                });
+        })(0);
+    });
+
+    /* â”€â”€ Xá»­ lÃ½ sau khi upload thÃ nh cÃ´ng â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    function onUploadSuccess(resp) {
+        submitBtn.disabled = true;
+        submitBtn.style.background = '#16a34a';
+        submitBtn.style.borderColor = '#16a34a';
+        submitBtn.innerHTML = '<i class="bi bi-check-circle"></i>' +
+            '<span data-i18n="upload.successBtn">' + t('upload.successBtn') + '</span>';
+        overlay.style.display = 'none';
+        progressWrap.style.display = 'none';
+        showToast('success', t('upload.toastSuccess'));
+        setTimeout(function () { window.location.href = resp.redirectUrl; }, 2000);
+    }
+})();
+</script>

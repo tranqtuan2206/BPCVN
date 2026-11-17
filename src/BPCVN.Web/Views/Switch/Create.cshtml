@@ -1,0 +1,86 @@
+@model BPCVN.Domain.Entities.Switch
+@{
+    ViewData["Title"] = "ThÃªm Switch má»›i";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+
+        <!-- Header -->
+        <div class="mb-4">
+            <h2 class="section-title">
+                <i class="bi bi-plus-circle me-2" style="opacity:0.5"></i>ThÃªm Switch má»›i
+            </h2>
+            <p class="section-subtitle">ThÃªm switch má»›i vÃ o cÆ¡ sá»Ÿ dá»¯ liá»‡u</p>
+        </div>
+
+        <!-- Form Card -->
+        <div class="card-lovable card-body-lovable">
+            <form asp-action="Create" method="post">
+
+                <!-- Validation Summary â€” hiá»ƒn thá»‹ lá»—i tá»•ng quan -->
+                <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
+
+                <!-- TÃªn Switch (báº¯t buá»™c) -->
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label-lovable">TÃªn Switch *</label>
+                    <input asp-for="Name" class="form-control" placeholder="VD: Boba U4T, Cherry MX Black..." />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <!-- HÃ£ng + Loáº¡i trÃªn cÃ¹ng má»™t hÃ ng -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Brand" class="form-label-lovable" data-i18n="kit.details.brand">HÃ£ng (Brand)</label>
+                        <input asp-for="Brand" class="form-control" placeholder="VD: Gateron, Cherry, JWK..." />
+                        <span asp-validation-for="Brand" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Type" class="form-label-lovable" data-i18n="switch.details.type">Loáº¡i (Type)</label>
+                        <select asp-for="Type" class="form-select">
+                            <option value="">â€” Chá»n loáº¡i â€”</option>
+                            <option value="Linear">Linear</option>
+                            <option value="Tactile">Tactile</option>
+                            <option value="Clicky">Clicky</option>
+                        </select>
+                        <span asp-validation-for="Type" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Lá»±c nháº¥n (Actuation Force) -->
+                <div class="mb-3">
+                    <label asp-for="ActuationForce" class="form-label-lovable">ActuationForce</label>
+                    <input asp-for="ActuationForce" class="form-control" placeholder="VD: 45g, 62g, 67g..." />
+                    <span asp-validation-for="ActuationForce" class="text-danger small"></span>
+                    <p class="form-hint">Lá»±c nháº¥n cáº§n thiáº¿t Ä‘á»ƒ kÃ­ch hoáº¡t switch (tÃ­nh báº±ng gram).</p>
+                </div>
+
+                <!-- Link hÃ¬nh áº£nh minh há»a (ImageUrl) -->
+                <div class="mb-4">
+                    <label asp-for="ImageUrl" class="form-label-lovable">HÃ¬nh áº£nh (URL)</label>
+                    <input asp-for="ImageUrl" class="form-control" placeholder="DÃ¡n link hÃ¬nh áº£nh switch vÃ o Ä‘Ã¢y..." />
+                    <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                    <p class="form-hint">DÃ¡n Ä‘Æ°á»ng link hÃ¬nh áº£nh minh há»a cho switch (khÃ´ng báº¯t buá»™c).</p>
+                </div>
+
+                <!-- NÃºt hÃ nh Ä‘á»™ng -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn-dark-lovable px-4 py-2">
+                        <i class="bi bi-plus-circle"></i>ThÃªm Switch
+                    </button>
+                    <a asp-controller="Switch" asp-action="Index"
+                        class="btn-ghost px-4 py-2">
+                        <i class="bi bi-x-lg"></i>Huá»·
+                    </a>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Client-side validation scripts (jQuery Unobtrusive Validation) -->
+    <partial name="_ValidationScriptsPartial" />
+}

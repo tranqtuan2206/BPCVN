@@ -1,0 +1,170 @@
+@model IEnumerable<BPCVN.Domain.Entities.Spec>
+@{
+    ViewData["Title"] = "KhÃ¡m phÃ¡ Builds";
+}
+
+<!-- â”€â”€ Page header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<div class="section-header mb-4">
+    <div>
+        <h2 class="section-title">
+            <i class="bi bi-search me-2" style="opacity:0.5"></i><span data-i18n="explore.title">KhÃ¡m phÃ¡ Builds</span>
+        </h2>
+        <p class="section-subtitle"><span data-i18n="explore.found">TÃ¬m tháº¥y</span> @Model.Count() <span data-i18n="explore.results">káº¿t quáº£</span></p>
+    </div>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <a asp-action="Create" class="btn-dark-lovable">
+            <i class="bi bi-plus-circle"></i><span data-i18n="nav.createBuild">Táº¡o Build</span>
+        </a>
+    }
+</div>
+
+<!-- â”€â”€ Form search & filter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<div class="card-lovable card-body-lovable mb-4">
+    <form asp-action="Index" method="get" class="row g-3 align-items-end">
+
+        <div class="col-12 col-md-6">
+            <label class="form-label-lovable">TÃ¬m kiáº¿m</label>
+            <input type="text" name="searchString" value="@ViewBag.SearchString"
+                class="form-control" placeholder="TÃªn build, kit, switch..." />
+        </div>
+
+        <div class="col-12 col-md-4">
+            <label class="form-label-lovable">Loáº¡i Switch</label>
+            <select name="switchType" class="form-select">
+                <option value="">-- Táº¥t cáº£ --</option>
+                @foreach (var t in new[] { "Linear", "Tactile", "Clicky" })
+                {
+                    if (ViewBag.SwitchType == t)
+                    {
+                        <option value="@t" selected>@t</option>
+                    }
+                    else
+                    {
+                        <option value="@t">@t</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="col-12 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn-dark-lovable flex-grow-1">
+                <i class="bi bi-funnel"></i>Lá»c
+            </button>
+            @if (!string.IsNullOrEmpty(ViewBag.SearchString as string) ||
+            !string.IsNullOrEmpty(ViewBag.SwitchType as string))
+            {
+                <a asp-action="Index" class="btn-ghost" title="XÃ³a bá»™ lá»c">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            }
+        </div>
+
+    </form>
+</div>
+
+<!-- â”€â”€ Káº¿t quáº£ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+@if (!Model.Any())
+{
+    <div class="card-lovable empty-state">
+        <i class="bi bi-search empty-icon"></i>
+        <p class="mb-0">KhÃ´ng tÃ¬m tháº¥y build nÃ o phÃ¹ há»£p.</p>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+        @foreach (var spec in Model)
+        {
+            <div class="col">
+                <div class="card-lovable h-100 d-flex flex-column">
+
+                    <!-- Header -->
+                    <div class="px-4 pt-4 pb-3">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <div class="avatar avatar-sm">
+                                @spec.User.Username[0].ToString().ToUpper()
+                            </div>
+                            <span class="text-caption" style="font-weight:500;color:var(--color-charcoal)">
+                                @spec.User.Username
+                            </span>
+                            <span class="text-caption ms-auto" style="font-size:.75rem">
+                                @spec.CreatedAt.ToString("dd/MM/yy")
+                            </span>
+                        </div>
+                        <h6 style="font-weight:600;color:var(--color-charcoal);margin:0">
+                            @spec.BuildName
+                        </h6>
+                    </div>
+
+                    <!-- Badges -->
+                    <div class="px-4 py-2 d-flex flex-wrap gap-2">
+                        <span class="badge-warm badge-kit">
+                            <i class="bi bi-cpu"></i>@spec.Kit.Name
+                        </span>
+                        <span class="badge-warm badge-switch">
+                            <i class="bi bi-toggles"></i>@(spec.Switch?.Name ?? spec.CustomSwitchName ?? "N/A")
+                        </span>
+                    </div>
+
+                    <!-- Audio náº¿u cÃ³ -->
+                    @if (spec.SoundTests.Any())
+                    {
+                        var top = spec.SoundTests.OrderByDescending(st => st.Upvotes).First();
+                        <div class="px-4 pb-3">
+                            <div class="waveform-player">
+                                <button type="button" class="waveform-play-btn" title="Play" disabled>
+                                    <i class="bi bi-hourglass-split waveform-icon-loading"></i>
+                                </button>
+                                <div class="waveform" data-audio-url="@top.AudioUrl"></div>
+                                <div class="waveform-time">
+                                    <span class="waveform-current-time">0:00</span>
+                                    <span class="waveform-time-separator">/</span>
+                                    <span class="waveform-duration">0:00</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Footer -->
+                    <div class="px-4 pb-4 mt-auto d-flex gap-2 align-items-center">
+                        <a asp-action="Details" asp-route-id="@spec.SpecId"
+                            class="btn-ghost btn-sm-lovable flex-grow-1 text-center">
+                            <i class="bi bi-arrow-right-circle"></i>Chi tiáº¿t
+                        </a>
+                        <span class="text-caption">
+                            <i class="bi bi-soundwave me-1"></i>
+                            @spec.SoundTests.Count
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+    <script>
+        async function upvote(btn) {
+            const testId = btn.dataset.testId;
+            btn.disabled = true;
+            try {
+                const res = await fetch('/SoundTest/Upvote', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken':
+                            document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? ''
+                    },
+                    body: JSON.stringify({ testId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    btn.querySelector('.upvote-count').textContent = data.newCount;
+                    btn.classList.add('upvoted');
+                }
+            } catch { btn.disabled = false; }
+        }
+    </script>
+}

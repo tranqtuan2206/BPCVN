@@ -1,0 +1,160 @@
+@model IEnumerable<BPCVN.Domain.Entities.Keycap>
+@{
+    ViewData["Title"] = "Keycap Catalog";
+
+    // Danh sÃ¡ch unique profile & material tá»« Controller cho dropdown filter
+    var profiles = ViewBag.Profiles as List<string> ?? new();
+    var materials = ViewBag.Materials as List<string> ?? new();
+}
+
+<!-- â”€â”€ Page header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<div class="section-header">
+    <div>
+        <h2 class="section-title">
+            <i class="bi bi-grid-3x3-gap me-2" style="opacity:0.5"></i>Keycap Catalog
+        </h2>
+        <p class="section-subtitle">
+            <span id="keycapCount">@Model.Count()</span> keycaps trong cÆ¡ sá»Ÿ dá»¯ liá»‡u
+        </p>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+        <!-- NÃºt ThÃªm má»›i â€” chá»‰ Admin tháº¥y -->
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-controller="Keycap" asp-action="Create" class="btn-dark-lovable">
+                <i class="bi bi-plus-circle"></i>ThÃªm Keycap
+            </a>
+        }
+        <span class="badge-count" id="keycapBadge" style="font-size:0.9375rem;padding:6px 16px">
+            @Model.Count() Keycaps
+        </span>
+    </div>
+</div>
+
+<!-- â”€â”€ Bá»™ lá»c & Live Search â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<div class="card-lovable card-body-lovable mb-4">
+    <div class="row g-3 align-items-end">
+        <!-- Ã” tÃ¬m kiáº¿m -->
+        <div class="col-12 col-md-5">
+            <label class="form-label-lovable">
+                <i class="bi bi-search me-1"></i><span data-i18n="keycap.searchLabel">TÃ¬m kiáº¿m</span>
+            </label>
+            <input type="text" id="searchInput" class="form-control"
+                placeholder="Nháº­p tÃªn keycap hoáº·c brand..." data-i18n-placeholder="keycap.index.searchPlaceholder" autocomplete="off" />
+        </div>
+
+        <!-- Dropdown Profile -->
+        <div class="col-6 col-md-3">
+            <label class="form-label-lovable">
+                <i class="bi bi-layers me-1"></i>Profile
+            </label>
+            <select id="filterProfile" class="form-select">
+                <option value="" data-i18n="keycap.index.allProfiles">-- Táº¥t cáº£ --</option>
+                @foreach (var p in profiles)
+                {
+                    <option value="@p">@p</option>
+                }
+            </select>
+        </div>
+
+        <!-- Dropdown Material -->
+        <div class="col-6 col-md-3">
+            <label class="form-label-lovable">
+                <i class="bi bi-gem me-1"></i><span data-i18n="keycap.materialLabel">Cháº¥t liá»‡u</span>
+            </label>
+            <select id="filterMaterial" class="form-select">
+                <option value="" data-i18n="keycap.index.allMaterials">-- Táº¥t cáº£ --</option>
+                @foreach (var m in materials)
+                {
+                    <option value="@m">@m</option>
+                }
+            </select>
+        </div>
+
+        <!-- NÃºt xÃ³a bá»™ lá»c -->
+        <div class="col-12 col-md-1 d-flex">
+            <button type="button" id="clearFilters" class="btn-ghost flex-grow-1" title="XÃ³a bá»™ lá»c">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- â”€â”€ Container danh sÃ¡ch Keycap â€” ná»™i dung Ä‘Æ°á»£c thay báº±ng AJAX â”€â”€â”€â”€â”€â”€ -->
+<div id="keycap-list-container">
+    <partial name="_KeycapListPartial" model="Model" />
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            'use strict';
+
+            // â”€â”€ Debounce â€” trÃ¬ hoÃ£n gá»i hÃ m cho Ä‘áº¿n khi user ngá»«ng gÃµ â”€â”€
+            function debounce(func, delay) {
+                let timerId;
+                return function (...args) {
+                    clearTimeout(timerId);
+                    timerId = setTimeout(() => func.apply(this, args), delay);
+                };
+            }
+
+            // â”€â”€ Tham chiáº¿u DOM â”€â”€
+            const searchInput = document.getElementById('searchInput');
+            const filterProfile = document.getElementById('filterProfile');
+            const filterMaterial = document.getElementById('filterMaterial');
+            const clearBtn = document.getElementById('clearFilters');
+            const container = document.getElementById('keycap-list-container');
+            const keycapCount = document.getElementById('keycapCount');
+            const keycapBadge = document.getElementById('keycapBadge');
+
+            // â”€â”€ Gá»i API láº¥y danh sÃ¡ch Keycap Ä‘Ã£ lá»c â”€â”€
+            async function fetchKeycaps() {
+                // GhÃ©p táº¥t cáº£ filter thÃ nh query string
+                const params = new URLSearchParams();
+                const search = searchInput.value.trim();
+                const profile = filterProfile.value;
+                const material = filterMaterial.value;
+
+                if (search) params.set('searchQuery', search);
+                if (profile) params.set('profile', profile);
+                if (material) params.set('material', material);
+
+                try {
+                    const res = await fetch(`/Keycap/Index?${params.toString()}`, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                    // GÃ¡n HTML partial vÃ o container
+                    const html = await res.text();
+                    container.innerHTML = html;
+
+                    // Cáº­p nháº­t bá»™ Ä‘áº¿m â€” Ä‘áº¿m sá»‘ card hiá»‡n táº¡i
+                    const count = container.querySelectorAll('.col').length;
+                    keycapCount.textContent = count;
+                    keycapBadge.textContent = count + ' Keycaps';
+                } catch (err) {
+                    console.error('Fetch keycaps error:', err);
+                }
+            }
+
+            // â”€â”€ Gáº¯n sá»± kiá»‡n â”€â”€
+            // Live search â€” debounce 350ms Ä‘á»ƒ trÃ¡nh spam request
+            searchInput.addEventListener('input', debounce(fetchKeycaps, 350));
+
+            // Dropdown filter â€” gá»i ngay khi thay Ä‘á»•i
+            filterProfile.addEventListener('change', fetchKeycaps);
+            filterMaterial.addEventListener('change', fetchKeycaps);
+
+            // NÃºt xÃ³a bá»™ lá»c â€” reset táº¥t cáº£ input/select rá»“i fetch láº¡i
+            clearBtn.addEventListener('click', function () {
+                searchInput.value = '';
+                filterProfile.value = '';
+                filterMaterial.value = '';
+                fetchKeycaps();
+            });
+        })();
+    </script>
+}

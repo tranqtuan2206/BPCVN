@@ -1,0 +1,142 @@
+@model BPCVN.Domain.Entities.Keycap
+@{
+    ViewData["Title"] = Model.Name + " â€” Keycap Details";
+}
+
+<!-- Header: TÃªn Keycap + nÃºt hÃ nh Ä‘á»™ng -->
+<div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+        <h2 class="section-title mb-1">
+            <i class="bi bi-grid-3x3-gap me-2" style="opacity:0.5"></i>@Model.Name
+        </h2>
+        <p class="text-caption mb-0">
+            <i class="bi bi-building me-1"></i>@(Model.Brand ?? "Unknown Brand")
+            @if (!string.IsNullOrEmpty(Model.Profile))
+            {
+                <span>&nbsp;Â·&nbsp;</span>
+                <i class="bi bi-layers me-1"></i>@Model.Profile
+            }
+            @if (!string.IsNullOrEmpty(Model.Material))
+            {
+                <span>&nbsp;Â·&nbsp;</span>
+                <i class="bi bi-gem me-1"></i>@Model.Material
+            }
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        @if (User.IsInRole("Admin"))
+        {
+            <!-- NÃºt Chá»‰nh sá»­a â€” chá»‰ Admin -->
+            <a asp-controller="Keycap" asp-action="Edit" asp-route-id="@Model.KeycapId"
+               class="btn-dark-lovable">
+                <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Chá»‰nh sá»­a</span>
+            </a>
+            <!-- NÃºt XÃ³a â€” chá»‰ Admin -->
+            <a asp-controller="Keycap" asp-action="Delete" asp-route-id="@Model.KeycapId"
+               class="btn-ghost" style="color:#b91c1c">
+                <i class="bi bi-trash"></i><span data-i18n="common.delete">XÃ³a</span>
+            </a>
+        }
+        <!-- NÃºt Quay láº¡i danh sÃ¡ch -->
+        <a asp-controller="Keycap" asp-action="Index" class="btn-ghost">
+            <i class="bi bi-arrow-left"></i><span data-i18n="common.backToList">Danh sÃ¡ch</span>
+        </a>
+    </div>
+</div>
+
+<!-- áº¢nh Keycap (náº¿u cÃ³) -->
+@if (!string.IsNullOrEmpty(Model.ImageUrl))
+{
+    <div class="card-lovable mb-4 overflow-hidden">
+        <img src="@Model.ImageUrl" class="w-100 img-detail-contain"
+             alt="@Model.Name" />
+    </div>
+}
+
+<!-- ThÃ´ng sá»‘ chi tiáº¿t Keycap -->
+<div class="card-lovable card-body-lovable mb-4">
+    <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:16px">
+        <i class="bi bi-sliders me-2" style="opacity:0.5"></i><span data-i18n="keycap.details.specs">ThÃ´ng sá»‘ Keycap</span>
+    </h5>
+    <div class="row g-3">
+        <!-- TÃªn Keycap -->
+        <div class="col-md-6">
+            <div class="info-block">
+                <div class="text-caption mb-1"><i class="bi bi-tag me-1"></i><span data-i18n="keycap.details.name">TÃªn Keycap</span></div>
+                <div style="font-weight:600;color:var(--color-charcoal)">@Model.Name</div>
+            </div>
+        </div>
+
+        <!-- HÃ£ng sáº£n xuáº¥t -->
+        <div class="col-md-6">
+            <div class="info-block">
+                <div class="text-caption mb-1"><i class="bi bi-building me-1"></i><span data-i18n="common.brand">HÃ£ng (Brand)</span></div>
+                <div style="font-weight:600;color:var(--color-charcoal)">
+                    @(Model.Brand ?? "â€”")
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile -->
+        <div class="col-md-4">
+            <div class="info-block">
+                <div class="text-caption mb-1"><i class="bi bi-layers me-1"></i><span data-i18n="common.profile">Profile</span></div>
+                <div style="font-weight:600;color:var(--color-charcoal)">
+                    @(Model.Profile ?? "â€”")
+                </div>
+            </div>
+        </div>
+
+        <!-- Material -->
+        <div class="col-md-4">
+            <div class="info-block">
+                <div class="text-caption mb-1"><i class="bi bi-gem me-1"></i><span data-i18n="common.material">Cháº¥t liá»‡u</span></div>
+                <div style="font-weight:600;color:var(--color-charcoal)">
+                    @(Model.Material ?? "â€”")
+                </div>
+            </div>
+        </div>
+
+        <!-- Image URL -->
+        <div class="col-md-4">
+            <div class="info-block">
+                <div class="text-caption mb-1"><i class="bi bi-image me-1"></i><span data-i18n="keycap.details.image">HÃ¬nh áº£nh</span></div>
+                <div style="font-weight:600;color:var(--color-charcoal)">
+                    @if (string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        @("â€”")
+                    }
+                    else
+                    {
+                        <span data-i18n="common.yes">CÃ³</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- MÃ´ táº£ -->
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <div class="col-12">
+                <div class="info-block">
+                    <div class="text-caption mb-1"><i class="bi bi-chat-left-text me-1"></i><span data-i18n="keycap.details.description">MÃ´ táº£</span></div>
+                    <div style="color:var(--color-charcoal)">@Model.Description</div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- NÃºt hÃ nh Ä‘á»™ng dÆ°á»›i cÃ¹ng -->
+<div class="d-flex gap-2">
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-controller="Keycap" asp-action="Edit" asp-route-id="@Model.KeycapId"
+           class="btn-dark-lovable">
+            <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Chá»‰nh sá»­a</span>
+        </a>
+    }
+    <a asp-controller="Keycap" asp-action="Index" class="btn-ghost">
+        <i class="bi bi-arrow-left"></i><span data-i18n="common.backToList">Quay láº¡i danh sÃ¡ch</span>
+    </a>
+</div>

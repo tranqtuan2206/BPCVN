@@ -1,0 +1,314 @@
+@model BPCVN.Application.ViewModels.KitEditViewModel
+@{
+    ViewData["Title"] = "Chá»‰nh sá»­a " + Model.Name;
+    var existingImages = ViewBag.ExistingImages as List<BPCVN.Domain.Entities.KitImage> ?? new();
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+
+        <div class="mb-4">
+            <h2 class="section-title">
+                <i class="bi bi-pencil-square me-2" style="opacity:0.5"></i>Chá»‰nh sá»­a Kit
+            </h2>
+            <p class="section-subtitle">Cáº­p nháº­t thÃ´ng tin cho <strong>@Model.Name</strong></p>
+        </div>
+
+        <div class="card-lovable card-body-lovable">
+            <form asp-action="Edit" method="post" enctype="multipart/form-data" id="kitForm">
+                <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
+                <input type="hidden" asp-for="KitId" />
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label-lovable">TÃªn Kit *</label>
+                    <input asp-for="Name" class="form-control" placeholder="VD: Neo65, QK75, Zoom65 V2..." />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Brand" class="form-label-lovable" data-i18n="kit.details.brand">HÃ£ng (Brand)</label>
+                        <input asp-for="Brand" class="form-control" placeholder="VD: Qwertykeys, Mode, KBDFans..." />
+                        <span asp-validation-for="Brand" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Layout" class="form-label-lovable" data-i18n="common.layout">Layout</label>
+                        <select asp-for="Layout" class="form-select">
+                            <option value="">â€” Chá»n layout â€”</option>
+                            <option value="40%">40%</option>
+                            <option value="60%">60%</option>
+                            <option value="65%">65%</option>
+                            <option value="Alice">Alice</option>
+                            <option value="70% - FRL">70% - FRL</option>
+                            <option value="75%">75%</option>
+                            <option value="TKL">TKL</option>
+                            <option value="98% - Full-size">98% - Full-size</option>
+                            <option value="Numpad">Numpad</option>
+                            <option value="Other">KhÃ¡c</option>
+                        </select>
+                        <span asp-validation-for="Layout" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="MountType" class="form-label-lovable" data-i18n="kit.details.mountType">Mount Type</label>
+                        <select asp-for="MountType" class="form-select">
+                            <option value="">â€” Chá»n mount â€”</option>
+                            <option value="Gasket Mount">Gasket Mount</option>
+                            <option value="Oring">Oring</option>
+                            <option value="Oringless">Oringless</option>
+                            <option value="Top Mount">Top Mount</option>
+                            <option value="Tray Mount">Tray Mount</option>
+                            <option value="Sandwich Mount">Sandwich Mount</option>
+                            <option value="Plateless">Plateless</option>
+                            <option value="Other">KhÃ¡c</option>
+                        </select>
+                        <span asp-validation-for="MountType" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="PcbType" class="form-label-lovable" data-i18n="kit.details.pcbType">PCB Type</label>
+                        <select asp-for="PcbType" class="form-select">
+                            <option value="">â€” Chá»n loáº¡i PCB â€”</option>
+                            <option value="Hotswap">Hotswap</option>
+                            <option value="Soldered">Soldered</option>
+                            <option value="Hotswap + Soldered">Hotswap + Soldered</option>
+                        </select>
+                        <span asp-validation-for="PcbType" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                @* â”€â”€ PHáº¦N áº¢NH KIT â”€â”€ *@
+                <div class="mb-4 p-3" style="border:1px dashed var(--border-interactive);border-radius:var(--radius-comfortable);background:var(--color-off-white)">
+                    <h6 style="font-weight:600;color:var(--color-charcoal);margin-bottom:12px">
+                        <i class="bi bi-images me-2" style="opacity:0.5"></i>áº¢nh Kit
+                        <small class="text-muted fw-normal ms-2">(KÃ©o tháº£ Ä‘á»ƒ sáº¯p xáº¿p â€” áº£nh Ä‘áº§u tiÃªn = áº£nh Ä‘áº¡i diá»‡n)</small>
+                    </h6>
+
+                    @* Container sortable â€” áº£nh cÅ© cÃ³ data-id, áº£nh má»›i cÃ³ data-type="new" *@
+                    <div id="imageSortableList" class="d-flex flex-wrap gap-2 mb-3" style="min-height:40px">
+                        @foreach (var img in existingImages)
+                        {
+                            var hasColor = !string.IsNullOrEmpty(img.ColorHex);
+                            var isFirst = existingImages.IndexOf(img) == 0;
+                            <div class="img-sortable-card" data-id="@img.Id" style="position:relative">
+                                @if (isFirst)
+                                {
+                                    <span class="img-cover-badge">áº¢nh Ä‘áº¡i diá»‡n</span>
+                                }
+                                <div class="img-drag-handle" title="KÃ©o"><i class="bi bi-grip-vertical"></i></div>
+                                <div style="width:70px;height:70px;border-radius:var(--radius-micro);overflow:hidden;flex-shrink:0;background:#f0f0f0">
+                                    <img src="@img.ImageUrl" style="width:100%;height:100%;object-fit:cover;display:block" />
+                                </div>
+                                <div class="img-card-label" title="@img.ImageUrl">
+                                    @(img.ImageUrl.Length > 20 ? img.ImageUrl.Substring(0, 20) + "..." : img.ImageUrl)
+                                </div>
+                                <div class="img-card-color @(hasColor ? "" : "no-color-active")">
+                                    <input type="color" value="@(hasColor ? img.ColorHex : "#1c1c1c")"
+                                           class="img-color-picker" @(hasColor ? "" : "disabled") title="MÃ u" />
+                                    <label class="img-no-color-label">
+                                        <input type="checkbox" class="no-color-checkbox"
+                                               @(hasColor ? "" : "checked") /> KhÃ´ng mÃ u
+                                    </label>
+                                </div>
+                                <button type="button" class="img-card-remove" title="XÃ³a"
+                                        onclick="this.closest('.img-sortable-card').remove()">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                        }
+                    </div>
+
+                    <div id="hiddenContainer" class="d-none"></div>
+                    <input type="file" asp-for="UploadImages" multiple accept="image/*" class="d-none" id="kitFileInput" />
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-ghost btn-sm" id="triggerFileBtn">
+                            <i class="bi bi-upload me-1"></i>Upload áº£nh má»›i
+                        </button>
+                        <button type="button" class="btn btn-ghost btn-sm" id="addUrlBtn">
+                            <i class="bi bi-link-45deg me-1"></i>ThÃªm link URL
+                        </button>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn-dark-lovable px-4 py-2">
+                        <i class="bi bi-floppy"></i>LÆ°u thay Ä‘á»•i
+                    </button>
+                    <a asp-controller="Kit" asp-action="Details" asp-route-id="@Model.KitId" class="btn-ghost px-4 py-2">
+                        <i class="bi bi-x-lg"></i>Huá»·
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+
+    <script>
+    (function () {
+        var sortableList = document.getElementById('imageSortableList');
+        var fileInput = document.getElementById('kitFileInput');
+        var form = document.getElementById('kitForm');
+        var fileMap = new WeakMap();
+
+        new Sortable(sortableList, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            onEnd: updateCoverBadge
+        });
+
+        function updateCoverBadge() {
+            sortableList.querySelectorAll('.img-cover-badge').forEach(function (b) { b.remove(); });
+            var first = sortableList.querySelector('.img-sortable-card');
+            if (first) {
+                var badge = document.createElement('span');
+                badge.className = 'img-cover-badge';
+                badge.textContent = 'áº¢nh Ä‘áº¡i diá»‡n';
+                first.style.position = 'relative';
+                first.appendChild(badge);
+            }
+        }
+
+        document.getElementById('triggerFileBtn').addEventListener('click', function () { fileInput.click(); });
+
+        fileInput.addEventListener('change', function () {
+            Array.from(this.files).forEach(function (file) {
+                if (!file.type.startsWith('image/')) return;
+                var card = addImageCard(file.name, URL.createObjectURL(file));
+                fileMap.set(card, file);
+            });
+            this.value = '';
+        });
+
+        document.getElementById('addUrlBtn').addEventListener('click', function () {
+            var url = prompt('DÃ¡n link áº£nh vÃ o Ä‘Ã¢y:');
+            if (!url || !url.trim()) return;
+            var card = addImageCard(url.trim(), url.trim());
+        });
+
+        function addImageCard(name, previewSrc) {
+            var card = document.createElement('div');
+            card.className = 'img-sortable-card';
+            card.setAttribute('data-id', '0'); // Id=0 nghÄ©a lÃ  áº£nh Má»šI
+
+            card.innerHTML =
+                '<div class="img-drag-handle" title="KÃ©o"><i class="bi bi-grip-vertical"></i></div>' +
+                '<div style="width:70px;height:70px;border-radius:var(--radius-micro);overflow:hidden;flex-shrink:0;background:#f0f0f0">' +
+                    '<img src="' + previewSrc + '" style="width:100%;height:100%;object-fit:cover;display:block" />' +
+                '</div>' +
+                '<div class="img-card-label" title="' + name + '">' + (name.length > 20 ? name.substring(0, 20) + '...' : name) + '</div>' +
+                '<div class="img-card-color no-color-active">' +
+                    '<input type="color" value="#1c1c1c" class="img-color-picker" disabled title="MÃ u" />' +
+                    '<label class="img-no-color-label"><input type="checkbox" class="no-color-checkbox" checked /> KhÃ´ng mÃ u</label>' +
+                '</div>' +
+                '<button type="button" class="img-card-remove" title="XÃ³a"><i class="bi bi-x-lg"></i></button>';
+
+            card.querySelector('.img-card-remove').addEventListener('click', function () {
+                fileMap.delete(card);
+                card.remove();
+            });
+
+            var noColorCheck = card.querySelector('.no-color-checkbox');
+            var colorPicker = card.querySelector('.img-color-picker');
+            var colorWrap = card.querySelector('.img-card-color');
+            noColorCheck.addEventListener('change', function () {
+                colorPicker.disabled = this.checked;
+                if (this.checked) {
+                    colorPicker.value = '#1c1c1c';
+                    colorWrap.classList.add('no-color-active');
+                } else {
+                    colorWrap.classList.remove('no-color-active');
+                }
+            });
+
+            sortableList.appendChild(card);
+            return card;
+        }
+
+        // â”€â”€ Submit: build FormData vá»›i ExistingImageIds â”€â”€
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var fd = new FormData();
+
+            // Field thÆ°á»ng
+            ['Name', 'Brand', 'Layout', 'MountType', 'PcbType', 'KitId'].forEach(function (name) {
+                var el = form.querySelector('[name="' + name + '"]');
+                if (el) fd.append(name, el.value);
+            });
+
+            var token = form.querySelector('input[name="__RequestVerificationToken"]');
+            if (token) fd.append('__RequestVerificationToken', token.value);
+
+            // Duyá»‡t sortable list theo Ä‘Ãºng thá»© tá»± DOM
+            var cards = sortableList.querySelectorAll('.img-sortable-card');
+            cards.forEach(function (card) {
+                var cardId = parseInt(card.getAttribute('data-id')) || 0;
+                var colorPicker = card.querySelector('.img-color-picker');
+                var noColorCheck = card.querySelector('.no-color-checkbox');
+                var color = (noColorCheck && noColorCheck.checked) ? '' : (colorPicker ? colorPicker.value : '');
+
+                if (cardId > 0) {
+                    // áº¢nh CÅ¨ (cÃ³ Id trong DB) â†’ gá»­i ExistingImageIds + ExistingImageColors
+                    fd.append('ExistingImageIds', cardId);
+                    fd.append('ExistingImageColors', color);
+                } else {
+                    // áº¢nh Má»šI â€” kiá»ƒm tra cÃ³ file trong fileMap khÃ´ng
+                    var file = fileMap.get(card);
+                    if (file) {
+                        // Upload file má»›i
+                        fd.append('UploadImages', file, file.name);
+                        fd.append('UploadImageColors', color);
+                    } else {
+                        // URL má»›i
+                        var label = card.querySelector('.img-card-label');
+                        fd.append('ExternalImageUrls', label ? label.title : '');
+                        fd.append('ExternalImageColors', color);
+                    }
+                }
+            });
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', form.action, true);
+            xhr.onload = function () {
+                if (xhr.status === 200 || xhr.status === 302) {
+                    window.location.href = xhr.responseURL || '/Kit';
+                } else {
+                    alert('CÃ³ lá»—i xáº£y ra, vui lÃ²ng thá»­ láº¡i.');
+                }
+            };
+            xhr.onerror = function () { alert('Lá»—i káº¿t ná»‘i.'); };
+            xhr.send(fd);
+        });
+    })();
+    </script>
+
+    <style>
+        .img-sortable-card {
+            display:flex;align-items:center;gap:6px;padding:6px 8px;background:#fff;
+            border:1px solid var(--border-light);border-radius:var(--radius-standard);
+            transition:box-shadow 0.2s;cursor:grab;position:relative;
+        }
+        .img-sortable-card:active{cursor:grabbing}
+        .img-sortable-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+        .img-drag-handle{cursor:grab;color:var(--color-charcoal-40);font-size:1rem;flex-shrink:0}
+        .img-card-label{font-size:11px;color:var(--color-muted);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .img-card-color{display:flex;align-items:center;gap:4px;flex-shrink:0}
+        .img-color-picker{width:26px;height:26px;padding:1px;cursor:pointer;border-radius:var(--radius-micro);border:1px solid var(--border-light)}
+        .img-no-color-label{font-size:10px;display:flex;align-items:center;gap:2px;cursor:pointer;white-space:nowrap;color:var(--color-muted)}
+        .img-card-remove{background:none;border:none;color:#b91c1c;cursor:pointer;font-size:12px;padding:2px;border-radius:50%;flex-shrink:0}
+        .img-card-remove:hover{background:rgba(185,28,28,0.1)}
+        .sortable-ghost{opacity:0.4}
+        .sortable-chosen{box-shadow:0 2px 12px rgba(0,0,0,0.15)}
+        .img-cover-badge{position:absolute;top:-6px;left:-6px;background:var(--color-charcoal);color:#fff;font-size:9px;padding:1px 5px;border-radius:var(--radius-pill);white-space:nowrap;pointer-events:none;z-index:1}
+        .img-card-color.no-color-active .img-color-picker{
+            background:repeating-conic-gradient(rgba(0,0,0,0.06) 0% 25%,transparent 0% 50%) 50%/10px 10px;
+            border:1px dashed var(--color-charcoal-40);opacity:0.5;
+        }
+    </style>
+}

@@ -1,0 +1,47 @@
+@model BPCVN.Application.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "ÄÄƒng nháº­p";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card-lovable card-body-lovable mt-3">
+            <div class="text-center mb-4">
+                <i class="bi bi-keyboard" style="font-size:2.5rem;color:var(--color-charcoal)"></i>
+                <h3 class="text-subheading mt-2" data-i18n="login.title">ÄÄƒng nháº­p</h3>
+                <p class="text-caption" data-i18n="login.subtitle">ChÃ o má»«ng trá»Ÿ láº¡i BPCVN</p>
+            </div>
+            <form asp-action="Login" method="post">
+                <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+                <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label-lovable">Email</label>
+                    <input asp-for="Email" class="form-control" placeholder="example@email.com" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label-lovable" data-i18n="login.passwordLabel">Máº­t kháº©u</label>
+                    <input asp-for="Password" class="form-control" data-i18n-placeholder="login.passwordPlaceholder" placeholder="Máº­t kháº©u cá»§a báº¡n" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+                <div class="mb-4 form-check form-check-lovable">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label text-caption" data-i18n="login.rememberMe">Ghi nhá»› Ä‘Äƒng nháº­p</label>
+                </div>
+                <button type="submit" class="btn-dark-lovable btn-block py-2">
+                    <i class="bi bi-box-arrow-in-right"></i><span data-i18n="login.submit">ÄÄƒng nháº­p</span>
+                </button>
+            </form>
+            <hr class="divider">
+            <p class="text-center text-caption mb-0">
+                <span data-i18n="login.noAccount">ChÆ°a cÃ³ tÃ i khoáº£n?</span>
+                <a asp-controller="Auth" asp-action="Register" class="link-lovable" style="font-weight:600"
+                    data-i18n="login.registerLink">ÄÄƒng kÃ½ ngay</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,109 @@
+@model BPCVN.Domain.Entities.Keycap
+@{
+    ViewData["Title"] = "Chá»‰nh sá»­a " + Model.Name;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+
+        <!-- Header -->
+        <div class="mb-4">
+            <h2 class="section-title">
+                <i class="bi bi-pencil-square me-2" style="opacity:0.5"></i>Chá»‰nh sá»­a Keycap
+            </h2>
+            <p class="section-subtitle">Cáº­p nháº­t thÃ´ng tin cho <strong>@Model.Name</strong></p>
+        </div>
+
+        <!-- Form Card -->
+        <div class="card-lovable card-body-lovable">
+            <form asp-action="Edit" method="post">
+
+                <!-- Validation Summary â€” hiá»ƒn thá»‹ lá»—i tá»•ng quan -->
+                <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
+
+                <!-- Hidden field: KeycapId (primary key) -->
+                <input type="hidden" asp-for="KeycapId" />
+
+                <!-- TÃªn Keycap (báº¯t buá»™c) -->
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label-lovable">TÃªn Keycap *</label>
+                    <input asp-for="Name" class="form-control" placeholder="VD: GMK Olivia, ePBT Cool Kids..." />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <!-- HÃ£ng + Profile trÃªn cÃ¹ng má»™t hÃ ng -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Brand" class="form-label-lovable" data-i18n="kit.details.brand">HÃ£ng (Brand)</label>
+                        <input asp-for="Brand" class="form-control" placeholder="VD: GMK, ePBT, JTK, Akko..." />
+                        <span asp-validation-for="Brand" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Profile" class="form-label-lovable" data-i18n="common.profile">Profile</label>
+                        <select asp-for="Profile" class="form-select">
+                            <option value="">â€” Chá»n profile â€”</option>
+                            <option value="Cherry">Cherry</option>
+                            <option value="SA">SA</option>
+                            <option value="OEM">OEM</option>
+                            <option value="DSA">DSA</option>
+                            <option value="KAT">KAT</option>
+                            <option value="MT3">MT3</option>
+                            <option value="XDA">XDA</option>
+                            <option value="ASA">ASA</option>
+                            <option value="Other">KhÃ¡c</option>
+                        </select>
+                        <span asp-validation-for="Profile" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Cháº¥t liá»‡u -->
+                <div class="mb-3">
+                    <label asp-for="Material" class="form-label-lovable" data-i18n="keycap.details.material">Cháº¥t liá»‡u</label>
+                    <select asp-for="Material" class="form-select">
+                        <option value="">â€” Chá»n cháº¥t liá»‡u â€”</option>
+                        <option value="PBT">PBT</option>
+                        <option value="ABS">ABS</option>
+                        <option value="POM">POM</option>
+                        <option value="PC">PC (Polycarbonate)</option>
+                        <option value="Other">KhÃ¡c</option>
+                    </select>
+                    <span asp-validation-for="Material" class="text-danger small"></span>
+                </div>
+
+                <!-- Image URL -->
+                <div class="mb-3">
+                    <label asp-for="ImageUrl" class="form-label-lovable">URL HÃ¬nh áº£nh</label>
+                    <input asp-for="ImageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
+                    <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                    <p class="form-hint">DÃ¡n link hÃ¬nh áº£nh trá»±c tiáº¿p (JPG, PNG, WebP).</p>
+                </div>
+
+                <!-- MÃ´ táº£ -->
+                <div class="mb-4">
+                    <label asp-for="Description" class="form-label-lovable" data-i18n="keycap.details.description">MÃ´ táº£</label>
+                    <textarea asp-for="Description" class="form-control" rows="3"
+                        placeholder="MÃ´ táº£ ngáº¯n gá»n vá» keycap..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+
+                <!-- NÃºt hÃ nh Ä‘á»™ng -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn-dark-lovable px-4 py-2">
+                        <i class="bi bi-floppy"></i>LÆ°u thay Ä‘á»•i
+                    </button>
+                    <a asp-controller="Keycap" asp-action="Details" asp-route-id="@Model.KeycapId"
+                        class="btn-ghost px-4 py-2">
+                        <i class="bi bi-x-lg"></i>Huá»·
+                    </a>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Client-side validation scripts (jQuery Unobtrusive Validation) -->
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -8,7 +8,10 @@ obj/
 ## Secrets — KHÔNG BAO GIỜ commit
 appsettings.*.json
 !appsettings.json
+**/appsettings.*.json
+!**/appsettings.json
 Properties/serviceDependencies.json
+**/Properties/serviceDependencies.json
 
 ## Logs
 *.log
@@ -17,6 +20,8 @@ logs/
 ## Uploads
 wwwroot/uploads/
 wwwroot/temp/
+**/wwwroot/uploads/
+**/wwwroot/temp/
 
 ## Publish
 publish/
@@ -27,23 +32,26 @@ node_modules/
 
 ## Media binaries
 FFmpeg/
+tools/FFmpeg/
 
 ## Misc
 .gemini
 .mimocode
 AllCode.txt
 AGENTS.md
-agents.md   
+agents.md
 DESIGN.md
+docs/DESIGN.md
 skills/
 skills_UI/
 skill_UI/
+tools/skill_UI/
 .claude/
 .agents/
 .mcp.json
 GEMINI.md
 graft/
+tools/graft/
 opencode.json
 skills-lock.json
 DESIGN.md
-
