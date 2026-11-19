@@ -10,7 +10,7 @@
     <div class="col-lg-7">
         <div class="mb-4">
             <h2 class="section-title">
-                <i class="bi bi-pencil-square me-2" style="opacity:0.5"></i>Chỉnh sửa Build
+                <i class="bi bi-pencil-square me-2" style="opacity:0.5"></i><span data-i18n="spec.edit.title">Chỉnh sửa Build</span>
             </h2>
             <p class="section-subtitle" data-i18n="spec.edit.subtitle">Cập nhật thông tin cấu hình của bạn</p>
         </div>
@@ -20,7 +20,7 @@
 
                 <!-- Tên Build -->
                 <div class="mb-3">
-                    <label asp-for="BuildName" class="form-label-lovable"></label>
+                    <label asp-for="BuildName" class="form-label-lovable" data-i18n="create.buildName">Tên build</label>
                     <input asp-for="BuildName" class="form-control" placeholder="VD: Neo65 Endgame Build..." data-i18n-placeholder="spec.edit.namePlaceholder" />
                     <span asp-validation-for="BuildName" class="text-danger small"></span>
                 </div>
@@ -28,7 +28,7 @@
                 <!-- Kit + Switch -->
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label asp-for="KitName" class="form-label-lovable"></label>
+                        <label asp-for="KitName" class="form-label-lovable" data-i18n="create.kitName">Kit</label>
                         <input asp-for="KitName" class="form-control" placeholder="VD: Neo65, QK75, Zoom65 V2..." data-i18n-placeholder="spec.edit.kitPlaceholder" />
                         <span asp-validation-for="KitName" class="text-danger small"></span>
                     </div>
@@ -52,14 +52,14 @@
 
                 <!-- Keycap -->
                 <div class="mb-3">
-                    <label asp-for="KeycapName" class="form-label-lovable"></label>
+                    <label asp-for="KeycapName" class="form-label-lovable" data-i18n="create.keycapName">Keycap</label>
                     <input asp-for="KeycapName" class="form-control" placeholder="VD: GMK Nord, EPBT BoW..." data-i18n-placeholder="spec.edit.keycapPlaceholder" />
                 </div>
 
                 <!-- Plate + Stab + Foam -->
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label asp-for="PlateMaterial" class="form-label-lovable"></label>
+                        <label asp-for="PlateMaterial" class="form-label-lovable" data-i18n="create.plateMaterial">Chất liệu plate</label>
                         <input asp-for="PlateMaterial" class="form-control" placeholder="VD: Aluminium, PC, FR4..." data-i18n-placeholder="spec.edit.platePlaceholder" />
                     </div>
                     <div class="col-md-6">
@@ -69,7 +69,7 @@
                 </div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label asp-for="FoamSetup" class="form-label-lovable"></label>
+                        <label asp-for="FoamSetup" class="form-label-lovable" data-i18n="create.foamSetup">Foam</label>
                         <input asp-for="FoamSetup" class="form-control" placeholder="VD: Case foam + PE foam..." data-i18n-placeholder="spec.edit.foamPlaceholder" />
                     </div>
                     <div class="col-md-6">
@@ -80,7 +80,7 @@
 
                 <!-- Mods -->
                 <div class="mb-4">
-                    <label asp-for="Mods" class="form-label-lovable"></label>
+                    <label asp-for="Mods" class="form-label-lovable" data-i18n="create.mods">Bài mod</label>
                     <textarea asp-for="Mods" class="form-control" rows="3"
                               placeholder="VD: Tape mod, tempest mod, switch film..." data-i18n-placeholder="spec.edit.modsPlaceholder"></textarea>
                 </div>
@@ -88,11 +88,11 @@
                 <!-- Nút hành động -->
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn-dark-lovable px-4 py-2">
-                        <i class="bi bi-floppy"></i>Lưu thay đổi
+                        <i class="bi bi-floppy"></i><span data-i18n="common.saveChanges">Lưu thay đổi</span>
                     </button>
                     <a asp-controller="Spec" asp-action="Details" asp-route-id="@specId"
                        class="btn-ghost px-4 py-2">
-                        <i class="bi bi-x-lg"></i>Huỷ
+                        <i class="bi bi-x-lg"></i><span data-i18n="common.cancel">Huỷ</span>
                     </a>
                 </div>
             </form>

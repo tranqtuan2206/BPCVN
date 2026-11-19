@@ -8,7 +8,7 @@
 {
     <div class="text-center py-4 text-muted">
         <i class="bi bi-check-circle-fill text-success fs-4 d-block mb-2"></i>
-        Không có @type nào đang chờ duyệt.
+        <span data-i18n="admin.pending.emptyTypePrefix">Không có</span> @type <span data-i18n="admin.pending.emptyTypeSuffix">nào đang chờ duyệt.</span>
     </div>
 }
 else
@@ -18,10 +18,10 @@ else
             <thead class="table-light">
                 <tr>
                     <th>#</th>
-                    <th>Tên @type</th>
-                    <th>Người submit</th>
-                    <th>Thời gian</th>
-                    <th class="text-end">Hành động</th>
+                    <th><span data-i18n="admin.pending.colName">Tên</span> @type</th>
+                    <th data-i18n="admin.pending.colSubmittedBy">Người submit</th>
+                    <th data-i18n="admin.pending.colTime">Thời gian</th>
+                    <th class="text-end" data-i18n="admin.pending.colActions">Hành động</th>
                 </tr>
             </thead>
             <tbody>
@@ -49,7 +49,7 @@ else
                                 @Html.AntiForgeryToken()
                                 <button type="submit" class="btn btn-success btn-sm"
                                         onclick="return confirm('Duyệt @Html.Raw(type) này?')">
-                                    <i class="bi bi-check-lg me-1"></i>Duyệt
+                                    <i class="bi bi-check-lg me-1"></i><span data-i18n="admin.pending.approve">Duyệt</span>
                                 </button>
                             </form>
 
@@ -67,7 +67,7 @@ else
                                 @Html.AntiForgeryToken()
                                 <button type="submit" class="btn btn-danger btn-sm"
                                         onclick="return confirm('Từ chối item này? Entity sẽ bị xóa, các build liên quan dùng tên tạm.')">
-                                    <i class="bi bi-x-lg me-1"></i>Từ chối
+                                    <i class="bi bi-x-lg me-1"></i><span data-i18n="admin.pending.reject">Từ chối</span>
                                 </button>
                             </form>
                         </div>

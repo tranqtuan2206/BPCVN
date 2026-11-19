@@ -9,9 +9,9 @@
         <!-- Header -->
         <div class="mb-4">
             <h2 class="section-title">
-                <i class="bi bi-plus-circle me-2" style="opacity:0.5"></i>Thêm Switch mới
+                <i class="bi bi-plus-circle me-2" style="opacity:0.5"></i><span data-i18n="switch.create.title">Thêm Switch mới</span>
             </h2>
-            <p class="section-subtitle">Thêm switch mới vào cơ sở dữ liệu</p>
+            <p class="section-subtitle" data-i18n="switch.create.addnewswitchtodatabase">Thêm switch mới vào cơ sở dữ liệu</p>
         </div>
 
         <!-- Form Card -->
@@ -23,7 +23,7 @@
 
                 <!-- Tên Switch (bắt buộc) -->
                 <div class="mb-3">
-                    <label asp-for="Name" class="form-label-lovable">Tên Switch *</label>
+                    <label asp-for="Name" class="form-label-lovable" data-i18n="switch.create.switchname">Tên Switch *</label>
                     <input asp-for="Name" class="form-control" placeholder="VD: Boba U4T, Cherry MX Black..." />
                     <span asp-validation-for="Name" class="text-danger small"></span>
                 </div>
@@ -38,7 +38,7 @@
                     <div class="col-md-6">
                         <label asp-for="Type" class="form-label-lovable" data-i18n="switch.details.type">Loại (Type)</label>
                         <select asp-for="Type" class="form-select">
-                            <option value="">— Chọn loại —</option>
+                            <option value="" data-i18n="switch.create.selecttype">— Chọn loại —</option>
                             <option value="Linear">Linear</option>
                             <option value="Tactile">Tactile</option>
                             <option value="Clicky">Clicky</option>
@@ -49,28 +49,28 @@
 
                 <!-- Lực nhấn (Actuation Force) -->
                 <div class="mb-3">
-                    <label asp-for="ActuationForce" class="form-label-lovable">ActuationForce</label>
+                    <label asp-for="ActuationForce" class="form-label-lovable" data-i18n="switch.create.label1">ActuationForce</label>
                     <input asp-for="ActuationForce" class="form-control" placeholder="VD: 45g, 62g, 67g..." />
                     <span asp-validation-for="ActuationForce" class="text-danger small"></span>
-                    <p class="form-hint">Lực nhấn cần thiết để kích hoạt switch (tính bằng gram).</p>
+                    <p class="form-hint" data-i18n="switch.create.forcerequiredtoactivatetheswitchingrams">Lực nhấn cần thiết để kích hoạt switch (tính bằng gram).</p>
                 </div>
 
                 <!-- Link hình ảnh minh họa (ImageUrl) -->
                 <div class="mb-4">
-                    <label asp-for="ImageUrl" class="form-label-lovable">Hình ảnh (URL)</label>
-                    <input asp-for="ImageUrl" class="form-control" placeholder="Dán link hình ảnh switch vào đây..." />
+                    <label asp-for="ImageUrl" class="form-label-lovable" data-i18n="switch.create.imageurl">Hình ảnh (URL)</label>
+                    <input asp-for="ImageUrl" class="form-control" placeholder="Dán link hình ảnh switch vào đây..." data-i18n-placeholder="switch.create.imagePlaceholder" />
                     <span asp-validation-for="ImageUrl" class="text-danger small"></span>
-                    <p class="form-hint">Dán đường link hình ảnh minh họa cho switch (không bắt buộc).</p>
+                    <p class="form-hint" data-i18n="switch.create.pasteillustrationimagelinkfortheswitchoptional">Dán đường link hình ảnh minh họa cho switch (không bắt buộc).</p>
                 </div>
 
                 <!-- Nút hành động -->
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn-dark-lovable px-4 py-2">
-                        <i class="bi bi-plus-circle"></i>Thêm Switch
+                        <i class="bi bi-plus-circle"></i><span data-i18n="switch.addBtn">Thêm Switch</span>
                     </button>
                     <a asp-controller="Switch" asp-action="Index"
                         class="btn-ghost px-4 py-2">
-                        <i class="bi bi-x-lg"></i>Huỷ
+                        <i class="bi bi-x-lg"></i><span data-i18n="common.cancel">Huỷ</span>
                     </a>
                 </div>
 

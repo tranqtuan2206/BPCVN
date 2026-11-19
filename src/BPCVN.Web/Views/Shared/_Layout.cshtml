@@ -156,7 +156,7 @@
                     <!-- Dropdown Ngôn ngữ — .nav-item.dropdown chuẩn Bootstrap 5, hỗ trợ hover CSS -->
                     <div class="nav-item dropdown lang-switcher" id="langSwitcher">
                         <button class="lang-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                            aria-expanded="false" title="Chuyển ngôn ngữ">
+                            aria-expanded="false" title="Chuyển ngôn ngữ" data-i18n-title="nav.switchLang">
                             <span class="lang-flag" id="langFlag">VN</span>
                             <span class="lang-label" id="langLabel">VN</span>
                         </button>
@@ -329,7 +329,7 @@
 -->
 
     <!-- ── Dark/Light Mode Toggle — góc dưới bên phải ────────────────────── -->
-    <button id="themeToggle" class="theme-toggle" title="Chuyển chế độ sáng/tối" onclick="toggleTheme()">
+    <button id="themeToggle" class="theme-toggle" title="Chuyển chế độ sáng/tối" data-i18n-title="nav.toggleTheme" onclick="toggleTheme()">
         <i class="bi bi-moon-fill theme-icon-dark"></i>
         <i class="bi bi-sun-fill theme-icon-light"></i>
     </button>
@@ -378,9 +378,9 @@
     </script>
 
     <!-- ── Language Switcher Script ────────────────────────────────────────── -->
-    <script src="~/js/translations.js"></script>
+    <script src="~/js/translations.js" asp-append-version="true"></script>
     <script>
-        /* Áp dụng ngôn ngữ: quét tất cả [data-i18n] và thay text */
+        /* Áp dụng ngôn ngữ: quét tất cả [data-i18n], [data-i18n-placeholder], [data-i18n-title] */
         function applyLang(lang) {
             const dict = translations[lang];
             if (!dict) return;
@@ -398,6 +398,11 @@
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
                 const key = el.getAttribute('data-i18n-placeholder');
                 if (dict[key]) el.placeholder = dict[key];
+            });
+
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (dict[key]) el.title = dict[key];
             });
 
             // Cập nhật flag + label trên nút chính

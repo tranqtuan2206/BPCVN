@@ -134,7 +134,7 @@
                                         </span>
                                         <button class="upvote-btn-lovable upvote-btn @(isLiked ? "upvoted" : "")" data-test-id="@topAudio.TestId"
                                             onclick="handleUpvote(this)"
-                                            @(User.Identity?.IsAuthenticated != true ? "disabled title=\"Đăng nhập để like\"" : "")>
+                                            @(User.Identity?.IsAuthenticated != true ? "disabled title=\"Đăng nhập để like\" data-i18n-title=\"common.loginToLike\"" : "")>
                                             <i class="bi bi-heart"></i>
                                             <i class="bi bi-heart-fill"></i>
                                             <span class="upvote-count">@topAudio.Upvotes</span>
@@ -158,8 +158,8 @@
                         {
                             <div class="px-4 pb-3">
                                 <div class="audio-container text-center" style="border-style:dashed">
-                                    <span class="text-caption" data-i18n="home.noSoundTest">
-                                        <i class="bi bi-mic-mute me-1"></i>Chưa có sound test
+                                    <span class="text-caption">
+                                        <i class="bi bi-mic-mute me-1"></i><span data-i18n="home.noSoundTest">Chưa có sound test</span>
                                     </span>
                                 </div>
                             </div>

@@ -9,7 +9,7 @@
         @* ── Header trang ── *@
         <div class="mb-4">
             <h2 class="section-title">
-                <i class="bi bi-plus-circle me-2" style="opacity:0.5"></i>Thêm Kit mới
+                <i class="bi bi-plus-circle me-2" style="opacity:0.5"></i><span data-i18n="kit.create.title">Thêm Kit mới</span>
             </h2>
             <p class="section-subtitle" data-i18n="kit.create.addDesc">Điền đầy đủ thông tin để thêm một kit vào hệ thống.</p>
         </div>
@@ -85,8 +85,8 @@
                 @* ── PHẦN ẢNH KIT (kéo thả + chọn màu) ── *@
                 <div class="mb-4 p-3" style="border:1px dashed var(--border-interactive);border-radius:var(--radius-comfortable);background:var(--color-off-white)">
                     <h6 style="font-weight:600;color:var(--color-charcoal);margin-bottom:12px">
-                        <i class="bi bi-images me-2" style="opacity:0.5"></i>Ảnh Kit
-                        <small class="text-muted fw-normal ms-2">(Kéo thả để sắp xếp thứ tự)</small>
+                        <i class="bi bi-images me-2" style="opacity:0.5"></i><span data-i18n="kit.images.title">Ảnh Kit</span>
+                        <small class="text-muted fw-normal ms-2" data-i18n="kit.images.dragHint">(Kéo thả để sắp xếp thứ tự)</small>
                     </h6>
 
                     @* Container chứa tất cả ảnh (upload + URL) — SortableJS sẽ kéo thả trong này *@
@@ -102,10 +102,10 @@
                     @* Nút thêm ảnh *@
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-ghost btn-sm" id="triggerFileBtn">
-                            <i class="bi bi-upload me-1"></i>Upload ảnh
+                            <i class="bi bi-upload me-1"></i><span data-i18n="kit.images.uploadBtn">Upload ảnh</span>
                         </button>
                         <button type="button" class="btn btn-ghost btn-sm" id="addUrlBtn">
-                            <i class="bi bi-link-45deg me-1"></i>Thêm link URL
+                            <i class="bi bi-link-45deg me-1"></i><span data-i18n="kit.images.addUrlBtn">Thêm link URL</span>
                         </button>
                     </div>
                 </div>
@@ -113,10 +113,10 @@
                 @* ── Nút hành động ── *@
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn-dark-lovable px-4 py-2">
-                        <i class="bi bi-plus-circle"></i>Thêm Kit
+                        <i class="bi bi-plus-circle"></i><span data-i18n="kit.addBtn">Thêm Kit</span>
                     </button>
                     <a asp-controller="Kit" asp-action="Index" class="btn-ghost px-4 py-2">
-                        <i class="bi bi-x-lg"></i>Huỷ
+                        <i class="bi bi-x-lg"></i><span data-i18n="common.cancel">Huỷ</span>
                     </a>
                 </div>
 

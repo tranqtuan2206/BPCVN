@@ -24,15 +24,15 @@
     <form asp-action="Index" method="get" class="row g-3 align-items-end">
 
         <div class="col-12 col-md-6">
-            <label class="form-label-lovable">Tìm kiếm</label>
+            <label class="form-label-lovable" data-i18n="explore.searchLabel">Tìm kiếm</label>
             <input type="text" name="searchString" value="@ViewBag.SearchString"
-                class="form-control" placeholder="Tên build, kit, switch..." />
+                class="form-control" placeholder="Tên build, kit, switch..." data-i18n-placeholder="explore.searchPlaceholder" />
         </div>
 
         <div class="col-12 col-md-4">
-            <label class="form-label-lovable">Loại Switch</label>
+            <label class="form-label-lovable" data-i18n="explore.switchType">Loại Switch</label>
             <select name="switchType" class="form-select">
-                <option value="">-- Tất cả --</option>
+                <option value="" data-i18n="explore.allTypes">-- Tất cả --</option>
                 @foreach (var t in new[] { "Linear", "Tactile", "Clicky" })
                 {
                     if (ViewBag.SwitchType == t)
@@ -49,12 +49,12 @@
 
         <div class="col-12 col-md-2 d-flex gap-2">
             <button type="submit" class="btn-dark-lovable flex-grow-1">
-                <i class="bi bi-funnel"></i>Lọc
+                <i class="bi bi-funnel"></i><span data-i18n="explore.filter">Lọc</span>
             </button>
             @if (!string.IsNullOrEmpty(ViewBag.SearchString as string) ||
             !string.IsNullOrEmpty(ViewBag.SwitchType as string))
             {
-                <a asp-action="Index" class="btn-ghost" title="Xóa bộ lọc">
+                <a asp-action="Index" class="btn-ghost" title="Xóa bộ lọc" data-i18n-title="common.clearFilters">
                     <i class="bi bi-x-lg"></i>
                 </a>
             }
@@ -68,7 +68,7 @@
 {
     <div class="card-lovable empty-state">
         <i class="bi bi-search empty-icon"></i>
-        <p class="mb-0">Không tìm thấy build nào phù hợp.</p>
+        <p class="mb-0" data-i18n="explore.noResult">Không tìm thấy build nào phù hợp.</p>
     </div>
 }
 else
@@ -130,7 +130,7 @@ else
                     <div class="px-4 pb-4 mt-auto d-flex gap-2 align-items-center">
                         <a asp-action="Details" asp-route-id="@spec.SpecId"
                             class="btn-ghost btn-sm-lovable flex-grow-1 text-center">
-                            <i class="bi bi-arrow-right-circle"></i>Chi tiết
+                            <i class="bi bi-arrow-right-circle"></i><span data-i18n="home.viewDetail">Chi tiết</span>
                         </a>
                         <span class="text-caption">
                             <i class="bi bi-soundwave me-1"></i>

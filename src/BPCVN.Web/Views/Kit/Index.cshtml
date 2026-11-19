@@ -26,7 +26,7 @@
         @if (User.IsInRole("Admin"))
         {
             <a asp-controller="Kit" asp-action="Create" class="btn-dark-lovable">
-                <i class="bi bi-plus-circle"></i>Thêm Kit
+                <i class="bi bi-plus-circle"></i><span data-i18n="kit.addBtn">Thêm Kit</span>
             </a>
         }
         <span class="badge-count" id="kitBadge" style="font-size:0.9375rem;padding:6px 16px">
@@ -77,7 +77,7 @@
 
         <!-- Nút xóa bộ lọc -->
         <div class="col-12 col-md-1 d-flex">
-            <button type="button" id="clearFilters" class="btn-ghost flex-grow-1" title="Xóa bộ lọc">
+            <button type="button" id="clearFilters" class="btn-ghost flex-grow-1" title="Xóa bộ lọc" data-i18n-title="common.clearFilters">
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
@@ -136,6 +136,11 @@
                     // Gán HTML partial vào container (bao gồm danh sách thẻ và thanh phân trang mới)
                     const html = await res.text();
                     container.innerHTML = html;
+
+                    // Áp dụng lại ngôn ngữ đang chọn cho nội dung mới render qua AJAX
+                    if (typeof applyLang === 'function') {
+                        applyLang(localStorage.getItem('bpcvn-lang') || 'vi');
+                    }
 
                     // Đồng bộ URL trên thanh địa chỉ về trang 1 khi thay đổi bộ lọc
                     const nextUrl = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;

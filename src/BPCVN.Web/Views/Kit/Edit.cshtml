@@ -9,9 +9,9 @@
 
         <div class="mb-4">
             <h2 class="section-title">
-                <i class="bi bi-pencil-square me-2" style="opacity:0.5"></i>Chỉnh sửa Kit
+                <i class="bi bi-pencil-square me-2" style="opacity:0.5"></i><span data-i18n="kit.edit.title">Chỉnh sửa Kit</span>
             </h2>
-            <p class="section-subtitle">Cập nhật thông tin cho <strong>@Model.Name</strong></p>
+            <p class="section-subtitle"><span data-i18n="common.updateInfoFor">Cập nhật thông tin cho</span> <strong>@Model.Name</strong></p>
         </div>
 
         <div class="card-lovable card-body-lovable">
@@ -20,7 +20,7 @@
                 <input type="hidden" asp-for="KitId" />
 
                 <div class="mb-3">
-                    <label asp-for="Name" class="form-label-lovable">Tên Kit *</label>
+                    <label asp-for="Name" class="form-label-lovable" data-i18n="kit.edit.kitname">Tên Kit *</label>
                     <input asp-for="Name" class="form-control" placeholder="VD: Neo65, QK75, Zoom65 V2..." />
                     <span asp-validation-for="Name" class="text-danger small"></span>
                 </div>
@@ -34,7 +34,7 @@
                     <div class="col-md-6">
                         <label asp-for="Layout" class="form-label-lovable" data-i18n="common.layout">Layout</label>
                         <select asp-for="Layout" class="form-select">
-                            <option value="">— Chọn layout —</option>
+                            <option value="" data-i18n="kit.edit.selectlayout">— Chọn layout —</option>
                             <option value="40%">40%</option>
                             <option value="60%">60%</option>
                             <option value="65%">65%</option>
@@ -44,7 +44,7 @@
                             <option value="TKL">TKL</option>
                             <option value="98% - Full-size">98% - Full-size</option>
                             <option value="Numpad">Numpad</option>
-                            <option value="Other">Khác</option>
+                            <option value="Other" data-i18n="common.other">Khác</option>
                         </select>
                         <span asp-validation-for="Layout" class="text-danger small"></span>
                     </div>
@@ -54,7 +54,7 @@
                     <div class="col-md-6">
                         <label asp-for="MountType" class="form-label-lovable" data-i18n="kit.details.mountType">Mount Type</label>
                         <select asp-for="MountType" class="form-select">
-                            <option value="">— Chọn mount —</option>
+                            <option value="" data-i18n="kit.edit.selectmount">— Chọn mount —</option>
                             <option value="Gasket Mount">Gasket Mount</option>
                             <option value="Oring">Oring</option>
                             <option value="Oringless">Oringless</option>
@@ -62,14 +62,14 @@
                             <option value="Tray Mount">Tray Mount</option>
                             <option value="Sandwich Mount">Sandwich Mount</option>
                             <option value="Plateless">Plateless</option>
-                            <option value="Other">Khác</option>
+                            <option value="Other" data-i18n="common.other">Khác</option>
                         </select>
                         <span asp-validation-for="MountType" class="text-danger small"></span>
                     </div>
                     <div class="col-md-6">
                         <label asp-for="PcbType" class="form-label-lovable" data-i18n="kit.details.pcbType">PCB Type</label>
                         <select asp-for="PcbType" class="form-select">
-                            <option value="">— Chọn loại PCB —</option>
+                            <option value="" data-i18n="kit.edit.option5">— Chọn loại PCB —</option>
                             <option value="Hotswap">Hotswap</option>
                             <option value="Soldered">Soldered</option>
                             <option value="Hotswap + Soldered">Hotswap + Soldered</option>
@@ -81,8 +81,8 @@
                 @* ── PHẦN ẢNH KIT ── *@
                 <div class="mb-4 p-3" style="border:1px dashed var(--border-interactive);border-radius:var(--radius-comfortable);background:var(--color-off-white)">
                     <h6 style="font-weight:600;color:var(--color-charcoal);margin-bottom:12px">
-                        <i class="bi bi-images me-2" style="opacity:0.5"></i>Ảnh Kit
-                        <small class="text-muted fw-normal ms-2">(Kéo thả để sắp xếp — ảnh đầu tiên = ảnh đại diện)</small>
+                        <i class="bi bi-images me-2" style="opacity:0.5"></i><span data-i18n="kit.images.title">Ảnh Kit</span>
+                        <small class="text-muted fw-normal ms-2" data-i18n="kit.images.dragCoverHint">(Kéo thả để sắp xếp — ảnh đầu tiên = ảnh đại diện)</small>
                     </h6>
 
                     @* Container sortable — ảnh cũ có data-id, ảnh mới có data-type="new" *@
@@ -94,7 +94,7 @@
                             <div class="img-sortable-card" data-id="@img.Id" style="position:relative">
                                 @if (isFirst)
                                 {
-                                    <span class="img-cover-badge">Ảnh đại diện</span>
+                                    <span class="img-cover-badge" data-i18n="kit.images.coverBadge">Ảnh đại diện</span>
                                 }
                                 <div class="img-drag-handle" title="Kéo"><i class="bi bi-grip-vertical"></i></div>
                                 <div style="width:70px;height:70px;border-radius:var(--radius-micro);overflow:hidden;flex-shrink:0;background:#f0f0f0">
@@ -108,10 +108,10 @@
                                            class="img-color-picker" @(hasColor ? "" : "disabled") title="Màu" />
                                     <label class="img-no-color-label">
                                         <input type="checkbox" class="no-color-checkbox"
-                                               @(hasColor ? "" : "checked") /> Không màu
+                                               @(hasColor ? "" : "checked") /> <span data-i18n="kit.images.noColor">Không màu</span>
                                     </label>
                                 </div>
-                                <button type="button" class="img-card-remove" title="Xóa"
+                                <button type="button" class="img-card-remove" title="Xóa" data-i18n-title="common.delete"
                                         onclick="this.closest('.img-sortable-card').remove()">
                                     <i class="bi bi-x-lg"></i>
                                 </button>
@@ -124,20 +124,20 @@
 
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-ghost btn-sm" id="triggerFileBtn">
-                            <i class="bi bi-upload me-1"></i>Upload ảnh mới
+                            <i class="bi bi-upload me-1"></i><span data-i18n="kit.images.uploadNewBtn">Upload ảnh mới</span>
                         </button>
                         <button type="button" class="btn btn-ghost btn-sm" id="addUrlBtn">
-                            <i class="bi bi-link-45deg me-1"></i>Thêm link URL
+                            <i class="bi bi-link-45deg me-1"></i><span data-i18n="kit.images.addUrlBtn">Thêm link URL</span>
                         </button>
                     </div>
                 </div>
 
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn-dark-lovable px-4 py-2">
-                        <i class="bi bi-floppy"></i>Lưu thay đổi
+                        <i class="bi bi-floppy"></i><span data-i18n="common.saveChanges">Lưu thay đổi</span>
                     </button>
                     <a asp-controller="Kit" asp-action="Details" asp-route-id="@Model.KitId" class="btn-ghost px-4 py-2">
-                        <i class="bi bi-x-lg"></i>Huỷ
+                        <i class="bi bi-x-lg"></i><span data-i18n="common.cancel">Huỷ</span>
                     </a>
                 </div>
             </form>

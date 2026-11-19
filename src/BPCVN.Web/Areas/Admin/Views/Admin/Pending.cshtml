@@ -10,16 +10,16 @@
     <div class="d-flex align-items-center gap-3 mb-4">
         <i class="bi bi-clipboard2-check fs-2 text-warning"></i>
         <div>
-            <h1 class="h3 mb-0">Queue Duyệt Master Data</h1>
-            <small class="text-muted">Các Kit / Switch / Keycap do user tự tạo, chưa được duyệt</small>
+            <h1 class="h3 mb-0" data-i18n="admin.pending.title">Queue Duyệt Master Data</h1>
+            <small class="text-muted" data-i18n="admin.pending.subtitle">Các Kit / Switch / Keycap do user tự tạo, chưa được duyệt</small>
         </div>
         @if (!Model.Any())
         {
-            <span class="badge bg-success ms-auto fs-6">Không có gì cần duyệt ✓</span>
+            <span class="badge bg-success ms-auto fs-6" data-i18n="admin.pending.allClear">Không có gì cần duyệt ✓</span>
         }
         else
         {
-            <span class="badge bg-warning text-dark ms-auto fs-6">@Model.Count() items đang chờ</span>
+            <span class="badge bg-warning text-dark ms-auto fs-6">@Model.Count() <span data-i18n="admin.pending.waitingSuffix">items đang chờ</span></span>
         }
     </div>
 
@@ -43,7 +43,7 @@
     {
         <div class="text-center py-5 text-muted">
             <i class="bi bi-inbox fs-1 d-block mb-3"></i>
-            Queue trống — mọi master data đều đã được duyệt!
+            <span data-i18n="admin.pending.emptyAll">Queue trống — mọi master data đều đã được duyệt!</span>
         </div>
     }
     else
@@ -94,26 +94,26 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-git me-2"></i>Merge vào entity chuẩn</h5>
+                <h5 class="modal-title"><i class="bi bi-git me-2"></i><span data-i18n="admin.pending.mergeTitle">Merge vào entity chuẩn</span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <p class="mb-3">
-                    Gộp "<strong id="mergeSourceName"></strong>" vào entity nào?
-                    <br><small class="text-muted">Tất cả Build dùng item này sẽ được cập nhật sang entity bạn chọn.</small>
+                    <span data-i18n="admin.pending.mergePromptPrefix">Gộp</span> "<strong id="mergeSourceName"></strong>" <span data-i18n="admin.pending.mergePromptSuffix">vào entity nào?</span>
+                    <br><small class="text-muted" data-i18n="admin.pending.mergeHint">Tất cả Build dùng item này sẽ được cập nhật sang entity bạn chọn.</small>
                 </p>
                 <select class="form-select" id="mergeTargetSelect">
-                    <option value="">-- Đang tải... --</option>
+                    <option value="" data-i18n="admin.pending.loading">-- Đang tải... --</option>
                 </select>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">Hủy</button>
                 <form id="mergeForm" method="post" asp-area="Admin" asp-controller="Admin" asp-action="Merge">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" id="mergeItemId" />
                     <input type="hidden" name="targetId" id="mergeTargetId" />
                     <button type="submit" class="btn btn-primary" id="mergeConfirmBtn" disabled>
-                        <i class="bi bi-git me-1"></i>Xác nhận Merge
+                        <i class="bi bi-git me-1"></i><span data-i18n="admin.pending.confirmMerge">Xác nhận Merge</span>
                     </button>
                 </form>
             </div>
@@ -132,17 +132,20 @@
         const pendingName = btn.dataset.mergeName;
         const type        = btn.dataset.mergeType;
 
+        const lang = localStorage.getItem('bpcvn-lang') || 'vi';
+        const dict = (typeof translations !== 'undefined' && translations[lang]) || {};
+
         document.getElementById('mergeItemId').value   = pendingId;
         document.getElementById('mergeSourceName').textContent = pendingName;
         document.getElementById('mergeConfirmBtn').disabled    = true;
-        document.getElementById('mergeTargetSelect').innerHTML = '<option>Đang tải...</option>';
+        document.getElementById('mergeTargetSelect').innerHTML = `<option>${dict['admin.pending.loading'] || 'Đang tải...'}</option>`;
 
         // Load danh sách entity approved cùng type
         const res  = await fetch(`/Admin/MergeTargets?type=${type}`);
         const list = await res.json();
 
         const sel = document.getElementById('mergeTargetSelect');
-        sel.innerHTML = '<option value="">-- Chọn entity chuẩn --</option>' +
+        sel.innerHTML = `<option value="">${dict['admin.pending.selectTarget'] || '-- Chọn entity chuẩn --'}</option>` +
             list.map(x => `<option value="${x.id}">${x.name}</option>`).join('');
 
         sel.addEventListener('change', function () {

@@ -208,7 +208,7 @@
                             <button class="upvote-btn-lovable upvote-btn @(isLiked ? "upvoted" : "")"
                                     data-test-id="@st.TestId"
                                     onclick="handleUpvote(this)"
-                                    @(User.Identity?.IsAuthenticated != true ? "disabled title=\"Đăng nhập để like\"" : "")>
+                                    @(User.Identity?.IsAuthenticated != true ? "disabled title=\"Đăng nhập để like\" data-i18n-title=\"common.loginToLike\"" : "")>
                                 <i class="bi bi-heart"></i>
                                 <i class="bi bi-heart-fill"></i>
                                 <span class="upvote-count">@st.Upvotes</span>
@@ -221,7 +221,7 @@
                                     <input type="hidden" name="testId" value="@st.TestId" />
                                     <button type="submit" class="btn-ghost btn-sm-lovable"
                                         style="color:#b91c1c;border-color:rgba(185,28,28,0.3);padding:4px 8px"
-                                        title="Xóa sound test">
+                                        title="Xóa sound test" data-i18n-title="spec.details.deleteSoundTest">
                                         <i class="bi bi-trash" style="font-size:0.8rem"></i>
                                     </button>
                                 </form>
