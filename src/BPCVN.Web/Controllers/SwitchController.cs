@@ -1,3 +1,4 @@
+using BPCVN.Application.Interfaces;
 using BPCVN.Domain.Entities;
 using BPCVN.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -9,56 +10,34 @@ namespace BPCVN.Web.Controllers;
 public class SwitchController : Controller
 {
     private readonly AppDbContext _db;
+    private readonly ISwitchService _switchService;
 
-    public SwitchController(AppDbContext db) => _db = db;
-
-    // GET /Switch — Danh sách Switch, hỗ trợ AJAX filter + live search
-    public async Task<IActionResult> Index(string? searchQuery, string? type, string? brand)
+    public SwitchController(AppDbContext db, ISwitchService switchService)
     {
-        var query = _db.Switches.AsNoTracking().AsQueryable();
+        _db = db;
+        _switchService = switchService;
+    }
 
-        // Lọc theo từ khóa tìm kiếm (tên hoặc brand)
-        if (!string.IsNullOrWhiteSpace(searchQuery))
-        {
-            var kw = searchQuery.Trim().ToLower();
-            query = query.Where(s =>
-                s.Name.ToLower().Contains(kw) ||
-                (s.Brand != null && s.Brand.ToLower().Contains(kw)));
-        }
-
-        // Lọc theo loại switch (Linear / Tactile / Clicky)
-        if (!string.IsNullOrWhiteSpace(type))
-            query = query.Where(s => s.Type == type);
-
-        // Lọc theo brand
-        if (!string.IsNullOrWhiteSpace(brand))
-            query = query.Where(s => s.Brand == brand);
-
-        var switches = await query
-            .OrderBy(s => s.Type)
-            .ThenBy(s => s.Name)
-            .ToListAsync();
+    // GET /Switch — Danh sách Switch có phân trang (18 sản phẩm/trang), hỗ trợ AJAX filter + live search
+    public async Task<IActionResult> Index(string? searchQuery, string? type, string? brand, [FromQuery] int page = 1)
+    {
+        var pagedSwitches = await _switchService.GetPagedAsync(searchQuery, type, brand, page);
 
         // Nếu là AJAX request → trả về Partial View
         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            return PartialView("_SwitchListPartial", switches);
+            return PartialView("_SwitchListPartial", pagedSwitches);
+
+        // Giữ lại giá trị tìm kiếm/bộ lọc hiện tại trên giao diện khi chuyển trang
+        ViewBag.SearchQuery = searchQuery;
+        ViewBag.SelectedType = type;
+        ViewBag.SelectedBrand = brand;
 
         // Load danh sách type & brand cho dropdown filter
-        ViewBag.Types = await _db.Switches
-            .Where(s => s.Type != null)
-            .Select(s => s.Type!)
-            .Distinct()
-            .OrderBy(t => t)
-            .ToListAsync();
+        var (types, brands) = await _switchService.GetFilterOptionsAsync();
+        ViewBag.Types = types;
+        ViewBag.Brands = brands;
 
-        ViewBag.Brands = await _db.Switches
-            .Where(s => s.Brand != null)
-            .Select(s => s.Brand!)
-            .Distinct()
-            .OrderBy(b => b)
-            .ToListAsync();
-
-        return View(switches);
+        return View(pagedSwitches);
     }
 
     // GET /Switch/Details/5 — Xem chi tiết một Switch (public)

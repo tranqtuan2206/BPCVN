@@ -1,18 +1,20 @@
-@model IEnumerable<BPCVN.Domain.Entities.Switch>
+@model BPCVN.Application.Common.PagedResult<BPCVN.Domain.Entities.Switch>
 
-@if (!Model.Any())
+@* Lưu TotalItems qua data attribute để JavaScript cập nhật đúng tổng số lượng khi lọc AJAX *@
+<div data-total-items="@Model.TotalItems">
+@if (!Model.Items.Any())
 {
     <div class="empty-state">
         <i class="bi bi-inbox empty-icon"></i>
-        <p class="text-body-lg" data-i18n="switch.empty">KhÃ´ng tÃ¬m tháº¥y switch nÃ o phÃ¹ há»£p.</p>
+        <p class="text-body-lg" data-i18n="switch.empty">Không tìm thấy switch nào phù hợp.</p>
     </div>
 }
 else
 {
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
-        @foreach (var sw in Model)
+        @foreach (var sw in Model.Items)
         {
-            @* Chá»n icon theo loáº¡i switch *@
+            @* Chọn icon theo loại switch *@
             string iconClass;
             if (sw.Type == "Linear") { iconClass = "bi-arrow-down"; }
             else if (sw.Type == "Tactile") { iconClass = "bi-arrow-down-up"; }
@@ -24,7 +26,7 @@ else
                     @if (!string.IsNullOrEmpty(sw.ImageUrl))
                     {
                         <img src="@sw.ImageUrl" class="img-lovable img-card-cover"
-                            alt="@sw.Name" style="height:140px; object-fit:cover;" />
+                            alt="@sw.Name" style="height:140px; object-fit:cover;" loading="lazy" decoding="async" />
                     }
                     else
                     {
@@ -46,29 +48,29 @@ else
                             <ul class="list-unstyled text-caption mb-0">
                                 <li>
                                     <i class="bi bi-speedometer2 me-2" style="color:var(--color-charcoal)"></i>
-                                    <span data-i18n="switch.actuationForce">Lá»±c nháº¥n</span>:
+                                    <span data-i18n="switch.actuationForce">Lực nhấn</span>:
                                     <strong>@sw.ActuationForce</strong>
                                 </li>
                             </ul>
                         }
                     </div>
                     <div class="px-3 pb-3 pt-1 d-flex gap-2">
-                        <!-- NÃºt Xem chi tiáº¿t -->
+                        <!-- Nút Xem chi tiết -->
                         <a asp-controller="Switch" asp-action="Details" asp-route-id="@sw.SwitchId"
                             class="btn-ghost btn-sm-lovable flex-grow-1 text-center">
                             <i class="bi bi-arrow-right-circle"></i><span data-i18n="switch.viewDetail">Xem chi
-                                tiáº¿t</span>
+                                tiết</span>
                         </a>
                         @if (User.IsInRole("Admin"))
                         {
-                            <!-- NÃºt Chá»‰nh sá»­a â€” chá»‰ Admin má»›i tháº¥y -->
+                            <!-- Nút Chỉnh sửa — chỉ Admin mới thấy -->
                             <a asp-controller="Switch" asp-action="Edit" asp-route-id="@sw.SwitchId"
-                                class="btn-ghost btn-sm-lovable" title="Chá»‰nh sá»­a">
+                                class="btn-ghost btn-sm-lovable" title="Chỉnh sửa">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-                            <!-- NÃºt XÃ³a â€” chá»‰ Admin má»›i tháº¥y -->
+                            <!-- Nút Xóa — chỉ Admin mới thấy -->
                             <a asp-controller="Switch" asp-action="Delete" asp-route-id="@sw.SwitchId"
-                                class="btn-ghost btn-sm-lovable" title="XÃ³a"
+                                class="btn-ghost btn-sm-lovable" title="Xóa"
                                 style="color:#b91c1c">
                                 <i class="bi bi-trash"></i>
                             </a>
@@ -78,4 +80,8 @@ else
             </div>
         }
     </div>
+
+    @* Thanh phân trang dùng chung — giữ nguyên tham số tìm kiếm/lọc *@
+    <partial name="_Pagination" model="Model" />
 }
+</div>

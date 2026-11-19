@@ -1,0 +1,107 @@
+@model BPCVN.Application.Common.IPagedResult
+@using Microsoft.AspNetCore.Routing
+
+@* Ẩn thanh phân trang nếu chỉ có tối đa 1 trang *@
+@if (Model != null && Model.TotalPages > 1)
+{
+    // Hàm tạo URL chuyển trang đồng thời giữ nguyên toàn bộ tham số tìm kiếm/bộ lọc trên query string
+    string BuildPageUrl(int targetPage)
+    {
+        var routeValues = new RouteValueDictionary();
+        foreach (var kv in Context.Request.Query)
+        {
+            if (!string.Equals(kv.Key, "page", StringComparison.OrdinalIgnoreCase) &&
+                !string.IsNullOrWhiteSpace(kv.Value))
+            {
+                routeValues[kv.Key] = kv.Value.ToString();
+            }
+        }
+        routeValues["page"] = targetPage;
+        return Url.Action(null, null, routeValues) ?? $"?page={targetPage}";
+    }
+
+    // Tạo danh sách các số trang hiển thị (luôn có trang đầu, trang cuối và vùng xung quanh trang hiện tại)
+    var currentPage = Model.PageNumber;
+    var totalPages = Model.TotalPages;
+    var corePages = new SortedSet<int> { 1, totalPages };
+
+    for (var p = Math.Max(1, currentPage - 1); p <= Math.Min(totalPages, currentPage + 1); p++)
+    {
+        corePages.Add(p);
+    }
+
+    var pageTokens = new List<int?>();
+    int? prevShown = null;
+    foreach (var p in corePages)
+    {
+        if (prevShown.HasValue)
+        {
+            var gap = p - prevShown.Value;
+            if (gap == 2)
+            {
+                // Nếu chỉ cách 1 trang thì hiện luôn số trang đó thay vì dấu "..."
+                pageTokens.Add(prevShown.Value + 1);
+            }
+            else if (gap > 2)
+            {
+                // Đánh dấu null để hiển thị dấu rút gọn "..."
+                pageTokens.Add(null);
+            }
+        }
+        pageTokens.Add(p);
+        prevShown = p;
+    }
+
+    <nav class="nb-pagination mt-4 pt-2" aria-label="Phân trang danh mục">
+        @* Nút Trang trước *@
+        @if (Model.HasPreviousPage)
+        {
+            <a class="nb-page-btn" href="@BuildPageUrl(currentPage - 1)" aria-label="Trang trước">
+                <i class="bi bi-chevron-left"></i>
+                <span>Trang trước</span>
+            </a>
+        }
+        else
+        {
+            <span class="nb-page-btn is-disabled" aria-disabled="true">
+                <i class="bi bi-chevron-left"></i>
+                <span>Trang trước</span>
+            </span>
+        }
+
+        @* Danh sách số trang và dấu rút gọn "..." *@
+        <div class="nb-page-numbers">
+            @foreach (var token in pageTokens)
+            {
+                if (token == null)
+                {
+                    <span class="nb-page-ellipsis" aria-hidden="true">...</span>
+                }
+                else if (token.Value == currentPage)
+                {
+                    <span class="nb-page-btn is-active" aria-current="page">@token.Value</span>
+                }
+                else
+                {
+                    <a class="nb-page-btn" href="@BuildPageUrl(token.Value)">@token.Value</a>
+                }
+            }
+        </div>
+
+        @* Nút Trang sau *@
+        @if (Model.HasNextPage)
+        {
+            <a class="nb-page-btn" href="@BuildPageUrl(currentPage + 1)" aria-label="Trang sau">
+                <span>Trang sau</span>
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        }
+        else
+        {
+            <span class="nb-page-btn is-disabled" aria-disabled="true">
+                <span>Trang sau</span>
+                <i class="bi bi-chevron-right"></i>
+            </span>
+        }
+    </nav>
+}

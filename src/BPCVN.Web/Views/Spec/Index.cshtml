@@ -1,38 +1,38 @@
 @model IEnumerable<BPCVN.Domain.Entities.Spec>
 @{
-    ViewData["Title"] = "KhÃ¡m phÃ¡ Builds";
+    ViewData["Title"] = "Khám phá Builds";
 }
 
-<!-- â”€â”€ Page header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ── Page header ───────────────────────────────────────────────────────── -->
 <div class="section-header mb-4">
     <div>
         <h2 class="section-title">
-            <i class="bi bi-search me-2" style="opacity:0.5"></i><span data-i18n="explore.title">KhÃ¡m phÃ¡ Builds</span>
+            <i class="bi bi-search me-2" style="opacity:0.5"></i><span data-i18n="explore.title">Khám phá Builds</span>
         </h2>
-        <p class="section-subtitle"><span data-i18n="explore.found">TÃ¬m tháº¥y</span> @Model.Count() <span data-i18n="explore.results">káº¿t quáº£</span></p>
+        <p class="section-subtitle"><span data-i18n="explore.found">Tìm thấy</span> @Model.Count() <span data-i18n="explore.results">kết quả</span></p>
     </div>
     @if (User.Identity?.IsAuthenticated == true)
     {
         <a asp-action="Create" class="btn-dark-lovable">
-            <i class="bi bi-plus-circle"></i><span data-i18n="nav.createBuild">Táº¡o Build</span>
+            <i class="bi bi-plus-circle"></i><span data-i18n="nav.createBuild">Tạo Build</span>
         </a>
     }
 </div>
 
-<!-- â”€â”€ Form search & filter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ── Form search & filter ──────────────────────────────────────────────── -->
 <div class="card-lovable card-body-lovable mb-4">
     <form asp-action="Index" method="get" class="row g-3 align-items-end">
 
         <div class="col-12 col-md-6">
-            <label class="form-label-lovable">TÃ¬m kiáº¿m</label>
+            <label class="form-label-lovable">Tìm kiếm</label>
             <input type="text" name="searchString" value="@ViewBag.SearchString"
-                class="form-control" placeholder="TÃªn build, kit, switch..." />
+                class="form-control" placeholder="Tên build, kit, switch..." />
         </div>
 
         <div class="col-12 col-md-4">
-            <label class="form-label-lovable">Loáº¡i Switch</label>
+            <label class="form-label-lovable">Loại Switch</label>
             <select name="switchType" class="form-select">
-                <option value="">-- Táº¥t cáº£ --</option>
+                <option value="">-- Tất cả --</option>
                 @foreach (var t in new[] { "Linear", "Tactile", "Clicky" })
                 {
                     if (ViewBag.SwitchType == t)
@@ -49,12 +49,12 @@
 
         <div class="col-12 col-md-2 d-flex gap-2">
             <button type="submit" class="btn-dark-lovable flex-grow-1">
-                <i class="bi bi-funnel"></i>Lá»c
+                <i class="bi bi-funnel"></i>Lọc
             </button>
             @if (!string.IsNullOrEmpty(ViewBag.SearchString as string) ||
             !string.IsNullOrEmpty(ViewBag.SwitchType as string))
             {
-                <a asp-action="Index" class="btn-ghost" title="XÃ³a bá»™ lá»c">
+                <a asp-action="Index" class="btn-ghost" title="Xóa bộ lọc">
                     <i class="bi bi-x-lg"></i>
                 </a>
             }
@@ -63,12 +63,12 @@
     </form>
 </div>
 
-<!-- â”€â”€ Káº¿t quáº£ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ── Kết quả ───────────────────────────────────────────────────────────── -->
 @if (!Model.Any())
 {
     <div class="card-lovable empty-state">
         <i class="bi bi-search empty-icon"></i>
-        <p class="mb-0">KhÃ´ng tÃ¬m tháº¥y build nÃ o phÃ¹ há»£p.</p>
+        <p class="mb-0">Không tìm thấy build nào phù hợp.</p>
     </div>
 }
 else
@@ -107,7 +107,7 @@ else
                         </span>
                     </div>
 
-                    <!-- Audio náº¿u cÃ³ -->
+                    <!-- Audio nếu có -->
                     @if (spec.SoundTests.Any())
                     {
                         var top = spec.SoundTests.OrderByDescending(st => st.Upvotes).First();
@@ -130,7 +130,7 @@ else
                     <div class="px-4 pb-4 mt-auto d-flex gap-2 align-items-center">
                         <a asp-action="Details" asp-route-id="@spec.SpecId"
                             class="btn-ghost btn-sm-lovable flex-grow-1 text-center">
-                            <i class="bi bi-arrow-right-circle"></i>Chi tiáº¿t
+                            <i class="bi bi-arrow-right-circle"></i>Chi tiết
                         </a>
                         <span class="text-caption">
                             <i class="bi bi-soundwave me-1"></i>

@@ -1,3 +1,4 @@
+using BPCVN.Application.Interfaces;
 using BPCVN.Domain.Entities;
 using BPCVN.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -9,56 +10,34 @@ namespace BPCVN.Web.Controllers;
 public class KeycapController : Controller
 {
     private readonly AppDbContext _db;
+    private readonly IKeycapService _keycapService;
 
-    public KeycapController(AppDbContext db) => _db = db;
-
-    // ── GET /Keycap — Danh sách Keycap, hỗ trợ AJAX filter + live search ──
-    public async Task<IActionResult> Index(string? searchQuery, string? profile, string? material)
+    public KeycapController(AppDbContext db, IKeycapService keycapService)
     {
-        var query = _db.Keycaps.AsNoTracking().AsQueryable();
+        _db = db;
+        _keycapService = keycapService;
+    }
 
-        // Lọc theo từ khóa tìm kiếm (tên hoặc brand)
-        if (!string.IsNullOrWhiteSpace(searchQuery))
-        {
-            var kw = searchQuery.Trim().ToLower();
-            query = query.Where(k =>
-                k.Name.ToLower().Contains(kw) ||
-                (k.Brand != null && k.Brand.ToLower().Contains(kw)));
-        }
-
-        // Lọc theo profile (Cherry, SA, OEM...)
-        if (!string.IsNullOrWhiteSpace(profile))
-            query = query.Where(k => k.Profile == profile);
-
-        // Lọc theo chất liệu (PBT, ABS...)
-        if (!string.IsNullOrWhiteSpace(material))
-            query = query.Where(k => k.Material == material);
-
-        var keycaps = await query
-            .OrderBy(k => k.Brand)
-            .ThenBy(k => k.Name)
-            .ToListAsync();
+    // ── GET /Keycap — Danh sách Keycap có phân trang (18 sản phẩm/trang), hỗ trợ AJAX filter + live search ──
+    public async Task<IActionResult> Index(string? searchQuery, string? profile, string? material, [FromQuery] int page = 1)
+    {
+        var pagedKeycaps = await _keycapService.GetPagedAsync(searchQuery, profile, material, page);
 
         // Nếu là AJAX request → trả về Partial View (chỉ HTML danh sách)
         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            return PartialView("_KeycapListPartial", keycaps);
+            return PartialView("_KeycapListPartial", pagedKeycaps);
+
+        // Giữ lại giá trị tìm kiếm/bộ lọc hiện tại trên giao diện khi chuyển trang
+        ViewBag.SearchQuery = searchQuery;
+        ViewBag.SelectedProfile = profile;
+        ViewBag.SelectedMaterial = material;
 
         // Load danh sách profile & material để đổ vào dropdown filter
-        ViewBag.Profiles = await _db.Keycaps
-            .Where(k => k.Profile != null)
-            .Select(k => k.Profile!)
-            .Distinct()
-            .OrderBy(p => p)
-            .ToListAsync();
+        var (profiles, materials) = await _keycapService.GetFilterOptionsAsync();
+        ViewBag.Profiles = profiles;
+        ViewBag.Materials = materials;
 
-        ViewBag.Materials = await _db.Keycaps
-            .Where(k => k.Material != null)
-            .Select(k => k.Material!)
-            .Distinct()
-            .OrderBy(m => m)
-            .ToListAsync();
-
-        return View(keycaps);
+        return View(pagedKeycaps);
     }
 
     // ── GET /Keycap/Details/5 — Xem chi tiết một Keycap (public) ──

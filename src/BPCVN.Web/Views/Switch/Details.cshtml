@@ -1,8 +1,8 @@
 @model BPCVN.Domain.Entities.Switch
 @{
-    ViewData["Title"] = Model.Name + " â€” Switch Details";
+    ViewData["Title"] = Model.Name + " — Switch Details";
 
-    // XÃ¡c Ä‘á»‹nh icon dá»±a trÃªn loáº¡i Switch
+    // Xác định icon dựa trên loại Switch
     string iconClass;
     if (Model.Type == "Linear") { iconClass = "bi-arrow-down"; }
     else if (Model.Type == "Tactile") { iconClass = "bi-arrow-down-up"; }
@@ -10,7 +10,7 @@
     else { iconClass = "bi-question-circle"; }
 }
 
-<!-- Header: TÃªn Switch + nÃºt hÃ nh Ä‘á»™ng -->
+<!-- Header: Tên Switch + nút hành động -->
 <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
     <div>
         <h2 class="section-title mb-1">
@@ -20,7 +20,7 @@
             <i class="bi bi-building me-1"></i>@(Model.Brand ?? "Unknown Brand")
             @if (!string.IsNullOrEmpty(Model.Type))
             {
-                <span>&nbsp;Â·&nbsp;</span>
+                <span>&nbsp;·&nbsp;</span>
                 <i class="bi @iconClass me-1"></i>@Model.Type
             }
         </p>
@@ -28,25 +28,25 @@
     <div class="d-flex gap-2">
         @if (User.IsInRole("Admin"))
         {
-            <!-- NÃºt Chá»‰nh sá»­a Switch â€” chá»‰ Admin -->
+            <!-- Nút Chỉnh sửa Switch — chỉ Admin -->
             <a asp-controller="Switch" asp-action="Edit" asp-route-id="@Model.SwitchId"
                class="btn-dark-lovable">
-                <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Chá»‰nh sá»­a</span>
+                <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Chỉnh sửa</span>
             </a>
-            <!-- NÃºt XÃ³a Switch â€” chá»‰ Admin -->
+            <!-- Nút Xóa Switch — chỉ Admin -->
             <a asp-controller="Switch" asp-action="Delete" asp-route-id="@Model.SwitchId"
                class="btn-ghost" style="color:#b91c1c">
-                <i class="bi bi-trash"></i><span data-i18n="common.delete">XÃ³a</span>
+                <i class="bi bi-trash"></i><span data-i18n="common.delete">Xóa</span>
             </a>
         }
-        <!-- NÃºt Quay láº¡i danh sÃ¡ch -->
+        <!-- Nút Quay lại danh sách -->
         <a asp-controller="Switch" asp-action="Index" class="btn-ghost">
-            <i class="bi bi-arrow-left"></i><span data-i18n="common.backToList">Danh sÃ¡ch</span>
+            <i class="bi bi-arrow-left"></i><span data-i18n="common.backToList">Danh sách</span>
         </a>
     </div>
 </div>
 
-<!-- áº¢nh minh hoáº¡ Switch (hoáº·c icon náº¿u khÃ´ng cÃ³ áº£nh) -->
+<!-- Ảnh minh hoạ Switch (hoặc icon nếu không có ảnh) -->
 @if (!string.IsNullOrEmpty(Model.ImageUrl))
 {
     <div class="card-lovable mb-4 overflow-hidden">
@@ -63,66 +63,66 @@ else
     </div>
 }
 
-<!-- ThÃ´ng sá»‘ chi tiáº¿t Switch -->
+<!-- Thông số chi tiết Switch -->
 <div class="card-lovable card-body-lovable mb-4">
     <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:16px">
-        <i class="bi bi-sliders me-2" style="opacity:0.5"></i><span data-i18n="switch.details.specs">ThÃ´ng sá»‘ Switch</span>
+        <i class="bi bi-sliders me-2" style="opacity:0.5"></i><span data-i18n="switch.details.specs">Thông số Switch</span>
     </h5>
     <div class="row g-3">
-        <!-- TÃªn Switch -->
+        <!-- Tên Switch -->
         <div class="col-md-6">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-tag me-1"></i><span data-i18n="switch.details.name">TÃªn Switch</span></div>
+                <div class="text-caption mb-1"><i class="bi bi-tag me-1"></i><span data-i18n="switch.details.name">Tên Switch</span></div>
                 <div style="font-weight:600;color:var(--color-charcoal)">@Model.Name</div>
             </div>
         </div>
 
-        <!-- HÃ£ng sáº£n xuáº¥t -->
+        <!-- Hãng sản xuất -->
         <div class="col-md-6">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-building me-1"></i><span data-i18n="common.brand">HÃ£ng (Brand)</span></div>
+                <div class="text-caption mb-1"><i class="bi bi-building me-1"></i><span data-i18n="common.brand">Hãng (Brand)</span></div>
                 <div style="font-weight:600;color:var(--color-charcoal)">
-                    @(Model.Brand ?? "â€”")
+                    @(Model.Brand ?? "—")
                 </div>
             </div>
         </div>
 
-        <!-- Loáº¡i Switch -->
+        <!-- Loại Switch -->
         <div class="col-md-6">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi @iconClass me-1"></i><span data-i18n="common.type">Loáº¡i (Type)</span></div>
+                <div class="text-caption mb-1"><i class="bi @iconClass me-1"></i><span data-i18n="common.type">Loại (Type)</span></div>
                 <div style="font-weight:600;color:var(--color-charcoal)">
-                    @(Model.Type ?? "â€”")
+                    @(Model.Type ?? "—")
                 </div>
             </div>
         </div>
 
-        <!-- Lá»±c nháº¥n -->
+        <!-- Lực nhấn -->
         <div class="col-md-6">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-speedometer2 me-1"></i><span data-i18n="switch.details.actuationForce">Lá»±c nháº¥n</span></div>
+                <div class="text-caption mb-1"><i class="bi bi-speedometer2 me-1"></i><span data-i18n="switch.details.actuationForce">Lực nhấn</span></div>
                 <div style="font-weight:600;color:var(--color-charcoal)">
-                    @(Model.ActuationForce ?? "â€”")
+                    @(Model.ActuationForce ?? "—")
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- NÃºt hÃ nh Ä‘á»™ng dÆ°á»›i cÃ¹ng -->
+<!-- Nút hành động dưới cùng -->
 <div class="d-flex gap-2">
     @if (User.IsInRole("Admin"))
     {
         <a asp-controller="Switch" asp-action="Edit" asp-route-id="@Model.SwitchId"
            class="btn-dark-lovable">
-            <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Chá»‰nh sá»­a</span>
+            <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Chỉnh sửa</span>
         </a>
         <a asp-controller="Switch" asp-action="Delete" asp-route-id="@Model.SwitchId"
            class="btn-ghost" style="color:#b91c1c">
-            <i class="bi bi-trash"></i><span data-i18n="common.delete">XÃ³a</span>
+            <i class="bi bi-trash"></i><span data-i18n="common.delete">Xóa</span>
         </a>
     }
     <a asp-controller="Switch" asp-action="Index" class="btn-ghost">
-        <i class="bi bi-arrow-left"></i><span data-i18n="common.backToList">Quay láº¡i danh sÃ¡ch</span>
+        <i class="bi bi-arrow-left"></i><span data-i18n="common.backToList">Quay lại danh sách</span>
     </a>
 </div>

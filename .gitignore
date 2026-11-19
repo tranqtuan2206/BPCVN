@@ -50,8 +50,8 @@ tools/skill_UI/
 .agents/
 .mcp.json
 GEMINI.md
-graft/
 tools/graft/
 opencode.json
 skills-lock.json
 DESIGN.md
+graft/

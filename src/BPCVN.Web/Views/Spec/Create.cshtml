@@ -1,8 +1,8 @@
 @model BPCVN.Application.ViewModels.SpecCreateViewModel
 @{
-    ViewData["Title"] = "Táº¡o Build má»›i";
+    ViewData["Title"] = "Tạo Build mới";
 
-    // Danh sÃ¡ch Switch cÃ³ sáºµn tá»« Controller
+    // Danh sách Switch có sẵn từ Controller
 
     var switches = ViewBag.Switches as List<BPCVN.Domain.Entities.Switch> ?? new();
 }
@@ -11,16 +11,16 @@
     <div class="col-lg-7">
         <div class="mb-4">
             <h2 class="section-title">
-                <i class="bi bi-plus-circle me-2" style="opacity:0.5"></i><span data-i18n="create.title">Táº¡o Build
-                    má»›i</span>
+                <i class="bi bi-plus-circle me-2" style="opacity:0.5"></i><span data-i18n="create.title">Tạo Build
+                    mới</span>
             </h2>
-            <p class="section-subtitle" data-i18n="create.subtitle">Chia sáº» cáº¥u hÃ¬nh bÃ n phÃ­m cá»§a báº¡n vá»›i cá»™ng Ä‘á»“ng</p>
+            <p class="section-subtitle" data-i18n="create.subtitle">Chia sẻ cấu hình bàn phím của bạn với cộng đồng</p>
         </div>
         <div class="card-lovable card-body-lovable">
             <form asp-action="Create" method="post">
                 <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
                 <div class="mb-3">
-                    <label asp-for="BuildName" class="form-label-lovable" data-i18n="create.buildName">TÃªn build</label>
+                    <label asp-for="BuildName" class="form-label-lovable" data-i18n="create.buildName">Tên build</label>
                     <input asp-for="BuildName" class="form-control" placeholder="VD: Neo65 Endgame Build..." data-i18n-placeholder="spec.edit.namePlaceholder" />
                     <span asp-validation-for="BuildName" class="text-danger small"></span>
                 </div>
@@ -33,7 +33,7 @@
                     <div class="col-md-6">
                         <label class="form-label-lovable" data-i18n="create.switchLabel">Switch</label>
                         <input type="text" id="switchInput" name="SwitchName" value="@Model.SwitchName"
-                            class="form-control" list="switchDatalist" placeholder="Chá»n hoáº·c nháº­p tÃªn switch..."
+                            class="form-control" list="switchDatalist" placeholder="Chọn hoặc nhập tên switch..."
                             data-i18n-placeholder="spec.edit.switchPlaceholder"
                             autocomplete="off" />
                         <datalist id="switchDatalist">
@@ -43,7 +43,7 @@
                                 <option value="@sw.Name" data-switch-id="@sw.SwitchId"></option>
                             }
                         </datalist>
-                        @* Hidden field gá»­i SwitchId khi user chá»n switch cÃ³ sáºµn *@
+                        @* Hidden field gửi SwitchId khi user chọn switch có sẵn *@
                         <input type="hidden" id="selectedSwitchId" name="SelectedSwitchId"
                             value="@Model.SelectedSwitchId" />
                         <span asp-validation-for="SwitchName" class="text-danger small"></span>
@@ -55,7 +55,7 @@
                 </div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label asp-for="PlateMaterial" class="form-label-lovable" data-i18n="create.plateMaterial">Cháº¥t liá»‡u plate</label>
+                        <label asp-for="PlateMaterial" class="form-label-lovable" data-i18n="create.plateMaterial">Chất liệu plate</label>
                         <input asp-for="PlateMaterial" class="form-control" placeholder="VD: Aluminium, PC, FR4..." data-i18n-placeholder="spec.edit.platePlaceholder" />
                     </div>
                     <div class="col-md-6">
@@ -74,16 +74,16 @@
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label asp-for="Mods" class="form-label-lovable" data-i18n="create.mods">BÃ i mod</label>
+                    <label asp-for="Mods" class="form-label-lovable" data-i18n="create.mods">Bài mod</label>
                     <textarea asp-for="Mods" class="form-control" rows="3"
                         placeholder="VD: Tape mod, tempest mod, switch film..." data-i18n-placeholder="spec.edit.modsPlaceholder"></textarea>
                 </div>
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn-dark-lovable px-4 py-2">
-                        <i class="bi bi-floppy"></i><span data-i18n="create.save">LÆ°u Build</span>
+                        <i class="bi bi-floppy"></i><span data-i18n="create.save">Lưu Build</span>
                     </button>
                     <a asp-controller="Home" asp-action="Index" class="btn-ghost px-4 py-2"
-                        data-i18n="common.cancel">Huá»·</a>
+                        data-i18n="common.cancel">Huỷ</a>
                 </div>
             </form>
         </div>
@@ -93,13 +93,13 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Map tÃªn switch â†’ ID Ä‘á»ƒ tá»± Ä‘á»™ng set hidden field khi user chá»n tá»« datalist
+        // Map tên switch → ID để tự động set hidden field khi user chọn từ datalist
         (function () {
             const switchInput = document.getElementById('switchInput');
             const hiddenId = document.getElementById('selectedSwitchId');
             const datalist = document.getElementById('switchDatalist');
 
-            // Táº¡o map: tÃªn (lowercase) â†’ switchId
+            // Tạo map: tên (lowercase) → switchId
             const switchMap = {};
             datalist.querySelectorAll('option').forEach(opt => {
                 switchMap[opt.value.toLowerCase()] = opt.dataset.switchId;
@@ -108,15 +108,15 @@
             switchInput.addEventListener('input', function () {
                 const val = this.value.trim().toLowerCase();
                 if (switchMap[val]) {
-                    // User chá»n/nháº­p tÃªn trÃ¹ng switch cÃ³ sáºµn â†’ set ID
+                    // User chọn/nhập tên trùng switch có sẵn → set ID
                     hiddenId.value = switchMap[val];
                 } else {
-                    // User nháº­p tÃªn má»›i â†’ xÃ³a ID, Controller sáº½ lÆ°u CustomSwitchName
+                    // User nhập tên mới → xóa ID, Controller sẽ lưu CustomSwitchName
                     hiddenId.value = '';
                 }
             });
 
-            // Xá»­ lÃ½ khi user chá»n tá»« datalist báº±ng cÃ¡ch click
+            // Xử lý khi user chọn từ datalist bằng cách click
             switchInput.addEventListener('change', function () {
                 const val = this.value.trim().toLowerCase();
                 if (switchMap[val]) {

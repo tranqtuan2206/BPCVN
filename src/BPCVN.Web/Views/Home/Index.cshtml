@@ -1,29 +1,29 @@
 @model IEnumerable<BPCVN.Domain.Entities.Spec>
 @using System.Security.Claims
 @{
-    ViewData["Title"] = "Trang chá»§";
+    ViewData["Title"] = "Trang chủ";
 }
 
 
 
-    <!-- â”€â”€ Hero Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Hero Section ──────────────────────────────────────────────────────── -->
     <div class="hero-section mb-5 text-center" style="padding: 80px 0;">
         <i class="bi bi-keyboard d-block mb-3" style="font-size:3rem;color:var(--color-charcoal);opacity:0.7"></i>
         <h1 class="text-display mb-2" data-i18n="home.title">
-            BÃ n PhÃ­m CÆ¡ Viá»‡t Nam
+            Bàn Phím Cơ Việt Nam
         </h1>
-        <p class="text-body-lg mb-4" data-i18n="home.subtitle">KhÃ¡m phÃ¡, láº¯ng nghe vÃ  chia sáº» tráº£i nghiá»‡m cá»§a báº¡n.</p>
+        <p class="text-body-lg mb-4" data-i18n="home.subtitle">Khám phá, lắng nghe và chia sẻ trải nghiệm của bạn.</p>
         <div class="d-flex justify-content-center gap-3 flex-wrap">
             <a asp-controller="Kit" asp-action="Index" class="btn-dark-lovable px-4 py-2">
                 <i class="bi bi-cpu"></i><span data-i18n="home.btnKit">Kit Catalog</span>
             </a>
             <a asp-controller="Spec" asp-action="Explore" class="btn-ghost px-4 py-2">
-                <i class="bi bi-compass"></i><span data-i18n="home.btnExplore">KhÃ¡m phÃ¡ Build</span>
+                <i class="bi bi-compass"></i><span data-i18n="home.btnExplore">Khám phá Build</span>
             </a>
         </div>
     </div>
 
-    <!-- â”€â”€ Stats Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Stats Bar ─────────────────────────────────────────────────────────── -->
     <div class="row g-3 mb-5 text-center">
         <div class="col-4">
             <div class="stat-card">
@@ -45,13 +45,13 @@
         </div>
     </div>
 
-    <!-- â”€â”€ Feed header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Feed header ───────────────────────────────────────────────────────── -->
     <div class="section-header">
         <h4 class="section-title">
-            <i class="bi bi-rss me-2" style="opacity:0.5"></i><span data-i18n="home.feedTitle">Má»›i nháº¥t tá»« cá»™ng Ä‘á»“ng</span>
+            <i class="bi bi-rss me-2" style="opacity:0.5"></i><span data-i18n="home.feedTitle">Mới nhất từ cộng đồng</span>
         </h4>
         <a asp-controller="Spec" asp-action="Explore" class="link-muted">
-            <span data-i18n="home.viewAll">Xem táº¥t cáº£</span> <i class="bi bi-arrow-right"></i>
+            <span data-i18n="home.viewAll">Xem tất cả</span> <i class="bi bi-arrow-right"></i>
         </a>
     </div>
 
@@ -59,11 +59,11 @@
     {
         <div class="empty-state">
             <i class="bi bi-inbox empty-icon"></i>
-            <p data-i18n="home.emptyState">ChÆ°a cÃ³ build nÃ o. HÃ£y lÃ  ngÆ°á»i Ä‘áº§u tiÃªn chia sáº»!</p>
+            <p data-i18n="home.emptyState">Chưa có build nào. Hãy là người đầu tiên chia sẻ!</p>
             @if (User.Identity?.IsAuthenticated == true)
             {
                 <a asp-controller="Spec" asp-action="Create" class="btn-dark-lovable px-4">
-                    <span data-i18n="home.createFirst">Táº¡o Build ngay</span>
+                    <span data-i18n="home.createFirst">Tạo Build ngay</span>
                 </a>
             }
         </div>
@@ -134,7 +134,7 @@
                                         </span>
                                         <button class="upvote-btn-lovable upvote-btn @(isLiked ? "upvoted" : "")" data-test-id="@topAudio.TestId"
                                             onclick="handleUpvote(this)"
-                                            @(User.Identity?.IsAuthenticated != true ? "disabled title=\"ÄÄƒng nháº­p Ä‘á»ƒ like\"" : "")>
+                                            @(User.Identity?.IsAuthenticated != true ? "disabled title=\"Đăng nhập để like\"" : "")>
                                             <i class="bi bi-heart"></i>
                                             <i class="bi bi-heart-fill"></i>
                                             <span class="upvote-count">@topAudio.Upvotes</span>
@@ -159,7 +159,7 @@
                             <div class="px-4 pb-3">
                                 <div class="audio-container text-center" style="border-style:dashed">
                                     <span class="text-caption" data-i18n="home.noSoundTest">
-                                        <i class="bi bi-mic-mute me-1"></i>ChÆ°a cÃ³ sound test
+                                        <i class="bi bi-mic-mute me-1"></i>Chưa có sound test
                                     </span>
                                 </div>
                             </div>
@@ -169,7 +169,7 @@
                         <div class="px-4 pb-4 mt-auto">
                             <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId"
                                 class="btn-ghost btn-sm-lovable btn-block text-center">
-                                <i class="bi bi-arrow-right-circle"></i><span data-i18n="home.viewDetail">Xem chi tiáº¿t</span>
+                                <i class="bi bi-arrow-right-circle"></i><span data-i18n="home.viewDetail">Xem chi tiết</span>
                             </a>
                         </div>
                     </div>
@@ -203,7 +203,7 @@
 
                 if (data.success) {
                     btn.querySelector('.upvote-count').textContent = data.newCount;
-                    // DÃ¹ng data.liked tá»« server Ä‘á»ƒ toggle class Ä‘Ãºng
+                    // Dùng data.liked từ server để toggle class đúng
                     if (data.liked) {
                         btn.classList.add('upvoted');
                     } else {

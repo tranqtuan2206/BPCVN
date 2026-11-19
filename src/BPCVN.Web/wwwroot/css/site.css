@@ -1648,3 +1648,74 @@ html.dark .comment-item-box .edit-btn {
 html.dark .comment-item-box .edit-btn:hover {
     color: var(--color-muted) !important;
 }
+
+/* ── 32. Thanh phân trang (Neo-Brutalist Pagination) ─────────────────────── */
+.nb-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.nb-page-numbers {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.nb-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 42px;
+    height: 42px;
+    padding: 0 14px;
+    background-color: var(--nb-bg);
+    color: var(--nb-ink);
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    font-family: var(--font-family);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: var(--nb-shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+a.nb-page-btn:hover {
+    background-color: var(--nb-accent);
+    color: var(--nb-ink);
+    text-decoration: none;
+    transform: translate(2px, 2px);
+    box-shadow: var(--nb-shadow-hover);
+}
+
+.nb-page-btn.is-active {
+    background-color: var(--nb-cta);
+    color: var(--nb-bg);
+    box-shadow: var(--nb-shadow-hover);
+    transform: translate(2px, 2px);
+    cursor: default;
+}
+
+.nb-page-btn.is-disabled {
+    opacity: 0.45;
+    box-shadow: none;
+    cursor: not-allowed;
+    user-select: none;
+}
+
+.nb-page-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 42px;
+    font-weight: 800;
+    color: var(--nb-ink);
+    user-select: none;
+}

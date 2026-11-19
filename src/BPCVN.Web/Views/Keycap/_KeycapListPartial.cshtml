@@ -1,23 +1,25 @@
-@model IEnumerable<BPCVN.Domain.Entities.Keycap>
+@model BPCVN.Application.Common.PagedResult<BPCVN.Domain.Entities.Keycap>
 
-@if (!Model.Any())
+@* Lưu TotalItems qua data attribute để JavaScript cập nhật đúng tổng số lượng khi lọc AJAX *@
+<div data-total-items="@Model.TotalItems">
+@if (!Model.Items.Any())
 {
     <div class="empty-state">
         <i class="bi bi-inbox empty-icon"></i>
-        <p class="text-body-lg" data-i18n="keycap.list.empty">KhÃ´ng tÃ¬m tháº¥y keycap nÃ o phÃ¹ há»£p.</p>
+        <p class="text-body-lg" data-i18n="keycap.list.empty">Không tìm thấy keycap nào phù hợp.</p>
     </div>
 }
 else
 {
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
-        @foreach (var keycap in Model)
+        @foreach (var keycap in Model.Items)
         {
             <div class="col">
                 <div class="card-lovable h-100 d-flex flex-column">
                     @if (!string.IsNullOrEmpty(keycap.ImageUrl))
                     {
                         <img src="@keycap.ImageUrl" class="img-lovable img-card-cover"
-                            alt="@keycap.Name" />
+                            alt="@keycap.Name" loading="lazy" decoding="async" />
                     }
                     else
                     {
@@ -42,21 +44,21 @@ else
                         </p>
                     </div>
                     <div class="px-3 pb-3 pt-1 d-flex gap-2">
-                        <!-- NÃºt Xem chi tiáº¿t -->
+                        <!-- Nút Xem chi tiết -->
                         <a asp-controller="Keycap" asp-action="Details" asp-route-id="@keycap.KeycapId"
                             class="btn-ghost btn-sm-lovable flex-grow-1 text-center">
-                            <i class="bi bi-arrow-right-circle"></i>Xem chi tiáº¿t
+                            <i class="bi bi-arrow-right-circle"></i>Xem chi tiết
                         </a>
                         @if (User.IsInRole("Admin"))
                         {
-                            <!-- NÃºt Chá»‰nh sá»­a â€” chá»‰ Admin má»›i tháº¥y -->
+                            <!-- Nút Chỉnh sửa — chỉ Admin mới thấy -->
                             <a asp-controller="Keycap" asp-action="Edit" asp-route-id="@keycap.KeycapId"
-                                class="btn-ghost btn-sm-lovable" title="Chá»‰nh sá»­a">
+                                class="btn-ghost btn-sm-lovable" title="Chỉnh sửa">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-                            <!-- NÃºt XÃ³a â€” chá»‰ Admin má»›i tháº¥y -->
+                            <!-- Nút Xóa — chỉ Admin mới thấy -->
                             <a asp-controller="Keycap" asp-action="Delete" asp-route-id="@keycap.KeycapId"
-                                class="btn-ghost btn-sm-lovable" title="XÃ³a"
+                                class="btn-ghost btn-sm-lovable" title="Xóa"
                                 style="color:#b91c1c">
                                 <i class="bi bi-trash"></i>
                             </a>
@@ -66,4 +68,8 @@ else
             </div>
         }
     </div>
+
+    @* Thanh phân trang dùng chung — giữ nguyên tham số tìm kiếm/lọc *@
+    <partial name="_Pagination" model="Model" />
 }
+</div>

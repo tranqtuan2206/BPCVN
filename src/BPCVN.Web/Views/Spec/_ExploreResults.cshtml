@@ -1,7 +1,7 @@
 @*
-    â”€â”€ _ExploreResults.cshtml â”€â”€
-    PartialView chá»©a danh sÃ¡ch Build cards cho trang Explore.
-    ÄÆ°á»£c tráº£ vá» qua AJAX khi user search/filter, trÃ¡nh reload toÃ n trang.
+    ── _ExploreResults.cshtml ──
+    PartialView chứa danh sách Build cards cho trang Explore.
+    Được trả về qua AJAX khi user search/filter, tránh reload toàn trang.
 *@
 @model IEnumerable<BPCVN.Domain.Entities.Spec>
 @using System.Security.Claims
@@ -10,8 +10,8 @@
 {
     <div class="card-lovable empty-state">
         <i class="bi bi-search empty-icon"></i>
-        <p class="mb-1 text-body-lg" data-i18n="explore.noResult">KhÃ´ng tÃ¬m tháº¥y build nÃ o phÃ¹ há»£p.</p>
-        <p class="text-caption" data-i18n="explore.tryAgain">Thá»­ tÃ¬m vá»›i tá»« khÃ³a khÃ¡c hoáº·c bá» bá»™ lá»c.</p>
+        <p class="mb-1 text-body-lg" data-i18n="explore.noResult">Không tìm thấy build nào phù hợp.</p>
+        <p class="text-caption" data-i18n="explore.tryAgain">Thử tìm với từ khóa khác hoặc bỏ bộ lọc.</p>
     </div>
 }
 else
@@ -59,7 +59,7 @@ else
                                     <span class="audio-label"><i class="bi bi-soundwave me-1"></i>Sound Test</span>
                                     <button class="upvote-btn-lovable upvote-btn @(isLiked ? "upvoted" : "")"
                                         data-test-id="@top.TestId" onclick="handleUpvote(this)"
-                                        @(User.Identity?.IsAuthenticated != true ? "disabled title=\"ÄÄƒng nháº­p Ä‘á»ƒ like\"" : "")>
+                                        @(User.Identity?.IsAuthenticated != true ? "disabled title=\"Đăng nhập để like\"" : "")>
                                         <i class="bi bi-heart"></i>
                                         <i class="bi bi-heart-fill"></i>
                                         <span class="upvote-count">@top.Upvotes</span>
@@ -84,7 +84,7 @@ else
                         <div class="px-4 pb-3">
                             <div class="audio-container text-center" style="border-style:dashed">
                                 <span class="text-caption" data-i18n="home.noSoundTest">
-                                    <i class="bi bi-mic-mute me-1"></i>ChÆ°a cÃ³ sound test
+                                    <i class="bi bi-mic-mute me-1"></i>Chưa có sound test
                                 </span>
                             </div>
                         </div>
@@ -92,7 +92,7 @@ else
                     <div class="px-4 pb-4 mt-auto d-flex gap-2 align-items-center">
                         <a asp-controller="Spec" asp-action="Details" asp-route-id="@spec.SpecId"
                             class="btn-ghost btn-sm-lovable flex-grow-1 text-center">
-                            <i class="bi bi-arrow-right-circle"></i><span data-i18n="home.viewDetail">Chi tiáº¿t</span>
+                            <i class="bi bi-arrow-right-circle"></i><span data-i18n="home.viewDetail">Chi tiết</span>
                         </a>
                         <span class="text-caption flex-shrink-0"><i class="bi bi-soundwave me-1"></i>@spec.SoundTests.Count</span>
                     </div>

@@ -1,6 +1,6 @@
 @model BPCVN.Domain.Entities.User
 @{
-    ViewData["Title"] = "Trang cÃ¡ nhÃ¢n";
+    ViewData["Title"] = "Trang cá nhân";
     int totalSoundTests = Model.Specs.Sum(s => s.SoundTests.Count);
     int totalUpvotes = Model.Specs.SelectMany(s => s.SoundTests).Sum(st => st.Upvotes);
 }
@@ -15,7 +15,7 @@
         <div class="flex-grow-1">
             <h3 class="text-subheading mb-1">@Model.Username</h3>
             <p class="text-caption mb-2">
-                <i class="bi bi-envelope me-1"></i>@Model.Email &nbsp;Â·&nbsp;
+                <i class="bi bi-envelope me-1"></i>@Model.Email &nbsp;·&nbsp;
                 <i class="bi bi-calendar3 me-1"></i>
                 <span data-i18n="profile.joined">Tham gia</span> @Model.CreatedAt.ToString("MM/yyyy")
             </p>
@@ -23,29 +23,29 @@
                 <span class="badge-warm"><i class="bi bi-collection"></i>@Model.Specs.Count Builds</span>
                 <span class="badge-warm"><i class="bi bi-soundwave"></i>@totalSoundTests Sound Tests</span>
                 <span class="badge-warm">
-                    <i class="bi bi-heart"></i>@totalUpvotes <span data-i18n="profile.upvotesReceived">Upvotes nháº­n Ä‘Æ°á»£c</span>
+                    <i class="bi bi-heart"></i>@totalUpvotes <span data-i18n="profile.upvotesReceived">Upvotes nhận được</span>
                 </span>
             </div>
         </div>
         <a asp-controller="Spec" asp-action="Create" class="btn-dark-lovable align-self-start">
-            <i class="bi bi-plus-circle"></i><span data-i18n="profile.newBuild">Build má»›i</span>
+            <i class="bi bi-plus-circle"></i><span data-i18n="profile.newBuild">Build mới</span>
         </a>
     </div>
 </div>
 
-<!-- Danh sÃ¡ch builds -->
+<!-- Danh sách builds -->
 <h5 class="section-title mb-3" style="font-size:1.25rem">
-    <i class="bi bi-collection me-2" style="opacity:0.5"></i><span data-i18n="profile.myBuilds">Builds cá»§a tÃ´i</span>
+    <i class="bi bi-collection me-2" style="opacity:0.5"></i><span data-i18n="profile.myBuilds">Builds của tôi</span>
 </h5>
 
 @if (!Model.Specs.Any())
 {
     <div class="card-lovable empty-state">
         <i class="bi bi-inbox empty-icon"></i>
-        <p class="mb-3" data-i18n="profile.noBuilds">Báº¡n chÆ°a cÃ³ build nÃ o.</p>
+        <p class="mb-3" data-i18n="profile.noBuilds">Bạn chưa có build nào.</p>
         <a asp-controller="Spec" asp-action="Create"
             class="btn-dark-lovable px-4 mx-auto" style="width:fit-content"
-            data-i18n="profile.createFirst">Táº¡o build Ä‘áº§u tiÃªn</a>
+            data-i18n="profile.createFirst">Tạo build đầu tiên</a>
     </div>
 }
 else
@@ -64,11 +64,11 @@ else
                             <span class="text-caption">
                                 <i class="bi bi-cpu me-1" style="color:var(--color-charcoal)"></i>@spec.Kit.Name
                             </span>
-                            <span class="text-caption">Â·</span>
+                            <span class="text-caption">·</span>
                             <span class="text-caption">
                                 <i class="bi bi-toggles me-1" style="color:var(--color-charcoal)"></i>@(spec.Switch?.Name ?? spec.CustomSwitchName ?? "N/A")
                             </span>
-                            <span class="text-caption">Â·</span>
+                            <span class="text-caption">·</span>
                             <span class="text-caption">
                                 <i class="bi bi-soundwave me-1" style="color:var(--color-charcoal)"></i>@spec.SoundTests.Count sound test(s)
                             </span>
@@ -96,19 +96,19 @@ else
                         </a>
                         <a asp-controller="Spec" asp-action="Edit" asp-route-id="@spec.SpecId"
                             class="btn-ghost btn-sm-lovable text-center">
-                            <i class="bi bi-pencil-square"></i>Sá»­a
+                            <i class="bi bi-pencil-square"></i>Sửa
                         </a>
                         <a asp-controller="SoundTest" asp-action="Upload" asp-route-specId="@spec.SpecId"
                             class="btn-cream btn-sm-lovable text-center">
                             <i class="bi bi-cloud-upload"></i>Upload
                         </a>
                         <form asp-controller="User" asp-action="DeleteSpec" method="post"
-                            onsubmit="return confirm('XÃ³a build \'@spec.BuildName\'?\nHÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoÃ n tÃ¡c.')">
+                            onsubmit="return confirm('Xóa build \'@spec.BuildName\'?\nHành động này không thể hoàn tác.')">
                             <input type="hidden" name="specId" value="@spec.SpecId" />
                             <button type="submit"
                                 class="btn-ghost btn-sm-lovable btn-block text-center"
                                 style="color:#b91c1c;border-color:rgba(185,28,28,0.3)">
-                                <i class="bi bi-trash"></i><span data-i18n="profile.delete">XÃ³a</span>
+                                <i class="bi bi-trash"></i><span data-i18n="profile.delete">Xóa</span>
                             </button>
                         </form>
                     </div>

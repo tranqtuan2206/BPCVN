@@ -1,43 +1,43 @@
 @model BPCVN.Application.ViewModels.KitCreateViewModel
 @{
-    ViewData["Title"] = "ThÃªm Kit má»›i";
+    ViewData["Title"] = "Thêm Kit mới";
 }
 
 <div class="row justify-content-center">
     <div class="col-lg-7">
 
-        @* â”€â”€ Header trang â”€â”€ *@
+        @* ── Header trang ── *@
         <div class="mb-4">
             <h2 class="section-title">
-                <i class="bi bi-plus-circle me-2" style="opacity:0.5"></i>ThÃªm Kit má»›i
+                <i class="bi bi-plus-circle me-2" style="opacity:0.5"></i>Thêm Kit mới
             </h2>
-            <p class="section-subtitle" data-i18n="kit.create.addDesc">Äiá»n Ä‘áº§y Ä‘á»§ thÃ´ng tin Ä‘á»ƒ thÃªm má»™t kit vÃ o há»‡ thá»‘ng.</p>
+            <p class="section-subtitle" data-i18n="kit.create.addDesc">Điền đầy đủ thông tin để thêm một kit vào hệ thống.</p>
         </div>
 
-        @* â”€â”€ Form Card â”€â”€ *@
+        @* ── Form Card ── *@
         <div class="card-lovable card-body-lovable">
             <form asp-action="Create" method="post" enctype="multipart/form-data" id="kitForm">
 
                 <div asp-validation-summary="ModelOnly" class="validation-summary-lovable"></div>
 
-                @* â”€â”€ TÃªn Kit â”€â”€ *@
+                @* ── Tên Kit ── *@
                 <div class="mb-3">
-                    <label asp-for="Name" class="form-label-lovable" data-i18n="kit.create.nameLabel">TÃªn Kit *</label>
+                    <label asp-for="Name" class="form-label-lovable" data-i18n="kit.create.nameLabel">Tên Kit *</label>
                     <input asp-for="Name" class="form-control" placeholder="VD: Neo65, QK75, Zoom65 V2..." />
                     <span asp-validation-for="Name" class="text-danger small"></span>
                 </div>
 
-                @* â”€â”€ HÃ£ng + Layout â”€â”€ *@
+                @* ── Hãng + Layout ── *@
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label asp-for="Brand" class="form-label-lovable" data-i18n="kit.create.brandLabel">HÃ£ng (Brand)</label>
+                        <label asp-for="Brand" class="form-label-lovable" data-i18n="kit.create.brandLabel">Hãng (Brand)</label>
                         <input asp-for="Brand" class="form-control" placeholder="VD: Qwertykeys, Mode, KBDFans..." />
                         <span asp-validation-for="Brand" class="text-danger small"></span>
                     </div>
                     <div class="col-md-6">
                         <label asp-for="Layout" class="form-label-lovable" data-i18n="kit.create.layoutLabel">Layout</label>
                         <select asp-for="Layout" class="form-select">
-                            <option value="" data-i18n="kit.create.selectLayout">â€” Chá»n layout â€”</option>
+                            <option value="" data-i18n="kit.create.selectLayout">— Chọn layout —</option>
                             <option value="40%" data-i18n="kit.create.layout40">40%</option>
                             <option value="60%" data-i18n="kit.create.layout60">60%</option>
                             <option value="65%" data-i18n="kit.create.layout65">65%</option>
@@ -47,18 +47,18 @@
                             <option value="TKL" data-i18n="kit.create.layoutTkl">TKL</option>
                             <option value="98% - Full-size" data-i18n="kit.create.layout98Fullsize">98% - Full-size</option>
                             <option value="Numpad" data-i18n="kit.create.layoutNumpad">Numpad</option>
-                            <option value="Other" data-i18n="kit.create.other">KhÃ¡c</option>
+                            <option value="Other" data-i18n="kit.create.other">Khác</option>
                         </select>
                         <span asp-validation-for="Layout" class="text-danger small"></span>
                     </div>
                 </div>
 
-                @* â”€â”€ Mount Type + PCB Type â”€â”€ *@
+                @* ── Mount Type + PCB Type ── *@
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
                         <label asp-for="MountType" class="form-label-lovable" data-i18n="kit.create.mountTypeLabel">Mount Type</label>
                         <select asp-for="MountType" class="form-select">
-                            <option value="" data-i18n="kit.create.selectMount">â€” Chá»n mount â€”</option>
+                            <option value="" data-i18n="kit.create.selectMount">— Chọn mount —</option>
                             <option value="Gasket Mount" data-i18n="kit.create.gasketMount">Gasket Mount</option>
                             <option value="Oring" data-i18n="kit.create.oring">Oring</option>
                             <option value="Oringless" data-i18n="kit.create.oringless">Oringless</option>
@@ -66,14 +66,14 @@
                             <option value="Tray Mount" data-i18n="kit.create.trayMount">Tray Mount</option>
                             <option value="Sandwich Mount" data-i18n="kit.create.sandwichMount">Sandwich Mount</option>
                             <option value="Plateless" data-i18n="kit.create.plateless">Plateless</option>
-                            <option value="Other" data-i18n="kit.create.otherMount">KhÃ¡c</option>
+                            <option value="Other" data-i18n="kit.create.otherMount">Khác</option>
                         </select>
                         <span asp-validation-for="MountType" class="text-danger small"></span>
                     </div>
                     <div class="col-md-6">
                         <label asp-for="PcbType" class="form-label-lovable" data-i18n="kit.create.pcbTypeLabel">PCB Type</label>
                         <select asp-for="PcbType" class="form-select">
-                            <option value="" data-i18n="kit.create.selectPcb">â€” Chá»n loáº¡i PCB â€”</option>
+                            <option value="" data-i18n="kit.create.selectPcb">— Chọn loại PCB —</option>
                             <option value="Hotswap" data-i18n="kit.create.hotswap">Hotswap</option>
                             <option value="Soldered" data-i18n="kit.create.soldered">Soldered</option>
                             <option value="Hotswap + Soldered" data-i18n="kit.create.hotswapSoldered">Hotswap + Soldered</option>
@@ -82,41 +82,41 @@
                     </div>
                 </div>
 
-                @* â”€â”€ PHáº¦N áº¢NH KIT (kÃ©o tháº£ + chá»n mÃ u) â”€â”€ *@
+                @* ── PHẦN ẢNH KIT (kéo thả + chọn màu) ── *@
                 <div class="mb-4 p-3" style="border:1px dashed var(--border-interactive);border-radius:var(--radius-comfortable);background:var(--color-off-white)">
                     <h6 style="font-weight:600;color:var(--color-charcoal);margin-bottom:12px">
-                        <i class="bi bi-images me-2" style="opacity:0.5"></i>áº¢nh Kit
-                        <small class="text-muted fw-normal ms-2">(KÃ©o tháº£ Ä‘á»ƒ sáº¯p xáº¿p thá»© tá»±)</small>
+                        <i class="bi bi-images me-2" style="opacity:0.5"></i>Ảnh Kit
+                        <small class="text-muted fw-normal ms-2">(Kéo thả để sắp xếp thứ tự)</small>
                     </h6>
 
-                    @* Container chá»©a táº¥t cáº£ áº£nh (upload + URL) â€” SortableJS sáº½ kÃ©o tháº£ trong nÃ y *@
+                    @* Container chứa tất cả ảnh (upload + URL) — SortableJS sẽ kéo thả trong này *@
                     <div id="imageSortableList" class="d-flex flex-wrap gap-2 mb-3" style="min-height:40px"></div>
 
-                    @* Ã” Upload file (áº©n â€” trigger bá»Ÿi nÃºt) *@
+                    @* Ô Upload file (ẩn — trigger bởi nút) *@
                     <input type="file" asp-for="UploadImages" multiple accept="image/*"
                            class="d-none" id="kitFileInput" />
 
-                    @* Ã” nháº­p URL áº©n (sáº½ append row má»›i khi nháº­p) *@
+                    @* Ô nhập URL ẩn (sẽ append row mới khi nhập) *@
                     <div id="externalUrlContainer" class="d-none"></div>
 
-                    @* NÃºt thÃªm áº£nh *@
+                    @* Nút thêm ảnh *@
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-ghost btn-sm" id="triggerFileBtn">
-                            <i class="bi bi-upload me-1"></i>Upload áº£nh
+                            <i class="bi bi-upload me-1"></i>Upload ảnh
                         </button>
                         <button type="button" class="btn btn-ghost btn-sm" id="addUrlBtn">
-                            <i class="bi bi-link-45deg me-1"></i>ThÃªm link URL
+                            <i class="bi bi-link-45deg me-1"></i>Thêm link URL
                         </button>
                     </div>
                 </div>
 
-                @* â”€â”€ NÃºt hÃ nh Ä‘á»™ng â”€â”€ *@
+                @* ── Nút hành động ── *@
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn-dark-lovable px-4 py-2">
-                        <i class="bi bi-plus-circle"></i>ThÃªm Kit
+                        <i class="bi bi-plus-circle"></i>Thêm Kit
                     </button>
                     <a asp-controller="Kit" asp-action="Index" class="btn-ghost px-4 py-2">
-                        <i class="bi bi-x-lg"></i>Huá»·
+                        <i class="bi bi-x-lg"></i>Huỷ
                     </a>
                 </div>
 
@@ -129,7 +129,7 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
-    @* SortableJS CDN â€” kÃ©o tháº£ sáº¯p xáº¿p áº£nh *@
+    @* SortableJS CDN — kéo thả sắp xếp ảnh *@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 
     <script>
@@ -140,11 +140,11 @@
             var addUrlBtn = document.getElementById('addUrlBtn');
             var form = document.getElementById('kitForm');
 
-            // Máº£ng lÆ°u File objects â€” gáº¯n vÃ o card Ä‘á»ƒ biáº¿t cÃ¡i nÃ o lÃ  file nÃ o
+            // Mảng lưu File objects — gắn vào card để biết cái nào là file nào
             // Key: card element, Value: File object
             var fileMap = new WeakMap();
 
-            // â”€â”€ KÃ­ch hoáº¡t SortableJS (kÃ©o cáº£ card, khÃ´ng cáº§n nÃºt grip) â”€â”€
+            // ── Kích hoạt SortableJS (kéo cả card, không cần nút grip) ──
             new Sortable(sortableList, {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
@@ -152,43 +152,43 @@
                 onEnd: updateCoverBadge
             });
 
-            // â”€â”€ Cáº­p nháº­t badge "áº¢nh Ä‘áº¡i diá»‡n" â€” card Ä‘áº§u tiÃªn luÃ´n cÃ³ badge â”€â”€
+            // ── Cập nhật badge "Ảnh đại diện" — card đầu tiên luôn có badge ──
             function updateCoverBadge() {
-                // XÃ³a táº¥t cáº£ badge cÅ©
+                // Xóa tất cả badge cũ
                 sortableList.querySelectorAll('.img-cover-badge').forEach(function (b) { b.remove(); });
-                // ThÃªm badge vÃ o card Ä‘áº§u tiÃªn
+                // Thêm badge vào card đầu tiên
                 var firstCard = sortableList.querySelector('.img-sortable-card');
                 if (firstCard) {
                     var badge = document.createElement('span');
                     badge.className = 'img-cover-badge';
-                    badge.textContent = 'áº¢nh Ä‘áº¡i diá»‡n';
+                    badge.textContent = 'Ảnh đại diện';
                     firstCard.style.position = 'relative';
                     firstCard.appendChild(badge);
                 }
             }
 
-            // â”€â”€ Trigger upload file â”€â”€
+            // ── Trigger upload file ──
             triggerFileBtn.addEventListener('click', function () { fileInput.click(); });
 
-            // â”€â”€ Khi chá»n file â†’ render preview + lÆ°u File vÃ o map â”€â”€
+            // ── Khi chọn file → render preview + lưu File vào map ──
             fileInput.addEventListener('change', function () {
                 var files = Array.from(this.files);
                 files.forEach(function (file) {
                     if (!file.type.startsWith('image/')) return;
                     var card = addImageCard('upload', file.name, URL.createObjectURL(file));
-                    fileMap.set(card, file); // LÆ°u File object kÃ¨m card
+                    fileMap.set(card, file); // Lưu File object kèm card
                 });
-                this.value = ''; // OK vÃ¬ File Ä‘Ã£ lÆ°u trong fileMap
+                this.value = ''; // OK vì File đã lưu trong fileMap
             });
 
-            // â”€â”€ ThÃªm link URL má»›i â”€â”€
+            // ── Thêm link URL mới ──
             addUrlBtn.addEventListener('click', function () {
-                var url = prompt('DÃ¡n link áº£nh vÃ o Ä‘Ã¢y:');
+                var url = prompt('Dán link ảnh vào đây:');
                 if (!url || !url.trim()) return;
                 addImageCard('url', url.trim(), url.trim());
             });
 
-            // â”€â”€ Táº¡o tháº» áº£nh trong sortable list, tráº£ vá» card element â”€â”€
+            // ── Tạo thẻ ảnh trong sortable list, trả về card element ──
             function addImageCard(type, name, previewSrc) {
                 var card = document.createElement('div');
                 card.className = 'img-sortable-card';
@@ -197,7 +197,7 @@
                 var handle = document.createElement('div');
                 handle.className = 'img-drag-handle';
                 handle.innerHTML = '<i class="bi bi-grip-vertical"></i>';
-                handle.title = 'KÃ©o Ä‘á»ƒ sáº¯p xáº¿p';
+                handle.title = 'Kéo để sắp xếp';
 
                 var imgWrap = document.createElement('div');
                 imgWrap.style.cssText = 'width:70px;height:70px;border-radius:var(--radius-micro);overflow:hidden;flex-shrink:0;background:#f0f0f0';
@@ -216,7 +216,7 @@
                 var colorInput = document.createElement('input');
                 colorInput.type = 'color';
                 colorInput.value = '#1c1c1c';
-                colorInput.title = 'Chá»n mÃ u';
+                colorInput.title = 'Chọn màu';
                 colorInput.className = 'img-color-picker';
                 var noColorLabel = document.createElement('label');
                 noColorLabel.className = 'img-no-color-label';
@@ -236,7 +236,7 @@
                 colorInput.disabled = true;
                 colorWrap.classList.add('no-color-active');
                 noColorLabel.appendChild(noColorCheck);
-                noColorLabel.appendChild(document.createTextNode(' KhÃ´ng mÃ u'));
+                noColorLabel.appendChild(document.createTextNode(' Không màu'));
                 colorWrap.appendChild(colorInput);
                 colorWrap.appendChild(noColorLabel);
 
@@ -244,9 +244,9 @@
                 removeBtn.type = 'button';
                 removeBtn.className = 'img-card-remove';
                 removeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
-                removeBtn.title = 'XÃ³a áº£nh nÃ y';
+                removeBtn.title = 'Xóa ảnh này';
                 removeBtn.addEventListener('click', function () {
-                    fileMap.delete(card); // XÃ³a file khá»i map khi remove card
+                    fileMap.delete(card); // Xóa file khỏi map khi remove card
                     card.remove();
                 });
 
@@ -260,13 +260,13 @@
                 return card;
             }
 
-            // â”€â”€ Submit: build FormData theo Ä‘Ãºng thá»© tá»± kÃ©o tháº£ â”€â”€
+            // ── Submit: build FormData theo đúng thứ tự kéo thả ──
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
 
                 var fd = new FormData();
 
-                // Copy cÃ¡c field bÃ¬nh thÆ°á»ng (Name, Brand, Layout...) tá»« form
+                // Copy các field bình thường (Name, Brand, Layout...) từ form
                 var inputs = form.querySelectorAll('input, select, textarea');
                 inputs.forEach(function (el) {
                     if (el.name && el.type !== 'file' && el.type !== 'hidden' && el.type !== 'submit') {
@@ -274,7 +274,7 @@
                     }
                 });
 
-                // Duyá»‡t sortable list theo Ä‘Ãºng thá»© tá»± DOM
+                // Duyệt sortable list theo đúng thứ tự DOM
                 var cards = sortableList.querySelectorAll('.img-sortable-card');
                 cards.forEach(function (card) {
                     var type = card.getAttribute('data-type');
@@ -283,7 +283,7 @@
                     var color = (noColorCheck && noColorCheck.checked) ? '' : (colorPicker ? colorPicker.value : '');
 
                     if (type === 'upload') {
-                        // File upload: append file + color vÃ o FormData
+                        // File upload: append file + color vào FormData
                         var file = fileMap.get(card);
                         if (file) {
                             fd.append('UploadImages', file, file.name);
@@ -297,7 +297,7 @@
                     }
                 });
 
-                // Gá»­i AJAX
+                // Gửi AJAX
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', form.action, true);
                 xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
@@ -308,14 +308,14 @@
 
                 xhr.onload = function () {
                     if (xhr.status === 200 || xhr.status === 302) {
-                        // ThÃ nh cÃ´ng â†’ redirect vá» trang Details
+                        // Thành công → redirect về trang Details
                         window.location.href = xhr.responseURL || '/Kit';
                     } else {
-                        alert('CÃ³ lá»—i xáº£y ra, vui lÃ²ng thá»­ láº¡i.');
+                        alert('Có lỗi xảy ra, vui lòng thử lại.');
                     }
                 };
                 xhr.onerror = function () {
-                    alert('Lá»—i káº¿t ná»‘i, vui lÃ²ng thá»­ láº¡i.');
+                    alert('Lỗi kết nối, vui lòng thử lại.');
                 };
                 xhr.send(fd);
             });
@@ -323,7 +323,7 @@
     </script>
 
     <style>
-        /* â”€â”€ Sortable card styles â”€â”€ */
+        /* ── Sortable card styles ── */
         .img-sortable-card {
             display: flex;
             align-items: center;
@@ -393,17 +393,17 @@
         .img-card-remove:hover {
             background: rgba(185,28,28,0.1);
         }
-        /* Hiá»‡u á»©ng khi kÃ©o */
+        /* Hiệu ứng khi kéo */
         .sortable-ghost { opacity: 0.4; }
         .sortable-chosen { box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
-        /* Badge áº£nh Ä‘áº¡i diá»‡n trÃªn card Ä‘áº§u tiÃªn */
+        /* Badge ảnh đại diện trên card đầu tiên */
         .img-cover-badge {
             position: absolute; top: -6px; left: -6px;
             background: var(--color-charcoal); color: #fff;
             font-size: 9px; padding: 1px 5px; border-radius: var(--radius-pill);
             white-space: nowrap; pointer-events: none; z-index: 1;
         }
-        /* Liquid glass effect khi "KhÃ´ng mÃ u" Ä‘Æ°á»£c tick */
+        /* Liquid glass effect khi "Không màu" được tick */
         .img-card-color.no-color-active .img-color-picker {
             background: repeating-conic-gradient(rgba(0,0,0,0.06) 0% 25%, transparent 0% 50%) 50% / 10px 10px;
             border: 1px dashed var(--color-charcoal-40);

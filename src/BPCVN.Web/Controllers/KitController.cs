@@ -1,3 +1,4 @@
+using BPCVN.Application.Interfaces;
 using BPCVN.Application.ViewModels;
 using BPCVN.Domain.Entities;
 using BPCVN.Infrastructure.Data;
@@ -12,46 +13,33 @@ public class KitController : Controller
 {
     private readonly AppDbContext _db;
     private readonly ImageService _imageService;
+    private readonly IKitService _kitService;
 
-    public KitController(AppDbContext db, ImageService imageService)
+    public KitController(AppDbContext db, ImageService imageService, IKitService kitService)
     {
         _db = db;
         _imageService = imageService;
+        _kitService = kitService;
     }
 
-    // GET /Kit — Danh sách Kit, hỗ trợ AJAX filter + live search
-    public async Task<IActionResult> Index(string? searchQuery, string? brand, string? layout)
+    // GET /Kit — Danh sách Kit có phân trang (18 sản phẩm/trang), hỗ trợ AJAX filter + live search
+    public async Task<IActionResult> Index(string? searchQuery, string? brand, string? layout, [FromQuery] int page = 1)
     {
-        var query = _db.Kits.AsNoTracking().AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(searchQuery))
-        {
-            var kw = searchQuery.Trim().ToLower();
-            query = query.Where(k =>
-                k.Name.ToLower().Contains(kw) ||
-                (k.Brand != null && k.Brand.ToLower().Contains(kw)));
-        }
-
-        if (!string.IsNullOrWhiteSpace(brand))
-            query = query.Where(k => k.Brand == brand);
-
-        if (!string.IsNullOrWhiteSpace(layout))
-            query = query.Where(k => k.Layout == layout);
-
-        var kits = await query
-            .Include(k => k.KitImages) // Load ảnh kèm Kit
-            .OrderBy(k => k.Brand)
-            .ThenBy(k => k.Name)
-            .ToListAsync();
+        var pagedKits = await _kitService.GetPagedAsync(searchQuery, brand, layout, page);
 
         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            return PartialView("_KitListPartial", kits);
+            return PartialView("_KitListPartial", pagedKits);
 
-        // Tính brands/layouts từ data đã có trong memory — tránh 2 DB call thêm
-        ViewBag.Brands  = kits.Where(k => k.Brand  != null).Select(k => k.Brand!).Distinct().Order().ToList();
-        ViewBag.Layouts = kits.Where(k => k.Layout != null).Select(k => k.Layout!).Distinct().Order().ToList();
+        // Giữ lại giá trị tìm kiếm/bộ lọc hiện tại trên giao diện khi chuyển trang
+        ViewBag.SearchQuery = searchQuery;
+        ViewBag.SelectedBrand = brand;
+        ViewBag.SelectedLayout = layout;
 
-        return View(kits);
+        var (brands, layouts) = await _kitService.GetFilterOptionsAsync();
+        ViewBag.Brands = brands;
+        ViewBag.Layouts = layouts;
+
+        return View(pagedKits);
     }
 
     // GET /Kit/Details/5 — Xem chi tiết một Kit (public)

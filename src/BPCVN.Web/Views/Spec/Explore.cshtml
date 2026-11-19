@@ -1,21 +1,21 @@
 @model IEnumerable<BPCVN.Domain.Entities.Spec>
 @{
-    ViewData["Title"] = "KhÃ¡m phÃ¡ Builds";
+    ViewData["Title"] = "Khám phá Builds";
 }
 
 <div class="section-header mb-4">
     <div>
         <h2 class="section-title">
-            <i class="bi bi-compass me-2" style="opacity:0.5"></i><span data-i18n="explore.title">KhÃ¡m phÃ¡ Builds</span>
+            <i class="bi bi-compass me-2" style="opacity:0.5"></i><span data-i18n="explore.title">Khám phá Builds</span>
         </h2>
         <p class="section-subtitle">
-            <span data-i18n="explore.found">TÃ¬m tháº¥y</span> <strong id="explore-count">@ViewBag.TotalResults</strong> <span data-i18n="explore.results">káº¿t quáº£</span>
+            <span data-i18n="explore.found">Tìm thấy</span> <strong id="explore-count">@ViewBag.TotalResults</strong> <span data-i18n="explore.results">kết quả</span>
         </p>
     </div>
     @if (User.Identity?.IsAuthenticated == true)
     {
         <a asp-controller="Spec" asp-action="Create" class="btn-dark-lovable">
-            <i class="bi bi-plus-circle"></i><span data-i18n="nav.createBuild">Táº¡o Build</span>
+            <i class="bi bi-plus-circle"></i><span data-i18n="nav.createBuild">Tạo Build</span>
         </a>
     }
 </div>
@@ -25,18 +25,18 @@
     <form id="explore-form" method="get" class="row g-3 align-items-end">
         <div class="col-12 col-md-6">
             <label class="form-label-lovable">
-                <i class="bi bi-search me-1"></i><span data-i18n="explore.searchLabel">TÃ¬m kiáº¿m</span>
+                <i class="bi bi-search me-1"></i><span data-i18n="explore.searchLabel">Tìm kiếm</span>
             </label>
             <input type="text" name="searchString" id="explore-search" value="@ViewBag.SearchString"
                 class="form-control" autocomplete="off"
-                data-i18n-placeholder="explore.searchPlaceholder" placeholder="Nháº­p tÃªn build, kit, switch..." />
+                data-i18n-placeholder="explore.searchPlaceholder" placeholder="Nhập tên build, kit, switch..." />
         </div>
         <div class="col-12 col-md-4">
             <label class="form-label-lovable">
-                <i class="bi bi-toggles me-1"></i><span data-i18n="explore.switchType">Loáº¡i Switch</span>
+                <i class="bi bi-toggles me-1"></i><span data-i18n="explore.switchType">Loại Switch</span>
             </label>
             <select name="switchType" id="explore-switch-type" class="form-select">
-                <option value="" data-i18n="explore.allTypes">-- Táº¥t cáº£ loáº¡i --</option>
+                <option value="" data-i18n="explore.allTypes">-- Tất cả loại --</option>
                 @foreach (var t in new[] { "Linear", "Tactile", "Clicky" })
                 {
                     if ((string?)ViewBag.SwitchType == t)
@@ -52,26 +52,26 @@
         </div>
         <div class="col-12 col-md-2 d-flex gap-2">
             <button type="submit" class="btn-dark-lovable flex-grow-1">
-                <i class="bi bi-funnel"></i><span data-i18n="explore.filter">Lá»c</span>
+                <i class="bi bi-funnel"></i><span data-i18n="explore.filter">Lọc</span>
             </button>
         </div>
     </form>
 </div>
 
-<!-- Wrapper chá»©a káº¿t quáº£ â€” AJAX sáº½ inject HTML vÃ o Ä‘Ã¢y -->
+<!-- Wrapper chứa kết quả — AJAX sẽ inject HTML vào đây -->
 <div id="explore-results">
     @await Html.PartialAsync("_ExploreResults", Model)
 </div>
 
 @section Scripts {
     <script>
-        /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-         *  BPCVN Live Search â€” gÃµ Ä‘áº¿n Ä‘Ã¢u, káº¿t quáº£ nháº£y ra Ä‘áº¿n Ä‘áº¥y
-         *  Debounce 300ms â€” trÃ¡nh spam request má»—i phÃ­m nháº¥n
-         * â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* ──────────────────────────────────────────────────────────────────
+         *  BPCVN Live Search — gõ đến đâu, kết quả nhảy ra đến đấy
+         *  Debounce 300ms — tránh spam request mỗi phím nhấn
+         * ────────────────────────────────────────────────────────────────── */
 
         (function () {
-            /* Láº¥y elements */
+            /* Lấy elements */
             var searchInput    = document.getElementById('explore-search');
             var switchSelect   = document.getElementById('explore-switch-type');
             var resultsWrapper = document.getElementById('explore-results');
@@ -81,7 +81,7 @@
 
             if (!searchInput || !resultsWrapper) return;
 
-            /* Táº¡o query string tá»« giÃ¡ trá»‹ hiá»‡n táº¡i */
+            /* Tạo query string từ giá trị hiện tại */
             function buildQuery() {
                 var s = searchInput.value.trim();
                 var t = switchSelect ? switchSelect.value : '';
@@ -91,7 +91,7 @@
                 return p.length ? '?' + p.join('&') : '';
             }
 
-            /* Fetch káº¿t quáº£ vÃ  cáº­p nháº­t DOM */
+            /* Fetch kết quả và cập nhật DOM */
             function doSearch() {
                 var qs = buildQuery();
 
@@ -109,22 +109,22 @@
                         /* Inject HTML */
                         resultsWrapper.innerHTML = xhr.responseText;
 
-                        /* Cáº­p nháº­t count */
+                        /* Cập nhật count */
                         var cards = resultsWrapper.querySelectorAll('.col');
                         var empty = resultsWrapper.querySelector('.empty-state');
                         if (resultCount) {
                             resultCount.textContent = empty ? '0' : cards.length;
                         }
 
-                        /* Cáº­p nháº­t URL */
+                        /* Cập nhật URL */
                         history.replaceState(null, '', '/Spec/Explore' + qs);
 
-                        /* Khá»Ÿi táº¡o láº¡i Waveform Player cho cÃ¡c card Ã¢m thanh má»›i Ä‘Æ°á»£c inject */
+                        /* Khởi tạo lại Waveform Player cho các card âm thanh mới được inject */
                         if (typeof window.initWaveformPlayers === 'function') {
                             window.initWaveformPlayers();
                         }
 
-                        /* Re-apply ngÃ´n ngá»¯ */
+                        /* Re-apply ngôn ngữ */
                         var lang = localStorage.getItem('bpcvn-lang') || 'vi';
                         if (typeof window.applyLang === 'function') {
                             window.applyLang(lang);
@@ -142,23 +142,23 @@
                 xhr.send();
             }
 
-            /* Debounce â€” chá» 300ms sau phÃ­m cuá»‘i rá»“i má»›i fetch */
+            /* Debounce — chờ 300ms sau phím cuối rồi mới fetch */
             function debounceSearch() {
                 clearTimeout(timer);
                 timer = setTimeout(doSearch, 300);
             }
 
-            /* â”€â”€ Gáº¯n sá»± kiá»‡n â”€â”€ */
+            /* ── Gắn sự kiện ── */
 
-            /* Má»—i phÃ­m gÃµ â†’ debounce â†’ fetch */
+            /* Mỗi phím gõ → debounce → fetch */
             searchInput.addEventListener('input', debounceSearch);
 
-            /* Äá»•i dropdown â†’ fetch ngay */
+            /* Đổi dropdown → fetch ngay */
             if (switchSelect) {
                 switchSelect.addEventListener('change', doSearch);
             }
 
-            /* Cháº·n form submit (nÃºt Lá»c) â†’ dÃ¹ng AJAX thay tháº¿ */
+            /* Chặn form submit (nút Lọc) → dùng AJAX thay thế */
             if (exploreForm) {
                 exploreForm.addEventListener('submit', function (e) {
                     e.preventDefault();
@@ -166,7 +166,7 @@
                 });
             }
 
-            /* Back/Forward trÃ¬nh duyá»‡t */
+            /* Back/Forward trình duyệt */
             window.addEventListener('popstate', function () {
                 var params = new URLSearchParams(window.location.search);
                 searchInput.value = params.get('searchString') || '';
@@ -176,7 +176,7 @@
 
         })();
 
-        /* â”€â”€ Upvote handler â”€â”€ */
+        /* ── Upvote handler ── */
         async function handleUpvote(btn) {
             const testId = btn.dataset.testId;
             if (!testId) return;
@@ -198,7 +198,7 @@
 
                 if (data.success) {
                     btn.querySelector('.upvote-count').textContent = data.newCount;
-                    // DÃ¹ng data.liked tá»« server Ä‘á»ƒ toggle class Ä‘Ãºng
+                    // Dùng data.liked từ server để toggle class đúng
                     if (data.liked) {
                         btn.classList.add('upvoted');
                     } else {

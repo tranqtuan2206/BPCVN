@@ -1,3 +1,4 @@
+using BPCVN.Application.Interfaces;
 using BPCVN.Application.Services;
 using BPCVN.Infrastructure.Data;
 using BPCVN.Infrastructure.Services;
@@ -61,6 +62,11 @@ builder.Services.AddScoped<AudioService>();
 
 // Đăng ký dịch vụ upload ảnh lên Cloudinary
 builder.Services.AddScoped<ImageService>();
+
+// Đăng ký dịch vụ truy vấn và phân trang danh mục sản phẩm
+builder.Services.AddScoped<IKitService, KitService>();
+builder.Services.AddScoped<ISwitchService, SwitchService>();
+builder.Services.AddScoped<IKeycapService, KeycapService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

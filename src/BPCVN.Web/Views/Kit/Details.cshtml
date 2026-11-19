@@ -1,11 +1,11 @@
 @model BPCVN.Domain.Entities.Kit
 @{
-    ViewData["Title"] = Model.Name + " â€” Kit Details";
+    ViewData["Title"] = Model.Name + " — Kit Details";
     var images = Model.KitImages?.ToList() ?? new List<BPCVN.Domain.Entities.KitImage>();
 }
 
 <style>
-    /* â”€â”€ Gallery Container â”€â”€ */
+    /* ── Gallery Container ── */
     .kit-gallery {
         border-radius: var(--radius-card);
         overflow: hidden;
@@ -13,7 +13,7 @@
         background: transparent;
     }
 
-    /* áº¢nh chÃ­nh â€” ná»n trong suá»‘t, contain Ä‘á»ƒ áº£nh khÃ´ng trÃ n */
+    /* Ảnh chính — nền trong suốt, contain để ảnh không tràn */
     .kit-gallery-main {
         width: 100%;
         max-height: 520px;
@@ -24,7 +24,7 @@
     }
     .kit-gallery-main.fading { opacity: 0; }
 
-    /* â”€â”€ Cá»¥m Ä‘iá»u hÆ°á»›ng: mÅ©i tÃªn + cháº¥m mÃ u â€” á»Ÿ DÆ¯á»šI áº£nh â”€â”€ */
+    /* ── Cụm điều hướng: mũi tên + chấm màu — ở DƯỚI ảnh ── */
     .kit-nav-row {
         display: flex;
         justify-content: center;
@@ -35,7 +35,7 @@
         border-top: 1px solid var(--border-light);
     }
 
-    /* NÃºt mÅ©i tÃªn trÃ¡i/pháº£i */
+    /* Nút mũi tên trái/phải */
     .kit-nav-btn {
         width: 40px; height: 40px; border-radius: 50%;
         background: rgba(255,255,255,0.85);
@@ -51,7 +51,7 @@
         box-shadow: 0 4px 14px rgba(0,0,0,0.15);
     }
 
-    /* â”€â”€ Cháº¥m mÃ u â”€â”€ */
+    /* ── Chấm màu ── */
     .kit-color-dots {
         display: flex;
         flex-wrap: wrap;
@@ -69,13 +69,13 @@
     }
     .kit-color-dot:hover { transform: scale(1.25); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
     .kit-color-dot.active { border-color: var(--color-charcoal); transform: scale(1.2); box-shadow: 0 2px 8px rgba(0,0,0,0.18); }
-    /* Liquid glass: cháº¥m khÃ´ng cÃ³ mÃ u */
+    /* Liquid glass: chấm không có màu */
     .kit-color-dot.kit-color-dot-none {
         background: repeating-conic-gradient(rgba(0,0,0,0.06) 0% 25%, transparent 0% 50%) 50% / 8px 8px !important;
         border: 2px dashed var(--color-charcoal-40);
     }
 
-    /* â”€â”€ Fallback khi khÃ´ng cÃ³ áº£nh â”€â”€ */
+    /* ── Fallback khi không có ảnh ── */
     .kit-gallery-placeholder {
         width: 100%; aspect-ratio: 16 / 10;
         display: flex; align-items: center; justify-content: center;
@@ -84,7 +84,7 @@
     }
 </style>
 
-<!-- Header: TÃªn Kit + nÃºt hÃ nh Ä‘á»™ng -->
+<!-- Header: Tên Kit + nút hành động -->
 <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
     <div>
         <h2 class="section-title mb-1">
@@ -94,7 +94,7 @@
             <i class="bi bi-building me-1"></i>@(Model.Brand ?? "Unknown Brand")
             @if (!string.IsNullOrEmpty(Model.Layout))
             {
-                <span data-i18n="kit.details.separator">&nbsp;Â·&nbsp;</span>
+                <span data-i18n="kit.details.separator">&nbsp;·&nbsp;</span>
                 <i class="bi bi-grid-3x3 me-1"></i>@Model.Layout
             }
         </p>
@@ -103,28 +103,28 @@
         @if (User.IsInRole("Admin"))
         {
             <a asp-controller="Kit" asp-action="Edit" asp-route-id="@Model.KitId" class="btn-dark-lovable">
-                <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Chá»‰nh sá»­a</span>
+                <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Chỉnh sửa</span>
             </a>
             <a asp-controller="Kit" asp-action="Delete" asp-route-id="@Model.KitId" class="btn-ghost" style="color:#b91c1c">
-                <i class="bi bi-trash"></i><span data-i18n="common.delete">XÃ³a</span>
+                <i class="bi bi-trash"></i><span data-i18n="common.delete">Xóa</span>
             </a>
         }
         <a asp-controller="Kit" asp-action="Index" class="btn-ghost">
-            <i class="bi bi-arrow-left"></i><span data-i18n="common.backToList">Danh sÃ¡ch</span>
+            <i class="bi bi-arrow-left"></i><span data-i18n="common.backToList">Danh sách</span>
         </a>
     </div>
 </div>
 
-<!-- â”€â”€ Gallery: áº¢nh chÃ­nh â†’ Cá»¥m navigation bÃªn dÆ°á»›i â”€â”€ -->
+<!-- ── Gallery: Ảnh chính → Cụm navigation bên dưới ── -->
 @if (images.Any())
 {
     <div class="kit-gallery mb-4">
-        <!-- áº¢nh chÃ­nh -->
+        <!-- Ảnh chính -->
         <img id="kitMainImage" class="kit-gallery-main" src="@images.First().ImageUrl" alt="@Model.Name" />
 
-        <!-- Cá»¥m Ä‘iá»u hÆ°á»›ng: mÅ©i tÃªn trÃ¡i/pháº£i + cháº¥m mÃ u â€” cÄƒn giá»¯a bÃªn dÆ°á»›i -->
+        <!-- Cụm điều hướng: mũi tên trái/phải + chấm màu — căn giữa bên dưới -->
         <div class="kit-nav-row">
-            <button type="button" class="kit-nav-btn" id="kitPrevBtn" title="áº¢nh trÆ°á»›c">
+            <button type="button" class="kit-nav-btn" id="kitPrevBtn" title="Ảnh trước">
                 <i class="bi bi-chevron-left"></i>
             </button>
 
@@ -138,11 +138,11 @@
                             data-url="@img.ImageUrl"
                             data-index="@i"
                             style="@(hasColor ? $"background-color:{img.ColorHex}" : "")"
-                            title="áº¢nh @(i + 1)"></button>
+                            title="Ảnh @(i + 1)"></button>
                 }
             </div>
 
-            <button type="button" class="kit-nav-btn" id="kitNextBtn" title="áº¢nh tiáº¿p">
+            <button type="button" class="kit-nav-btn" id="kitNextBtn" title="Ảnh tiếp">
                 <i class="bi bi-chevron-right"></i>
             </button>
         </div>
@@ -155,58 +155,58 @@ else
     </div>
 }
 
-<!-- ThÃ´ng sá»‘ chi tiáº¿t Kit -->
+<!-- Thông số chi tiết Kit -->
 <div class="card-lovable card-body-lovable mb-4">
     <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:16px">
-        <i class="bi bi-sliders me-2" style="opacity:0.5"></i><span data-i18n="kit.details.specs">ThÃ´ng sá»‘ Kit</span>
+        <i class="bi bi-sliders me-2" style="opacity:0.5"></i><span data-i18n="kit.details.specs">Thông số Kit</span>
     </h5>
     <div class="row g-3">
         <div class="col-md-6">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-tag me-1"></i><span data-i18n="kit.details.name">TÃªn Kit</span></div>
+                <div class="text-caption mb-1"><i class="bi bi-tag me-1"></i><span data-i18n="kit.details.name">Tên Kit</span></div>
                 <div style="font-weight:600;color:var(--color-charcoal)">@Model.Name</div>
             </div>
         </div>
         <div class="col-md-6">
             <div class="info-block">
-                <div class="text-caption mb-1"><i class="bi bi-building me-1"></i><span data-i18n="kit.details.brand">HÃ£ng (Brand)</span></div>
-                <div style="font-weight:600;color:var(--color-charcoal)">@(Model.Brand ?? "â€”")</div>
+                <div class="text-caption mb-1"><i class="bi bi-building me-1"></i><span data-i18n="kit.details.brand">Hãng (Brand)</span></div>
+                <div style="font-weight:600;color:var(--color-charcoal)">@(Model.Brand ?? "—")</div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="info-block">
                 <div class="text-caption mb-1"><i class="bi bi-grid-3x3 me-1"></i><span data-i18n="kit.details.layout">Layout</span></div>
-                <div style="font-weight:600;color:var(--color-charcoal)">@(Model.Layout ?? "â€”")</div>
+                <div style="font-weight:600;color:var(--color-charcoal)">@(Model.Layout ?? "—")</div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="info-block">
                 <div class="text-caption mb-1"><i class="bi bi-layers me-1"></i><span data-i18n="kit.details.mountType">Mount Type</span></div>
-                <div style="font-weight:600;color:var(--color-charcoal)">@(Model.MountType ?? "â€”")</div>
+                <div style="font-weight:600;color:var(--color-charcoal)">@(Model.MountType ?? "—")</div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="info-block">
                 <div class="text-caption mb-1"><i class="bi bi-motherboard me-1"></i><span data-i18n="kit.details.pcbType">PCB Type</span></div>
-                <div style="font-weight:600;color:var(--color-charcoal)">@(Model.PcbType ?? "â€”")</div>
+                <div style="font-weight:600;color:var(--color-charcoal)">@(Model.PcbType ?? "—")</div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- NÃºt hÃ nh Ä‘á»™ng dÆ°á»›i cÃ¹ng -->
+<!-- Nút hành động dưới cùng -->
 <div class="d-flex gap-2">
     @if (User.IsInRole("Admin"))
     {
         <a asp-controller="Kit" asp-action="Edit" asp-route-id="@Model.KitId" class="btn-dark-lovable">
-            <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Chá»‰nh sá»­a</span>
+            <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Chỉnh sửa</span>
         </a>
         <a asp-controller="Kit" asp-action="Delete" asp-route-id="@Model.KitId" class="btn-ghost" style="color:#b91c1c">
-            <i class="bi bi-trash"></i><span data-i18n="common.delete">XÃ³a</span>
+            <i class="bi bi-trash"></i><span data-i18n="common.delete">Xóa</span>
         </a>
     }
     <a asp-controller="Kit" asp-action="Index" class="btn-ghost">
-        <i class="bi bi-arrow-left"></i><span data-i18n="common.backToList">Quay láº¡i danh sÃ¡ch</span>
+        <i class="bi bi-arrow-left"></i><span data-i18n="common.backToList">Quay lại danh sách</span>
     </a>
 </div>
 
@@ -223,10 +223,10 @@ else
 
             var currentIndex = 0;
 
-            // â”€â”€ Äá»•i áº£nh chÃ­nh + cáº­p nháº­t dot active â”€â”€
+            // ── Đổi ảnh chính + cập nhật dot active ──
             function goToImage(index) {
-                if (index < 0) index = totalImages - 1;       // Loop: Ä‘áº§u â†’ cuá»‘i
-                if (index >= totalImages) index = 0;           // Loop: cuá»‘i â†’ Ä‘áº§u
+                if (index < 0) index = totalImages - 1;       // Loop: đầu → cuối
+                if (index >= totalImages) index = 0;           // Loop: cuối → đầu
                 if (index === currentIndex) return;
 
                 currentIndex = index;
@@ -241,16 +241,16 @@ else
                     mainImage.onerror = function () { mainImage.classList.remove('fading'); };
                 }, 350);
 
-                // Cáº­p nháº­t dot active
+                // Cập nhật dot active
                 dots.forEach(function (d) { d.classList.remove('active'); });
                 targetDot.classList.add('active');
             }
 
-            // â”€â”€ NÃºt mÅ©i tÃªn trÃ¡i/pháº£i â”€â”€
+            // ── Nút mũi tên trái/phải ──
             prevBtn.addEventListener('click', function () { goToImage(currentIndex - 1); });
             nextBtn.addEventListener('click', function () { goToImage(currentIndex + 1); });
 
-            // â”€â”€ Click/hover cháº¥m mÃ u â”€â”€
+            // ── Click/hover chấm màu ──
             dots.forEach(function (dot, idx) {
                 dot.addEventListener('mouseenter', function () { goToImage(idx); });
                 dot.addEventListener('click', function (e) { e.preventDefault(); goToImage(idx); });

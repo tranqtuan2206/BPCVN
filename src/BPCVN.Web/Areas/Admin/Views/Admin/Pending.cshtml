@@ -1,6 +1,6 @@
 @model IEnumerable<BPCVN.Domain.Entities.PendingItem>
 @{
-    ViewData["Title"] = "Duyá»‡t Master Data";
+    ViewData["Title"] = "Duyệt Master Data";
     var kits     = Model.Where(p => p.Type == "Kit").ToList();
     var switches = Model.Where(p => p.Type == "Switch").ToList();
     var keycaps  = Model.Where(p => p.Type == "Keycap").ToList();
@@ -10,20 +10,20 @@
     <div class="d-flex align-items-center gap-3 mb-4">
         <i class="bi bi-clipboard2-check fs-2 text-warning"></i>
         <div>
-            <h1 class="h3 mb-0">Queue Duyá»‡t Master Data</h1>
-            <small class="text-muted">CÃ¡c Kit / Switch / Keycap do user tá»± táº¡o, chÆ°a Ä‘Æ°á»£c duyá»‡t</small>
+            <h1 class="h3 mb-0">Queue Duyệt Master Data</h1>
+            <small class="text-muted">Các Kit / Switch / Keycap do user tự tạo, chưa được duyệt</small>
         </div>
         @if (!Model.Any())
         {
-            <span class="badge bg-success ms-auto fs-6">KhÃ´ng cÃ³ gÃ¬ cáº§n duyá»‡t âœ“</span>
+            <span class="badge bg-success ms-auto fs-6">Không có gì cần duyệt ✓</span>
         }
         else
         {
-            <span class="badge bg-warning text-dark ms-auto fs-6">@Model.Count() items Ä‘ang chá»</span>
+            <span class="badge bg-warning text-dark ms-auto fs-6">@Model.Count() items đang chờ</span>
         }
     </div>
 
-    @* Toast thÃ´ng bÃ¡o *@
+    @* Toast thông báo *@
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -43,7 +43,7 @@
     {
         <div class="text-center py-5 text-muted">
             <i class="bi bi-inbox fs-1 d-block mb-3"></i>
-            Queue trá»‘ng â€” má»i master data Ä‘á»u Ä‘Ã£ Ä‘Æ°á»£c duyá»‡t!
+            Queue trống — mọi master data đều đã được duyệt!
         </div>
     }
     else
@@ -94,26 +94,26 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-git me-2"></i>Merge vÃ o entity chuáº©n</h5>
+                <h5 class="modal-title"><i class="bi bi-git me-2"></i>Merge vào entity chuẩn</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <p class="mb-3">
-                    Gá»™p "<strong id="mergeSourceName"></strong>" vÃ o entity nÃ o?
-                    <br><small class="text-muted">Táº¥t cáº£ Build dÃ¹ng item nÃ y sáº½ Ä‘Æ°á»£c cáº­p nháº­t sang entity báº¡n chá»n.</small>
+                    Gộp "<strong id="mergeSourceName"></strong>" vào entity nào?
+                    <br><small class="text-muted">Tất cả Build dùng item này sẽ được cập nhật sang entity bạn chọn.</small>
                 </p>
                 <select class="form-select" id="mergeTargetSelect">
-                    <option value="">-- Äang táº£i... --</option>
+                    <option value="">-- Đang tải... --</option>
                 </select>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Há»§y</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                 <form id="mergeForm" method="post" asp-area="Admin" asp-controller="Admin" asp-action="Merge">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" id="mergeItemId" />
                     <input type="hidden" name="targetId" id="mergeTargetId" />
                     <button type="submit" class="btn btn-primary" id="mergeConfirmBtn" disabled>
-                        <i class="bi bi-git me-1"></i>XÃ¡c nháº­n Merge
+                        <i class="bi bi-git me-1"></i>Xác nhận Merge
                     </button>
                 </form>
             </div>
@@ -123,7 +123,7 @@
 
 @section Scripts {
 <script>
-    // Khi click nÃºt Merge â†’ load danh sÃ¡ch entity chuáº©n qua AJAX
+    // Khi click nút Merge → load danh sách entity chuẩn qua AJAX
     document.addEventListener('click', async function (e) {
         const btn = e.target.closest('[data-merge-id]');
         if (!btn) return;
@@ -135,14 +135,14 @@
         document.getElementById('mergeItemId').value   = pendingId;
         document.getElementById('mergeSourceName').textContent = pendingName;
         document.getElementById('mergeConfirmBtn').disabled    = true;
-        document.getElementById('mergeTargetSelect').innerHTML = '<option>Äang táº£i...</option>';
+        document.getElementById('mergeTargetSelect').innerHTML = '<option>Đang tải...</option>';
 
-        // Load danh sÃ¡ch entity approved cÃ¹ng type
+        // Load danh sách entity approved cùng type
         const res  = await fetch(`/Admin/MergeTargets?type=${type}`);
         const list = await res.json();
 
         const sel = document.getElementById('mergeTargetSelect');
-        sel.innerHTML = '<option value="">-- Chá»n entity chuáº©n --</option>' +
+        sel.innerHTML = '<option value="">-- Chọn entity chuẩn --</option>' +
             list.map(x => `<option value="${x.id}">${x.name}</option>`).join('');
 
         sel.addEventListener('change', function () {

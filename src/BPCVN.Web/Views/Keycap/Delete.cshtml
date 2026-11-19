@@ -1,20 +1,20 @@
 @model BPCVN.Domain.Entities.Keycap
 @{
-    ViewData["Title"] = "XÃ³a " + Model.Name;
+    ViewData["Title"] = "Xóa " + Model.Name;
 }
 
 <div class="row justify-content-center">
     <div class="col-lg-6">
 
-        <!-- Header cáº£nh bÃ¡o -->
+        <!-- Header cảnh báo -->
         <div class="mb-4">
             <h2 class="section-title" style="color:#b91c1c">
-                <i class="bi bi-exclamation-triangle me-2"></i><span data-i18n="keycap.delete.title">XÃ¡c nháº­n xÃ³a Keycap</span>
+                <i class="bi bi-exclamation-triangle me-2"></i><span data-i18n="keycap.delete.title">Xác nhận xóa Keycap</span>
             </h2>
-            <p class="section-subtitle">HÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoÃ n tÃ¡c.</p>
+            <p class="section-subtitle">Hành động này không thể hoàn tác.</p>
         </div>
 
-        <!-- ThÃ´ng tin Keycap sáº½ bá»‹ xÃ³a -->
+        <!-- Thông tin Keycap sẽ bị xóa -->
         <div class="card-lovable card-body-lovable mb-4">
             <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:16px">
                 <i class="bi bi-grid-3x3-gap me-2" style="opacity:0.5"></i>@Model.Name
@@ -22,9 +22,9 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <div class="info-block">
-                        <div class="text-caption mb-1"><i class="bi bi-building me-1"></i><span data-i18n="common.brand">HÃ£ng</span></div>
+                        <div class="text-caption mb-1"><i class="bi bi-building me-1"></i><span data-i18n="common.brand">Hãng</span></div>
                         <div style="font-weight:600;color:var(--color-charcoal)">
-                            @(Model.Brand ?? "â€”")
+                            @(Model.Brand ?? "—")
                         </div>
                     </div>
                 </div>
@@ -32,34 +32,34 @@
                     <div class="info-block">
                         <div class="text-caption mb-1"><i class="bi bi-layers me-1"></i><span data-i18n="common.profile">Profile</span></div>
                         <div style="font-weight:600;color:var(--color-charcoal)">
-                            @(Model.Profile ?? "â€”")
+                            @(Model.Profile ?? "—")
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="info-block">
-                        <div class="text-caption mb-1"><i class="bi bi-gem me-1"></i><span data-i18n="common.material">Cháº¥t liá»‡u</span></div>
+                        <div class="text-caption mb-1"><i class="bi bi-gem me-1"></i><span data-i18n="common.material">Chất liệu</span></div>
                         <div style="font-weight:600;color:var(--color-charcoal)">
-                            @(Model.Material ?? "â€”")
+                            @(Model.Material ?? "—")
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Form xÃ¡c nháº­n xÃ³a -->
+        <!-- Form xác nhận xóa -->
         <form asp-action="Delete" method="post">
             <input type="hidden" asp-for="KeycapId" />
             <div class="d-flex gap-2">
-                <!-- NÃºt XÃ³a â€” mÃ u Ä‘á» cáº£nh bÃ¡o -->
+                <!-- Nút Xóa — màu đỏ cảnh báo -->
                 <button type="submit" class="btn-dark-lovable px-4 py-2"
                         style="background-color:#b91c1c">
-                    <i class="bi bi-trash"></i><span data-i18n="common.deletePermanently">XÃ³a vÄ©nh viá»…n</span>
+                    <i class="bi bi-trash"></i><span data-i18n="common.deletePermanently">Xóa vĩnh viễn</span>
                 </button>
-                <!-- NÃºt Huá»· â€” quay vá» Details -->
+                <!-- Nút Huỷ — quay về Details -->
                 <a asp-controller="Keycap" asp-action="Details" asp-route-id="@Model.KeycapId"
                     class="btn-ghost px-4 py-2">
-                    <i class="bi bi-x-lg"></i><span data-i18n="common.cancel">Huá»·</span>
+                    <i class="bi bi-x-lg"></i><span data-i18n="common.cancel">Huỷ</span>
                 </a>
             </div>
         </form>

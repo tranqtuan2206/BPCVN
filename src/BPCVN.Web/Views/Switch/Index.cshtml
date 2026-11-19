@@ -1,57 +1,62 @@
-@model IEnumerable<BPCVN.Domain.Entities.Switch>
+@model BPCVN.Application.Common.PagedResult<BPCVN.Domain.Entities.Switch>
 @{
     ViewData["Title"] = "Switch Catalog";
 
-    // Danh sÃ¡ch unique type & brand tá»« Controller cho dropdown filter
+    // Danh sách unique type & brand từ Controller cho dropdown filter
     var types = ViewBag.Types as List<string> ?? new();
     var brands = ViewBag.Brands as List<string> ?? new();
+
+    // Trạng thái bộ lọc hiện tại để đồng bộ giao diện khi chuyển trang
+    var searchQuery = ViewBag.SearchQuery as string ?? "";
+    var selectedType = ViewBag.SelectedType as string ?? "";
+    var selectedBrand = ViewBag.SelectedBrand as string ?? "";
 }
 
-<!-- â”€â”€ Page header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ── Page header ─────────────────────────────────────────────────────── -->
 <div class="section-header">
     <div>
         <h2 class="section-title">
             <i class="bi bi-toggles me-2" style="opacity:0.5"></i>Switch Catalog
         </h2>
         <p class="section-subtitle">
-            <span id="switchCount">@Model.Count()</span> <span data-i18n="switch.countSuffix">switches trong cÆ¡ sá»Ÿ dá»¯ liá»‡u</span>
+            <span id="switchCount">@Model.TotalItems</span> <span data-i18n="switch.countSuffix">switches trong cơ sở dữ liệu</span>
         </p>
     </div>
     <div class="d-flex gap-2 align-items-center">
         @if (User.IsInRole("Admin"))
         {
             <a asp-controller="Switch" asp-action="Create" class="btn-dark-lovable">
-                <i class="bi bi-plus-circle"></i>ThÃªm Switch
+                <i class="bi bi-plus-circle"></i>Thêm Switch
             </a>
         }
         <span class="badge-count" id="switchBadge" style="font-size:0.9375rem;padding:6px 16px">
-            @Model.Count() Switches
+            @Model.TotalItems Switches
         </span>
     </div>
 </div>
 
-<!-- â”€â”€ Bá»™ lá»c & Live Search â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ── Bộ lọc & Live Search ────────────────────────────────────────────── -->
 <div class="card-lovable card-body-lovable mb-4">
     <div class="row g-3 align-items-end">
-        <!-- Ã” tÃ¬m kiáº¿m -->
+        <!-- Ô tìm kiếm -->
         <div class="col-12 col-md-5">
             <label class="form-label-lovable">
-                <i class="bi bi-search me-1"></i><span data-i18n="switch.searchLabel">TÃ¬m kiáº¿m</span>
+                <i class="bi bi-search me-1"></i><span data-i18n="switch.searchLabel">Tìm kiếm</span>
             </label>
-            <input type="text" id="searchInput" class="form-control"
-                placeholder="Nháº­p tÃªn switch hoáº·c brand..." data-i18n-placeholder="switch.index.searchPlaceholder" autocomplete="off" />
+            <input type="text" id="searchInput" class="form-control" value="@searchQuery"
+                placeholder="Nhập tên switch hoặc brand..." data-i18n-placeholder="switch.index.searchPlaceholder" autocomplete="off" />
         </div>
 
-        <!-- Dropdown Loáº¡i Switch -->
+        <!-- Dropdown Loại Switch -->
         <div class="col-6 col-md-3">
             <label class="form-label-lovable">
-                <i class="bi bi-toggles me-1"></i><span data-i18n="switch.typeLabel">Loáº¡i</span>
+                <i class="bi bi-toggles me-1"></i><span data-i18n="switch.typeLabel">Loại</span>
             </label>
             <select id="filterType" class="form-select">
-                <option value="" data-i18n="switch.index.allTypes">-- Táº¥t cáº£ --</option>
+                <option value="" data-i18n="switch.index.allTypes">-- Tất cả --</option>
                 @foreach (var t in types)
                 {
-                    <option value="@t">@t</option>
+                    <option value="@t" selected="@(selectedType == t)">@t</option>
                 }
             </select>
         </div>
@@ -62,24 +67,24 @@
                 <i class="bi bi-building me-1"></i>Brand
             </label>
             <select id="filterBrand" class="form-select">
-                <option value="" data-i18n="switch.index.allBrands">-- Táº¥t cáº£ --</option>
+                <option value="" data-i18n="switch.index.allBrands">-- Tất cả --</option>
                 @foreach (var b in brands)
                 {
-                    <option value="@b">@b</option>
+                    <option value="@b" selected="@(selectedBrand == b)">@b</option>
                 }
             </select>
         </div>
 
-        <!-- NÃºt xÃ³a bá»™ lá»c -->
+        <!-- Nút xóa bộ lọc -->
         <div class="col-12 col-md-1 d-flex">
-            <button type="button" id="clearFilters" class="btn-ghost flex-grow-1" title="XÃ³a bá»™ lá»c">
+            <button type="button" id="clearFilters" class="btn-ghost flex-grow-1" title="Xóa bộ lọc">
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
     </div>
 </div>
 
-<!-- â”€â”€ Container danh sÃ¡ch Switch â€” ná»™i dung Ä‘Æ°á»£c thay báº±ng AJAX â”€â”€â”€â”€â”€ -->
+<!-- ── Container danh sách Switch — nội dung được thay bằng AJAX ───── -->
 <div id="switch-list-container">
     <partial name="_SwitchListPartial" model="Model" />
 </div>
@@ -89,8 +94,8 @@
         (function () {
             'use strict';
 
-            // â”€â”€ Debounce â€” trÃ¬ hoÃ£n gá»i hÃ m cho Ä‘áº¿n khi user ngá»«ng gÃµ â”€â”€
-            // delay: thá»i gian chá» (ms) ká»ƒ tá»« láº§n nháº¥n phÃ­m cuá»‘i
+            // ── Debounce — trì hoãn gọi hàm cho đến khi user ngừng gõ ──
+            // delay: thời gian chờ (ms) kể từ lần nhấn phím cuối
             function debounce(func, delay) {
                 let timerId;
                 return function (...args) {
@@ -99,7 +104,7 @@
                 };
             }
 
-            // â”€â”€ Tham chiáº¿u DOM â”€â”€
+            // ── Tham chiếu DOM ──
             const searchInput = document.getElementById('searchInput');
             const filterType = document.getElementById('filterType');
             const filterBrand = document.getElementById('filterBrand');
@@ -108,9 +113,9 @@
             const switchCount = document.getElementById('switchCount');
             const switchBadge = document.getElementById('switchBadge');
 
-            // â”€â”€ Gá»i API láº¥y danh sÃ¡ch Switch Ä‘Ã£ lá»c â”€â”€
+            // ── Gọi API lấy danh sách Switch đã lọc ──
             async function fetchSwitches() {
-                // GhÃ©p táº¥t cáº£ filter thÃ nh query string
+                // Ghép tất cả filter thành query string
                 const params = new URLSearchParams();
                 const search = searchInput.value.trim();
                 const type = filterType.value;
@@ -121,18 +126,24 @@
                 if (brand) params.set('brand', brand);
 
                 try {
-                    const res = await fetch(`/Switch/Index?${params.toString()}`, {
+                    const qs = params.toString();
+                    const res = await fetch(`/Switch/Index?${qs}`, {
                         headers: { 'X-Requested-With': 'XMLHttpRequest' }
                     });
 
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-                    // GÃ¡n HTML partial vÃ o container
+                    // Gán HTML partial vào container (bao gồm danh sách thẻ và thanh phân trang mới)
                     const html = await res.text();
                     container.innerHTML = html;
 
-                    // Cáº­p nháº­t bá»™ Ä‘áº¿m â€” Ä‘áº¿m sá»‘ card hiá»‡n táº¡i
-                    const count = container.querySelectorAll('.col').length;
+                    // Đồng bộ URL trên thanh địa chỉ về trang 1 khi thay đổi bộ lọc
+                    const nextUrl = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+                    window.history.replaceState(null, '', nextUrl);
+
+                    // Cập nhật bộ đếm theo tổng số sản phẩm khớp bộ lọc (TotalItems)
+                    const totalEl = container.querySelector('[data-total-items]');
+                    const count = totalEl ? Number(totalEl.dataset.totalItems) : container.querySelectorAll('.col').length;
                     switchCount.textContent = count;
                     switchBadge.textContent = count + ' Switches';
                 } catch (err) {
@@ -140,15 +151,15 @@
                 }
             }
 
-            // â”€â”€ Gáº¯n sá»± kiá»‡n â”€â”€
-            // Live search â€” debounce 350ms Ä‘á»ƒ trÃ¡nh spam request
+            // ── Gắn sự kiện ──
+            // Live search — debounce 350ms để tránh spam request
             searchInput.addEventListener('input', debounce(fetchSwitches, 350));
 
-            // Dropdown filter â€” gá»i ngay khi thay Ä‘á»•i
+            // Dropdown filter — gọi ngay khi thay đổi
             filterType.addEventListener('change', fetchSwitches);
             filterBrand.addEventListener('change', fetchSwitches);
 
-            // NÃºt xÃ³a bá»™ lá»c â€” reset táº¥t cáº£ input/select rá»“i fetch láº¡i
+            // Nút xóa bộ lọc — reset tất cả input/select rồi fetch lại
             clearBtn.addEventListener('click', function () {
                 searchInput.value = '';
                 filterType.value = '';

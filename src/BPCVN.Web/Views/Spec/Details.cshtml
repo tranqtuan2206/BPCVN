@@ -14,7 +14,7 @@
     <div>
         <h2 class="section-title mb-1">@Model.BuildName</h2>
         <p class="text-caption mb-0">
-            <i class="bi bi-person-circle me-1"></i>@Model.User.Username &nbsp;Â·&nbsp;
+            <i class="bi bi-person-circle me-1"></i>@Model.User.Username &nbsp;·&nbsp;
             <i class="bi bi-clock me-1"></i>@Model.CreatedAt.ToString("dd/MM/yyyy")
         </p>
     </div>
@@ -22,37 +22,37 @@
         @if (isOwner)
 
         {
-            <!-- Upload Sound Test â€” chá»‰ owner -->
+            <!-- Upload Sound Test — chỉ owner -->
             <a asp-controller="SoundTest" asp-action="Upload" asp-route-specId="@Model.SpecId" class="btn-dark-lovable">
                 <i class="bi bi-cloud-upload"></i><span data-i18n="details.uploadBtn">Upload Sound Test</span>
             </a>
-            <!-- Sá»­a Build â€” chá»‰ owner -->
+            <!-- Sửa Build — chỉ owner -->
             <a asp-controller="Spec" asp-action="Edit" asp-route-id="@Model.SpecId" class="btn-ghost">
-                <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Sá»­a</span>
+                <i class="bi bi-pencil-square"></i><span data-i18n="common.edit">Sửa</span>
             </a>
         }
         @if (isOwner || isAdmin)
 
         {
-            <!-- XÃ³a Build â€” owner hoáº·c Admin -->
+            <!-- Xóa Build — owner hoặc Admin -->
             <form asp-controller="Spec" asp-action="Delete" asp-route-id="@Model.SpecId" method="post"
-                onsubmit="return confirm('XÃ³a build \'@Model.BuildName\'?\nHÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoÃ n tÃ¡c.')">
+                onsubmit="return confirm('Xóa build \'@Model.BuildName\'?\nHành động này không thể hoàn tác.')">
                 <button type="submit" class="btn-ghost btn-sm-lovable"
                     style="color:#b91c1c;border-color:rgba(185,28,28,0.3)">
-                    <i class="bi bi-trash"></i><span data-i18n="common.delete">XÃ³a</span>
+                    <i class="bi bi-trash"></i><span data-i18n="common.delete">Xóa</span>
                 </button>
             </form>
         }
     </div>
 </div>
 
-<!-- ThÃ´ng sá»‘ build -->
+<!-- Thông số build -->
 <div class="card-lovable card-body-lovable mb-4">
     <h5 style="font-weight:600;color:var(--color-charcoal);margin-bottom:16px">
-        <i class="bi bi-sliders me-2" style="opacity:0.5"></i><span data-i18n="details.specTitle">ThÃ´ng sá»‘ cáº¥u hÃ¬nh</span>
+        <i class="bi bi-sliders me-2" style="opacity:0.5"></i><span data-i18n="details.specTitle">Thông số cấu hình</span>
     </h5>
     @*
-        Layout 3 hÃ ng: 3 cá»™t â†’ 4 cá»™t â†’ full width.
+        Layout 3 hàng: 3 cột → 4 cột → full width.
         Row 1: Kit, Switch, Keycap
         Row 2: Plate, Stab, Foam, Space
         Row 3: Mods (full width)
@@ -64,19 +64,19 @@
         .spec-row .info-block { height: 100%; box-sizing: border-box; }
     </style>
 
-    <!-- Row 1: Kit, Switch, Keycap â€” luÃ´n 3 Ã´ -->
+    <!-- Row 1: Kit, Switch, Keycap — luôn 3 ô -->
     <div class="spec-row spec-row-3">
         <div class="info-block">
             <div class="text-caption mb-1"><i class="bi bi-cpu me-1"></i>Kit</div>
             <div style="font-weight:600;color:var(--color-charcoal)">@Model.Kit.Name</div>
-            <div class="text-caption">@Model.Kit.Brand Â· @Model.Kit.Layout</div>
+            <div class="text-caption">@Model.Kit.Brand · @Model.Kit.Layout</div>
         </div>
         <div class="info-block">
             <div class="text-caption mb-1"><i class="bi bi-toggles me-1"></i>Switch</div>
             @if (Model.Switch != null)
             {
                 <div style="font-weight:600;color:var(--color-charcoal)">@Model.Switch.Name</div>
-                <div class="text-caption">@Model.Switch.Brand Â· @Model.Switch.Type</div>
+                <div class="text-caption">@Model.Switch.Brand · @Model.Switch.Type</div>
             }
             else if (!string.IsNullOrEmpty(Model.CustomSwitchName))
             {
@@ -85,7 +85,7 @@
             }
             else
             {
-                <div class="text-caption" style="font-style:italic" data-i18n="spec.details.unknown">KhÃ´ng rÃµ</div>
+                <div class="text-caption" style="font-style:italic" data-i18n="spec.details.unknown">Không rõ</div>
             }
         </div>
         <div class="info-block">
@@ -93,18 +93,18 @@
             @if (Model.Keycap != null)
             {
                 <div style="font-weight:600;color:var(--color-charcoal)">@Model.Keycap.Name</div>
-                <div class="text-caption">@Model.Keycap.Brand Â· @Model.Keycap.Profile</div>
+                <div class="text-caption">@Model.Keycap.Brand · @Model.Keycap.Profile</div>
             }
             else
             {
-                <div class="text-caption" style="font-style:italic" data-i18n="details.none">KhÃ´ng cÃ³</div>
+                <div class="text-caption" style="font-style:italic" data-i18n="details.none">Không có</div>
             }
         </div>
     </div>
 
     @*
-        Row 2: Plate, Stab, Foam, Space â€” 4 Ã´ ngang hÃ ng.
-        Chá»‰ render row náº¿u cÃ³ Ã­t nháº¥t 1 field trong row nÃ y.
+        Row 2: Plate, Stab, Foam, Space — 4 ô ngang hàng.
+        Chỉ render row nếu có ít nhất 1 field trong row này.
     *@
     @if (!string.IsNullOrEmpty(Model.PlateMaterial) || !string.IsNullOrEmpty(Model.Stab)
         || !string.IsNullOrEmpty(Model.FoamSetup) || !string.IsNullOrEmpty(Model.Space))
@@ -141,7 +141,7 @@
         </div>
     }
 
-    <!-- Row 3: Mods â€” full width, ná»™i dung dÃ i cÅ©ng khÃ´ng bá»‹ vá»¡ layout -->
+    <!-- Row 3: Mods — full width, nội dung dài cũng không bị vỡ layout -->
     @if (!string.IsNullOrEmpty(Model.Mods))
     {
         <div class="info-block">
@@ -160,14 +160,14 @@
         </h5>
     </div>
     <p class="text-caption mb-3" style="font-style:italic;opacity:0.7">
-        <i class="bi bi-headphones me-1"></i><span data-i18n="spec.details.headphoneHint">Äeo tai nghe Ä‘á»ƒ cÃ³ tráº£i nghiá»‡m tá»‘t nháº¥t</span>
+        <i class="bi bi-headphones me-1"></i><span data-i18n="spec.details.headphoneHint">Đeo tai nghe để có trải nghiệm tốt nhất</span>
     </p>
     @if (!Model.SoundTests.Any())
 
     {
         <div class="empty-state" style="padding:32px 16px">
             <i class="bi bi-mic-mute empty-icon" style="font-size:2.5rem"></i>
-            <p class="mb-0" data-i18n="details.noSoundTest">ChÆ°a cÃ³ sound test nÃ o.</p>
+            <p class="mb-0" data-i18n="details.noSoundTest">Chưa có sound test nào.</p>
             @if (isOwner)
 
             {
@@ -195,7 +195,7 @@
                                 }
                                 else
                                 {
-                                    <span data-i18n="spec.details.unknownMic">KhÃ´ng rÃµ mic</span>
+                                    <span data-i18n="spec.details.unknownMic">Không rõ mic</span>
                                 }
                             </span>
                             <span class="text-caption ms-2">@st.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
@@ -208,20 +208,20 @@
                             <button class="upvote-btn-lovable upvote-btn @(isLiked ? "upvoted" : "")"
                                     data-test-id="@st.TestId"
                                     onclick="handleUpvote(this)"
-                                    @(User.Identity?.IsAuthenticated != true ? "disabled title=\"ÄÄƒng nháº­p Ä‘á»ƒ like\"" : "")>
+                                    @(User.Identity?.IsAuthenticated != true ? "disabled title=\"Đăng nhập để like\"" : "")>
                                 <i class="bi bi-heart"></i>
                                 <i class="bi bi-heart-fill"></i>
                                 <span class="upvote-count">@st.Upvotes</span>
                             </button>
                             @if (isOwner || isAdmin)
                             {
-                                <!-- NÃºt xÃ³a Sound Test â€” owner hoáº·c Admin -->
+                                <!-- Nút xóa Sound Test — owner hoặc Admin -->
                                 <form asp-controller="SoundTest" asp-action="Delete" method="post"
-                                    onsubmit="return confirm('XÃ³a sound test nÃ y?')">
+                                    onsubmit="return confirm('Xóa sound test này?')">
                                     <input type="hidden" name="testId" value="@st.TestId" />
                                     <button type="submit" class="btn-ghost btn-sm-lovable"
                                         style="color:#b91c1c;border-color:rgba(185,28,28,0.3);padding:4px 8px"
-                                        title="XÃ³a sound test">
+                                        title="Xóa sound test">
                                         <i class="bi bi-trash" style="font-size:0.8rem"></i>
                                     </button>
                                 </form>
@@ -241,20 +241,20 @@
                     </div>
                 </div>
 
-                <!-- BÃ¬nh luáº­n cho tá»«ng sound test -->
+                <!-- Bình luận cho từng sound test -->
                 <div class="comment-section mt-3" data-test-id="@st.TestId">
                     <div class="d-flex align-items-center gap-2 mb-2">
                         <i class="bi bi-chat-dots" style="opacity:0.5"></i>
-                        <span class="text-caption" data-i18n="comment.title">BÃ¬nh luáº­n</span>
+                        <span class="text-caption" data-i18n="comment.title">Bình luận</span>
                         <span class="comment-count badge-count ms-1">0</span>
                     </div>
 
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        <!-- Form nháº­p bÃ¬nh luáº­n (Ä‘Ã£ Ä‘Äƒng nháº­p) -->
+                        <!-- Form nhập bình luận (đã đăng nhập) -->
                         <div class="comment-form d-flex gap-2 mb-3">
                             <textarea class="comment-input form-control form-control-sm" rows="1" maxlength="1000"
-                                      data-i18n-placeholder="comment.placeholder" placeholder="Viáº¿t bÃ¬nh luáº­n..."></textarea>
+                                      data-i18n-placeholder="comment.placeholder" placeholder="Viết bình luận..."></textarea>
                             <button class="btn-dark-lovable btn-sm-lovable comment-submit-btn" disabled>
                                 <i class="bi bi-send"></i>
                             </button>
@@ -263,11 +263,11 @@
                     else
                     {
                         <div class="text-caption mb-3" style="font-style:italic">
-                            <a asp-controller="Auth" asp-action="Login" data-i18n="comment.loginToComment">ÄÄƒng nháº­p Ä‘á»ƒ bÃ¬nh luáº­n</a>
+                            <a asp-controller="Auth" asp-action="Login" data-i18n="comment.loginToComment">Đăng nhập để bình luận</a>
                         </div>
                     }
 
-                    <!-- Danh sÃ¡ch bÃ¬nh luáº­n (load qua AJAX) -->
+                    <!-- Danh sách bình luận (load qua AJAX) -->
                     <div class="comment-list"></div>
                 </div>
             }
@@ -277,25 +277,25 @@
 
 @section Scripts {
 <script>
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// BÃŒNH LUáº¬N â€” AJAX load / thÃªm / reply / xÃ³a
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════
+// BÌNH LUẬN — AJAX load / thêm / reply / xóa
+// ═══════════════════════════════════════════════════════════════════
 
-// Token chá»‘ng CSRF â€” láº¥y tá»« input áº©n trong _Layout.cshtml
+// Token chống CSRF — lấy từ input ẩn trong _Layout.cshtml
 const _commentToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
 
-// Láº¥y ngÃ´n ngá»¯ hiá»‡n táº¡i tá»« localStorage
+// Lấy ngôn ngữ hiện tại từ localStorage
 function _commentLang() {
     return localStorage.getItem('bpcvn-lang') || 'vi';
 }
 
-// Dá»‹ch key i18n
+// Dịch key i18n
 function _t(key) {
     const lang = _commentLang();
     return translations?.[lang]?.[key] || translations?.vi?.[key] || key;
 }
 
-// Hiá»ƒn thá»‹ toast
+// Hiển thị toast
 function _showToast(msg, type) {
     const existing = document.querySelector('.toast-fixed');
     if (existing) existing.remove();
@@ -315,9 +315,9 @@ function _showToast(msg, type) {
     setTimeout(() => toast.remove(), 4000);
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// LOAD BÃŒNH LUáº¬N â€” Gá»i API GetComments, build tree, render
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════
+// LOAD BÌNH LUẬN — Gọi API GetComments, build tree, render
+// ═══════════════════════════════════════════════════════════════════
 
 async function loadComments(section) {
     const testId = section.dataset.testId;
@@ -342,7 +342,7 @@ async function loadComments(section) {
     }
 }
 
-// Chuyá»ƒn flat list â†’ nested tree
+// Chuyển flat list → nested tree
 function buildTree(list) {
     const map = {};
     const roots = [];
@@ -358,7 +358,7 @@ function buildTree(list) {
     return roots;
 }
 
-// Render HTML cho tree bÃ¬nh luáº­n (Ä‘á»‡ quy)
+// Render HTML cho tree bình luận (đệ quy)
 function renderTree(nodes, testId, depth = 0) {
     return nodes.map((node, i) => {
         const isLast = i === nodes.length - 1;
@@ -387,7 +387,7 @@ function renderTree(nodes, testId, depth = 0) {
                     <p class="mb-1" style="font-size:0.9rem;white-space:pre-wrap">${escapeHtml(node.content)}</p>
                     <div class="d-flex gap-2 align-items-center">
                         ${currentUserId ? `<button class="btn-link text-caption reply-btn" style="font-size:0.8rem;padding:0;border:0" data-comment-id="${node.id}">${_t('comment.reply')}</button>` : ''}
-                        ${node.userId.toLowerCase() === currentUserId.toLowerCase() ? `<button class="btn-link text-caption edit-btn" style="font-size:0.8rem;padding:0;border:0" data-comment-id="${node.id}" data-content="${escapeHtml(node.content)}">${_commentLang() === 'vi' ? 'Sá»­a' : 'Edit'}</button>` : ''}
+                        ${node.userId.toLowerCase() === currentUserId.toLowerCase() ? `<button class="btn-link text-caption edit-btn" style="font-size:0.8rem;padding:0;border:0" data-comment-id="${node.id}" data-content="${escapeHtml(node.content)}">${_commentLang() === 'vi' ? 'Sửa' : 'Edit'}</button>` : ''}
                         ${canDelete ? `<button class="btn-link text-caption delete-btn" style="font-size:0.8rem;padding:0;border:0;color:#b91c1c" data-comment-id="${node.id}">${_t('comment.delete')}</button>` : ''}
                     </div>
                     <!-- Form reply -->
@@ -401,7 +401,7 @@ function renderTree(nodes, testId, depth = 0) {
                             <button class="btn-ghost btn-sm-lovable reply-cancel">${_t('comment.cancel')}</button>
                         </div>
                     </div>
-                    <!-- Form sá»­a comment -->
+                    <!-- Form sửa comment -->
                     <div class="edit-form mt-2" style="display:none">
                         <div class="d-flex gap-2">
                             <textarea class="form-control form-control-sm edit-input" rows="1" maxlength="1000">${escapeHtml(node.content)}</textarea>
@@ -418,16 +418,16 @@ function renderTree(nodes, testId, depth = 0) {
     }).join('');
 }
 
-// Escape HTMLé˜²æ­¢ XSS
+// Escape HTML防止 XSS
 function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// THÃŠM BÃŒNH LUáº¬N Má»šI
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════
+// THÊM BÌNH LUẬN MỚI
+// ═══════════════════════════════════════════════════════════════════
 
 async function addComment(section, content, parentId = null) {
     const testId = section.dataset.testId;
@@ -458,9 +458,9 @@ async function addComment(section, content, parentId = null) {
     }
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// XÃ“A BÃŒNH LUáº¬N
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════
+// XÓA BÌNH LUẬN
+// ═══════════════════════════════════════════════════════════════════
 
 async function deleteComment(section, commentId) {
     if (!confirm(_t('comment.confirmDelete'))) return;
@@ -487,9 +487,9 @@ async function deleteComment(section, commentId) {
     }
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// Sá»¬A BÃŒNH LUáº¬N
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════
+// SỬA BÌNH LUẬN
+// ═══════════════════════════════════════════════════════════════════
 
 async function editComment(section, commentId, content) {
     try {
@@ -514,24 +514,24 @@ async function editComment(section, commentId, content) {
     }
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// Tá»° Äá»˜NG Má»ž Rá»˜NG TEXTAREA
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════
+// TỰ ĐỘNG MỞ RỘNG TEXTAREA
+// ═══════════════════════════════════════════════════════════════════
 
 function autoResize(textarea) {
     textarea.style.height = 'auto';
     textarea.style.height = textarea.scrollHeight + 'px';
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// Gáº®N Sá»° KIá»†N â€” Khá»Ÿi táº¡o khi DOM sáºµn sÃ ng
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════
+// GẮN SỰ KIỆN — Khởi tạo khi DOM sẵn sàng
+// ═══════════════════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.comment-section').forEach(section => {
         loadComments(section);
 
-        // Form nháº­p bÃ¬nh luáº­n chÃ­nh
+        // Form nhập bình luận chính
         const input = section.querySelector('.comment-input');
         const submitBtn = section.querySelector('.comment-submit-btn');
 
@@ -550,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.disabled = true;
             });
 
-            // Enter Ä‘á»ƒ gá»­i, Shift+Enter Ä‘á»ƒ xuá»‘ng dÃ²ng
+            // Enter để gửi, Shift+Enter để xuống dòng
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -563,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
         section.addEventListener('click', (e) => {
             const target = e.target;
 
-            // NÃºt "Tráº£ lá»i"
+            // Nút "Trả lời"
             if (target.classList.contains('reply-btn')) {
                 const commentBox = target.closest('.comment-item-box');
                 const replyForm = commentBox.querySelector('.reply-form');
@@ -573,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // NÃºt "Sá»­a"
+            // Nút "Sửa"
             if (target.classList.contains('edit-btn')) {
                 const commentBox = target.closest('.comment-item-box');
                 const editForm = commentBox.querySelector('.edit-form');
@@ -585,20 +585,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // NÃºt "Huá»·" reply
+            // Nút "Huỷ" reply
             if (target.classList.contains('reply-cancel')) {
                 const replyForm = target.closest('.reply-form');
                 replyForm.style.display = 'none';
                 replyForm.querySelector('.reply-input').value = '';
             }
 
-            // NÃºt "Huá»·" edit
+            // Nút "Huỷ" edit
             if (target.classList.contains('edit-cancel')) {
                 const editForm = target.closest('.edit-form');
                 editForm.style.display = 'none';
             }
 
-            // Gá»­i reply
+            // Gửi reply
             if (target.classList.contains('reply-submit') || target.closest('.reply-submit')) {
                 const btn = target.classList.contains('reply-submit') ? target : target.closest('.reply-submit');
                 const replyForm = btn.closest('.reply-form');
@@ -613,7 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 addComment(section, content, commentId);
             }
 
-            // Gá»­i edit
+            // Gửi edit
             if (target.classList.contains('edit-submit') || target.closest('.edit-submit')) {
                 const btn = target.classList.contains('edit-submit') ? target : target.closest('.edit-submit');
                 const editForm = btn.closest('.edit-form');
@@ -627,14 +627,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 editComment(section, commentId, content);
             }
 
-            // XÃ³a bÃ¬nh luáº­n
+            // Xóa bình luận
             if (target.classList.contains('delete-btn')) {
                 const commentId = parseInt(target.dataset.commentId);
                 if (commentId) deleteComment(section, commentId);
             }
         });
 
-        // Auto-resize + Enter cho reply vÃ  edit textarea
+        // Auto-resize + Enter cho reply và edit textarea
         section.addEventListener('input', (e) => {
             if (e.target.classList.contains('reply-input')) {
                 autoResize(e.target);
@@ -648,7 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Enter Ä‘á»ƒ gá»­i trong reply vÃ  edit form
+        // Enter để gửi trong reply và edit form
         section.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 if (e.target.classList.contains('reply-input')) {
@@ -666,9 +666,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// UPVOTE / UNLIKE â€” AJAX
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════
+// UPVOTE / UNLIKE — AJAX
+// ═══════════════════════════════════════════════════════════════════
 
 async function handleUpvote(btn) {
     const testId = btn.dataset.testId;
@@ -691,7 +691,7 @@ async function handleUpvote(btn) {
 
         if (data.success) {
             btn.querySelector('.upvote-count').textContent = data.newCount;
-            // DÃ¹ng data.liked tá»« server Ä‘á»ƒ toggle class Ä‘Ãºng (like=true â†’ add, unlike=false â†’ remove)
+            // Dùng data.liked từ server để toggle class đúng (like=true → add, unlike=false → remove)
             if (data.liked) {
                 btn.classList.add('upvoted');
             } else {
