@@ -20,11 +20,13 @@
         return Url.Action(null, null, routeValues) ?? $"?page={targetPage}";
     }
 
-    // Tạo danh sách các số trang hiển thị (luôn có trang đầu, trang cuối và vùng xung quanh trang hiện tại)
     var currentPage = Model.PageNumber;
     var totalPages = Model.TotalPages;
-    var corePages = new SortedSet<int> { 1, totalPages };
+    var startItem = ((currentPage - 1) * Model.PageSize) + 1;
+    var endItem = Math.Min(currentPage * Model.PageSize, Model.TotalItems);
 
+    // Tạo danh sách số trang hiển thị: trang đầu, trang cuối và vùng xung quanh trang hiện tại
+    var corePages = new SortedSet<int> { 1, totalPages };
     for (var p = Math.Max(1, currentPage - 1); p <= Math.Min(totalPages, currentPage + 1); p++)
     {
         corePages.Add(p);
@@ -39,7 +41,7 @@
             var gap = p - prevShown.Value;
             if (gap == 2)
             {
-                // Nếu chỉ cách 1 trang thì hiện luôn số trang đó thay vì dấu "..."
+                // Nếu chỉ cách đúng 1 trang thì hiện số trang đó thay vì dấu "..."
                 pageTokens.Add(prevShown.Value + 1);
             }
             else if (gap > 2)
@@ -52,56 +54,93 @@
         prevShown = p;
     }
 
-    <nav class="nb-pagination mt-4 pt-2" aria-label="Phân trang danh mục">
-        @* Nút Trang trước *@
-        @if (Model.HasPreviousPage)
-        {
-            <a class="nb-page-btn" href="@BuildPageUrl(currentPage - 1)" aria-label="Trang trước">
-                <i class="bi bi-chevron-left"></i>
-                <span>Trang trước</span>
-            </a>
-        }
-        else
-        {
-            <span class="nb-page-btn is-disabled" aria-disabled="true">
-                <i class="bi bi-chevron-left"></i>
-                <span>Trang trước</span>
-            </span>
-        }
-
-        @* Danh sách số trang và dấu rút gọn "..." *@
-        <div class="nb-page-numbers">
-            @foreach (var token in pageTokens)
-            {
-                if (token == null)
-                {
-                    <span class="nb-page-ellipsis" aria-hidden="true">...</span>
-                }
-                else if (token.Value == currentPage)
-                {
-                    <span class="nb-page-btn is-active" aria-current="page">@token.Value</span>
-                }
-                else
-                {
-                    <a class="nb-page-btn" href="@BuildPageUrl(token.Value)">@token.Value</a>
-                }
-            }
+    <nav class="nb-pagination-shell" aria-label="Phân trang danh mục">
+        @* Nhãn trạng thái trang hiện tại và phạm vi sản phẩm đang xem *@
+        <div class="nb-page-meta">
+            <span class="nb-page-meta-badge">TRANG @currentPage / @totalPages</span>
+            <span class="nb-page-meta-range"> @startItem–@endItem / @Model.TotalItems</span>
         </div>
 
-        @* Nút Trang sau *@
-        @if (Model.HasNextPage)
-        {
-            <a class="nb-page-btn" href="@BuildPageUrl(currentPage + 1)" aria-label="Trang sau">
-                <span>Trang sau</span>
-                <i class="bi bi-chevron-right"></i>
-            </a>
-        }
-        else
-        {
-            <span class="nb-page-btn is-disabled" aria-disabled="true">
-                <span>Trang sau</span>
-                <i class="bi bi-chevron-right"></i>
-            </span>
-        }
+        @* Hàng phím điều hướng Neo-Brutalist *@
+        <div class="nb-pagination-bar">
+            @* Nút Về trang đầu tiên *@
+            @if (Model.HasPreviousPage)
+            {
+                <a class="nb-page-btn nb-page-edge" href="@BuildPageUrl(1)" aria-label="Về trang đầu tiên" title="Trang đầu">
+                    <i class="bi bi-chevron-bar-left" aria-hidden="true"></i>
+                </a>
+            }
+            else
+            {
+                <span class="nb-page-btn nb-page-edge is-disabled" aria-disabled="true" title="Đang ở trang đầu tiên">
+                    <i class="bi bi-chevron-bar-left" aria-hidden="true"></i>
+                </span>
+            }
+
+            @* Nút Trang trước *@
+            @if (Model.HasPreviousPage)
+            {
+                <a class="nb-page-btn nb-page-nav" href="@BuildPageUrl(currentPage - 1)" aria-label="Trang trước">
+                    <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                    <span class="nb-page-nav-label">Trang trước</span>
+                </a>
+            }
+            else
+            {
+                <span class="nb-page-btn nb-page-nav is-disabled" aria-disabled="true" title="Đang ở trang đầu tiên">
+                    <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                    <span class="nb-page-nav-label">Trang trước</span>
+                </span>
+            }
+
+            @* Cụm số trang dạng phím cơ *@
+            <div class="nb-page-numbers">
+                @foreach (var token in pageTokens)
+                {
+                    if (token == null)
+                    {
+                        <span class="nb-page-ellipsis" aria-hidden="true">...</span>
+                    }
+                    else if (token.Value == currentPage)
+                    {
+                        <span class="nb-page-btn nb-page-num is-active" aria-current="page" title="Trang hiện tại">@token.Value</span>
+                    }
+                    else
+                    {
+                        <a class="nb-page-btn nb-page-num" href="@BuildPageUrl(token.Value)" aria-label="Trang @token.Value">@token.Value</a>
+                    }
+                }
+            </div>
+
+            @* Nút Trang sau *@
+            @if (Model.HasNextPage)
+            {
+                <a class="nb-page-btn nb-page-nav" href="@BuildPageUrl(currentPage + 1)" aria-label="Trang sau">
+                    <span class="nb-page-nav-label">Trang sau</span>
+                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </a>
+            }
+            else
+            {
+                <span class="nb-page-btn nb-page-nav is-disabled" aria-disabled="true" title="Đang ở trang cuối cùng">
+                    <span class="nb-page-nav-label">Trang sau</span>
+                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </span>
+            }
+
+            @* Nút Đến trang cuối cùng *@
+            @if (Model.HasNextPage)
+            {
+                <a class="nb-page-btn nb-page-edge" href="@BuildPageUrl(totalPages)" aria-label="Đến trang cuối cùng" title="Trang cuối">
+                    <i class="bi bi-chevron-bar-right" aria-hidden="true"></i>
+                </a>
+            }
+            else
+            {
+                <span class="nb-page-btn nb-page-edge is-disabled" aria-disabled="true" title="Đang ở trang cuối cùng">
+                    <i class="bi bi-chevron-bar-right" aria-hidden="true"></i>
+                </span>
+            }
+        </div>
     </nav>
 }

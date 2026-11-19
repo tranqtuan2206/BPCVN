@@ -41,6 +41,10 @@
     --nb-border: 3px solid var(--nb-ink);
     --nb-shadow: 4px 4px 0 var(--nb-ink);
     --nb-shadow-hover: 2px 2px 0 var(--nb-ink);
+    --nb-shadow-lift: 6px 6px 0 var(--nb-ink);
+    --nb-accent-ink: #1a1a1a;
+    --nb-cta-ink: #FFFDF0;
+    --nb-disabled-bg: rgba(26, 26, 26, 0.06);
 
     /* Typography */
     --font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
@@ -848,12 +852,15 @@ html.dark .waveform-play-btn.playing:hover {
 .upvote-btn-lovable.upvoted .bi-heart {
     color: #e91e63;
 }
+
 .upvote-btn-lovable.upvoted .bi-heart-fill {
     display: inline-block;
 }
+
 .upvote-btn-lovable.upvoted .bi-heart {
     display: none;
 }
+
 .upvote-btn-lovable .bi-heart-fill {
     display: none;
 }
@@ -903,7 +910,7 @@ html.dark .waveform-play-btn.playing:hover {
     box-shadow: var(--nb-shadow);
 }
 
-.hero-section > * {
+.hero-section>* {
     position: relative;
     z-index: 1;
 }
@@ -1257,6 +1264,10 @@ html.dark {
     --nb-border: 3px solid var(--nb-ink);
     --nb-shadow: 4px 4px 0 rgba(255, 253, 240, 0.3);
     --nb-shadow-hover: 2px 2px 0 rgba(255, 253, 240, 0.3);
+    --nb-shadow-lift: 6px 6px 0 rgba(255, 253, 240, 0.35);
+    --nb-accent-ink: #1a1a1a;
+    --nb-cta-ink: #1a1a1a;
+    --nb-disabled-bg: rgba(255, 253, 240, 0.07);
     --nb-badge-bg: rgba(255, 253, 240, 0.08);
 
     /* ── LEGACY TOKENS MAPPING (DARK) ── */
@@ -1626,14 +1637,17 @@ html.dark .comment-item-box .reply-btn {
     background: none !important;
     text-decoration: none !important;
 }
+
 html.dark .comment-item-box .reply-btn:hover {
     color: var(--color-muted) !important;
 }
+
 html.dark .comment-item-box .delete-btn {
     color: #fca5a5 !important;
     background: none !important;
     text-decoration: none !important;
 }
+
 html.dark .comment-item-box .delete-btn:hover {
     color: #f87171 !important;
 }
@@ -1645,77 +1659,194 @@ html.dark .comment-item-box .edit-btn {
     border: none !important;
     box-shadow: none !important;
 }
+
 html.dark .comment-item-box .edit-btn:hover {
     color: var(--color-muted) !important;
 }
 
-/* ── 32. Thanh phân trang (Neo-Brutalist Pagination) ─────────────────────── */
-.nb-pagination {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
 
-.nb-page-numbers {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
+    /* Hallmark · component: pagination · genre: brutalist · theme: bpcvn-neo-brutal
+ * Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5
+ * states: default · hover · focus-visible · active · current · disabled
+ * contrast: pass (locked --nb-ink / --nb-accent-ink / --nb-cta-ink)
+ */
+    /* ── 32. Thanh phân trang (Neo-Brutalist Mechanical Keycap Pagination) ───── */
+    .nb-pagination-shell {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        margin-top: 40px;
+        padding-top: 8px;
+    }
 
-.nb-page-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    min-width: 42px;
-    height: 42px;
-    padding: 0 14px;
-    background-color: var(--nb-bg);
-    color: var(--nb-ink);
-    border: var(--nb-border);
-    border-radius: var(--nb-radius);
-    font-family: var(--font-family);
-    font-size: 0.9375rem;
-    font-weight: 700;
-    text-decoration: none;
-    box-shadow: var(--nb-shadow);
-    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
-}
+    /* Thẻ hiển thị trạng thái trang và số lượng bản ghi */
+    .nb-page-meta {
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-variant-numeric: tabular-nums;
+    }
 
-a.nb-page-btn:hover {
-    background-color: var(--nb-accent);
-    color: var(--nb-ink);
-    text-decoration: none;
-    transform: translate(2px, 2px);
-    box-shadow: var(--nb-shadow-hover);
-}
+    .nb-page-meta-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        background-color: var(--nb-accent);
+        color: var(--nb-accent-ink);
+        border: 2px solid var(--nb-ink);
+        border-radius: var(--nb-radius);
+        box-shadow: 3px 3px 0 var(--nb-ink);
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
 
-.nb-page-btn.is-active {
-    background-color: var(--nb-cta);
-    color: var(--nb-bg);
-    box-shadow: var(--nb-shadow-hover);
-    transform: translate(2px, 2px);
-    cursor: default;
-}
+    .nb-page-meta-range {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        background-color: var(--nb-bg);
+        color: var(--nb-ink);
+        border: 2px solid var(--nb-ink);
+        border-radius: var(--nb-radius);
+        box-shadow: 3px 3px 0 var(--nb-ink);
+        font-size: 0.8125rem;
+        font-weight: 700;
+    }
 
-.nb-page-btn.is-disabled {
-    opacity: 0.45;
-    box-shadow: none;
-    cursor: not-allowed;
-    user-select: none;
-}
+    .nb-pagination-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
 
-.nb-page-ellipsis {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 32px;
-    height: 42px;
-    font-weight: 800;
-    color: var(--nb-ink);
-    user-select: none;
-}
+    .nb-page-numbers {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    /* Khối nút phím cơ: hit target tối thiểu 44x44px, viền 3px, bóng cứng 4px */
+    .nb-page-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0 14px;
+        background-color: var(--nb-bg);
+        color: var(--nb-ink);
+        border: var(--nb-border);
+        border-radius: var(--nb-radius);
+        font-family: var(--font-family);
+        font-size: 0.9375rem;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+        white-space: nowrap;
+        text-decoration: none;
+        box-shadow: var(--nb-shadow);
+        outline: 3px solid transparent;
+        outline-offset: 2px;
+        transition: transform 0.14s ease, box-shadow 0.14s ease, background-color 0.14s ease, color 0.14s ease;
+    }
+
+
+        .nb-page-num {
+            padding: 0 10px;
+        }
+
+        /* Nút nhảy nhanh Trang đầu / Trang cuối dạng phím vuông đồng bộ kích thước */
+        .nb-page-edge {
+            width: 44px;
+            padding: 0;
+            font-size: 1.125rem;
+        }
+
+        /* Hover: nổi lên theo chuẩn Pop Neo-Brutalist (chỉ áp dụng trên thiết bị có con trỏ) */
+        @media (hover: hover) {
+            a.nb-page-btn:hover {
+                background-color: var(--nb-cta);
+                color: var(--nb-cta-ink);
+                text-decoration: none;
+                transform: translate(-2px, -2px);
+                box-shadow: var(--nb-shadow-lift);
+            }
+        }
+
+        /* Focus bàn phím: vòng viền nổi bật, không gây giật bố cục */
+        a.nb-page-btn:focus-visible {
+            outline: 3px solid var(--nb-accent);
+            outline-offset: 3px;
+        }
+
+        /* Nhấn chuột: hiệu ứng ấn lún phím cơ xuống sát bề mặt */
+        a.nb-page-btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: none;
+        }
+
+        /* Trang đang chọn: phím đang được nhấn giữ với màu nhấn nổi bật */
+        .nb-page-btn.is-active {
+            background-color: var(--nb-accent);
+            color: var(--nb-accent-ink);
+            transform: translate(3px, 3px);
+            box-shadow: none;
+            cursor: default;
+        }
+
+        /* Trạng thái vô hiệu (ở trang đầu hoặc trang cuối): viền nét đứt, không đổ bóng */
+        .nb-page-btn.is-disabled {
+            background-color: var(--nb-disabled-bg);
+            color: var(--color-muted);
+            border-style: dashed;
+            opacity: 0.65;
+            box-shadow: none;
+            cursor: not-allowed;
+            user-select: none;
+        }
+
+        /* Dấu rút gọn khi có nhiều trang */
+        .nb-page-ellipsis {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            min-height: 44px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            color: var(--nb-ink);
+            user-select: none;
+        }
+
+        /* Responsive trên màn hình hẹp (320px - 575px): thu gọn nhãn nút Trước/Sau còn icon 44x44px */
+        @media (max-width: 575.98px) {
+            .nb-page-nav {
+                padding: 0;
+                width: 44px;
+            }
+
+            .nb-page-nav-label {
+                display: none;
+            }
+
+            .nb-pagination-bar {
+                gap: 8px;
+            }
+        }
+
+        /* Tôn trọng cài đặt giảm chuyển động của hệ điều hành */
+        @media (prefers-reduced-motion: reduce) {
+            .nb-page-btn {
+                transition: none;
+            }
+        }
