@@ -80,34 +80,23 @@ public class AuthController : Controller
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
 
-            // ── Gửi email xác thực ──────────────────────────────────────────
+            // ── Gửi email xác thực (rút gọn URL, chỉ truyền token) ───────────
             var verifyLink = BuildPublicActionUrl(
                 "VerifyEmail",
                 "Auth",
-                new { email = user.Email, token = verificationToken });
+                new { token = verificationToken });
 
-            var safeUsername = System.Net.WebUtility.HtmlEncode(user.Username);
-            var safeVerifyLink = System.Net.WebUtility.HtmlEncode(verifyLink);
-            var emailBody = $@"
-                <h2>Chào mừng bạn đến với BPCVN!</h2>
-                <p>Xin chào <strong>{safeUsername}</strong>,</p>
-                <p>Vui lòng nhấn vào link bên dưới để kích hoạt tài khoản của bạn:</p>
-                <p><a href='{safeVerifyLink}' style='display:inline-block;padding:10px 20px;background:#333;color:#fff;text-decoration:none;border-radius:5px;'>
-                    ✅ Kích hoạt tài khoản
-                </a></p>
-                <p>Hoặc copy link này vào trình duyệt:</p>
-                <p>{safeVerifyLink}</p>
-                <hr/>
-                <p style='color:#888;font-size:12px;'>Nếu bạn không đăng ký tài khoản này, vui lòng bỏ qua email này.</p>
-            ";
+            var (verifySubject, emailBody) = AuthEmailTemplateBuilder.BuildVerifyAccountEmail(
+                user.Username, verifyLink, GetPreferredEmailLanguage());
 
             try
             {
-                await _emailService.SendEmailAsync(user.Email, "BPCVN - Xác thực tài khoản", emailBody);
+                await _emailService.SendEmailAsync(user.Email, verifySubject, emailBody);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Nếu gửi mail lỗi, vẫn tạo tài khoản thành công
+                // Nếu gửi mail lỗi, vẫn tạo tài khoản thành công và ghi log
+                _logger.LogWarning(ex, "[Auth] Không thể gửi email xác thực tới {UserId}", user.UserId);
             }
         }
         // Nếu email đã tồn tại: không làm gì thêm → message chung bên dưới
@@ -124,7 +113,7 @@ public class AuthController : Controller
     /// </summary>
     [HttpGet]
     [EnableRateLimiting("AuthActionRateLimit")]
-    public async Task<IActionResult> VerifyEmail(string email, string token)
+    public async Task<IActionResult> VerifyEmail(string? token, string? email = null)
     {
         // Validate tham số đầu vào
         if (string.IsNullOrEmpty(token))
@@ -299,30 +288,18 @@ public class AuthController : Controller
             user.PasswordResetTokenExpiry = DateTime.UtcNow.AddMinutes(15);
             await _db.SaveChangesAsync();
 
+            // Rút gọn URL: chỉ truyền token, không đưa email lên query string
             var resetLink = BuildPublicActionUrl(
                 "ResetPassword",
                 "Auth",
-                new { email = user.Email, token = rawToken });
+                new { token = rawToken });
 
-            var safeUsername = System.Net.WebUtility.HtmlEncode(user.Username);
-            var safeResetLink = System.Net.WebUtility.HtmlEncode(resetLink);
-            var emailBody = $@"
-                <h2>BPCVN - Yêu cầu đặt lại mật khẩu</h2>
-                <p>Xin chào <strong>{safeUsername}</strong>,</p>
-                <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.</p>
-                <p><a href='{safeResetLink}' style='display:inline-block;padding:10px 20px;background:#1a1a1a;color:#fffdf0;text-decoration:none;font-weight:bold;border:2px solid #1a1a1a;'>
-                    Đặt lại mật khẩu
-                </a></p>
-                <p>Hoặc sao chép liên kết này vào trình duyệt:</p>
-                <p>{safeResetLink}</p>
-                <p><strong>Lưu ý:</strong> Liên kết này chỉ có hiệu lực trong <strong>15 phút</strong> và chỉ sử dụng được một lần.</p>
-                <hr/>
-                <p style='color:#666;font-size:12px;'>Nếu bạn không thực hiện yêu cầu này, hãy bỏ qua email này.</p>
-            ";
+            var (resetSubject, emailBody) = AuthEmailTemplateBuilder.BuildPasswordResetEmail(
+                user.Username, resetLink, GetPreferredEmailLanguage());
 
             try
             {
-                await _emailService.SendEmailAsync(user.Email, "BPCVN - Đặt lại mật khẩu", emailBody);
+                await _emailService.SendEmailAsync(user.Email, resetSubject, emailBody);
             }
             catch (Exception ex)
             {
@@ -342,18 +319,25 @@ public class AuthController : Controller
 
     [HttpGet]
     [EnableRateLimiting("AuthActionRateLimit")]
-    public async Task<IActionResult> ResetPassword(string? email, string? token)
+    public async Task<IActionResult> ResetPassword(string? token, string? email = null)
     {
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(token))
+        if (string.IsNullOrWhiteSpace(token))
         {
             TempData["Error"] = "toast.auth.reset.invalid";
             return RedirectToAction(nameof(ForgotPassword));
         }
 
-        var normalizedEmail = email.Trim().ToLower();
-        var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+        // Tìm user theo mã băm token (không cần lộ email trên URL)
+        var cleanToken = token.Trim();
+        var tokenHash = PasswordResetTokenHelper.HashToken(cleanToken);
+        var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.PasswordResetTokenHash == tokenHash);
 
-        if (user == null || !PasswordResetTokenHelper.VerifyToken(token, user.PasswordResetTokenHash, user.PasswordResetTokenExpiry))
+        // Nếu link cũ có kèm email thì kiểm tra khớp bổ sung cho chặt chẽ
+        var emailMatches = string.IsNullOrWhiteSpace(email) ||
+            (user != null && string.Equals(user.Email, email.Trim(), StringComparison.OrdinalIgnoreCase));
+
+        if (user == null || !emailMatches ||
+            !PasswordResetTokenHelper.VerifyToken(cleanToken, user.PasswordResetTokenHash, user.PasswordResetTokenExpiry))
         {
             TempData["Error"] = "toast.auth.reset.invalid";
             return RedirectToAction(nameof(ForgotPassword));
@@ -361,8 +345,8 @@ public class AuthController : Controller
 
         return View(new ResetPasswordViewModel
         {
-            Email = normalizedEmail,
-            Token = token.Trim()
+            Email = user.Email,
+            Token = cleanToken
         });
     }
 
@@ -406,6 +390,16 @@ public class AuthController : Controller
     public IActionResult AccessDenied() => View();
 
     // ── HELPER ───────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Lấy ngôn ngữ gửi email theo lựa chọn trên web (cookie bpcvn-lang) hoặc Accept-Language.
+    /// </summary>
+    private string GetPreferredEmailLanguage()
+    {
+        return AuthEmailTemplateBuilder.ResolveEmailLanguage(
+            Request.Cookies["bpcvn-lang"],
+            Request.Headers.AcceptLanguage.ToString());
+    }
 
     /// <summary>
     /// Tạo URL công khai cho liên kết xác thực/đặt lại mật khẩu trong email.

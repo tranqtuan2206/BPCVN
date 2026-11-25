@@ -191,6 +191,39 @@ public class PasswordResetTests
         Assert.Contains("New password cannot be the same as your current password.", layout);
     }
 
+    [Theory]
+    [InlineData("en", "vi-VN,vi;q=0.9", "en")]
+    [InlineData("vi", "en-US,en;q=0.9", "vi")]
+    [InlineData(null, "en-US,en;q=0.9", "en")]
+    [InlineData("", "ja-JP,ja;q=0.8,en;q=0.6", "en")]
+    [InlineData(null, "vi-VN,vi;q=0.9,en;q=0.8", "vi")]
+    [InlineData(null, null, "vi")]
+    public void ResolveEmailLanguage_ShouldPrioritizeCookieThenAcceptLanguageThenDefaultVi(
+        string? cookieLang, string? acceptLang, string expected)
+    {
+        Assert.Equal(expected, AuthEmailTemplateBuilder.ResolveEmailLanguage(cookieLang, acceptLang));
+    }
+
+    [Fact]
+    public void EmailTemplates_ShouldRenderLocalizedHtmlWithoutExposingRawTokenText()
+    {
+        const string secretToken = "SecretTokenValue_123456";
+        var resetUrl = $"https://bpcvn.dev/Auth/ResetPassword?token={secretToken}";
+        var verifyUrl = $"https://bpcvn.dev/Auth/VerifyEmail?token={secretToken}";
+
+        var (enSubject, enBody) = AuthEmailTemplateBuilder.BuildPasswordResetEmail("Alex <script>", resetUrl, "en");
+        Assert.Equal("BPCVN - Reset your password", enSubject);
+        Assert.Contains("Alex &lt;script&gt;", enBody);
+        Assert.Contains($"href=\"{resetUrl}\"", enBody);
+        // Không in chuỗi URL thô có token ra nội dung văn bản hiển thị
+        Assert.DoesNotContain($">{resetUrl}<", enBody);
+
+        var (viSubject, viBody) = AuthEmailTemplateBuilder.BuildVerifyAccountEmail("Tuan", verifyUrl, "vi");
+        Assert.Equal("BPCVN - Xác thực tài khoản", viSubject);
+        Assert.Contains($"href=\"{verifyUrl}\"", viBody);
+        Assert.DoesNotContain($">{verifyUrl}<", viBody);
+    }
+
     private static List<ValidationResult> ValidateModel(object model)
     {
         var results = new List<ValidationResult>();

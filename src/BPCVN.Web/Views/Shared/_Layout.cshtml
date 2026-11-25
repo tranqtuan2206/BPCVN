@@ -472,9 +472,17 @@
             });
         }
 
-        /* Đặt ngôn ngữ + lưu localStorage, đóng dropdown bằng Bootstrap API */
+        /* Đồng bộ lựa chọn ngôn ngữ sang cookie để backend gửi email đúng ngôn ngữ */
+        function syncLangCookie(lang) {
+            if (lang === 'vi' || lang === 'en') {
+                document.cookie = 'bpcvn-lang=' + lang + '; path=/; max-age=31536000; SameSite=Lax';
+            }
+        }
+
+        /* Đặt ngôn ngữ + lưu localStorage & cookie, đóng dropdown bằng Bootstrap API */
         function setLang(lang) {
             localStorage.setItem('bpcvn-lang', lang);
+            syncLangCookie(lang);
             applyLang(lang);
             // Đóng dropdown ngôn ngữ qua Bootstrap 5 API
             const toggler = document.querySelector('#langSwitcher .dropdown-toggle');
@@ -486,7 +494,11 @@
 
         /* Khôi phục ngôn ngữ khi load trang */
         (function () {
-            var saved = localStorage.getItem('bpcvn-lang') || 'vi';
+            var storedLang = localStorage.getItem('bpcvn-lang');
+            if (storedLang === 'vi' || storedLang === 'en') {
+                syncLangCookie(storedLang);
+            }
+            var saved = storedLang || 'vi';
             applyLang(saved);
 
             function translateValidationMessages() {
