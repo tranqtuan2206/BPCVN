@@ -1,11 +1,13 @@
+using System.Net;
+using System.Threading.RateLimiting;
 using BPCVN.Application.Interfaces;
 using BPCVN.Application.Services;
 using BPCVN.Infrastructure.Data;
 using BPCVN.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
-using System.Threading.RateLimiting;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -90,6 +92,15 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
             : CookieSecurePolicy.Always;
     });
 
+// Cấu hình Forwarded Headers để nhận đúng HTTPS và IP gốc khi chạy sau Cloudflare Proxy / IIS
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Chấp nhận header chuyển tiếp từ reverse proxy bên ngoài (Cloudflare)
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
 
 // ── Seed Database ─────────────────────────────────────────────────────────────
@@ -109,8 +120,24 @@ using (var scope = app.Services.CreateScope())
 
 
 // ── Middleware Pipeline ───────────────────────────────────────────────────────
+// Phải đặt UseForwardedHeaders trước HttpsRedirection, Canonical Redirect và RateLimiter
+app.UseForwardedHeaders();
+
+// Tự động chuyển hướng tên miền tạm của hosting (*.etempurl.com) sang domain chính thức bpcvn.dev
 if (!app.Environment.IsDevelopment())
 {
+    app.Use(async (context, next) =>
+    {
+        var redirectUrl = Program.GetCanonicalRedirectUrl(
+            context, app.Environment.IsDevelopment(), app.Configuration);
+        if (redirectUrl != null)
+        {
+            context.Response.Redirect(redirectUrl, permanent: false);
+            return;
+        }
+        await next();
+    });
+
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
@@ -171,13 +198,73 @@ app.Run();
 
 public partial class Program
 {
+    public const string DefaultProductionBaseUrl = "https://bpcvn.dev";
+
     /// <summary>
-    /// Tạo phân vùng giới hạn tần suất theo địa chỉ IP của client.
+    /// Xác định URL gốc công khai dùng để tạo link trong email.
+    /// Ưu tiên AppSettings:PublicBaseUrl; ở Production tự fallback về https://bpcvn.dev.
+    /// </summary>
+    public static string? ResolvePublicBaseUrl(IConfiguration config, bool isDevelopment)
+    {
+        var configured = config["AppSettings:PublicBaseUrl"]?.Trim();
+        if (!string.IsNullOrEmpty(configured))
+            return configured.TrimEnd('/');
+
+        return isDevelopment ? null : DefaultProductionBaseUrl;
+    }
+
+    /// <summary>
+    /// Tạo URL chuyển hướng về domain chính nếu người dùng truy cập trực tiếp tên miền tạm của hosting (*.etempurl.com).
+    /// Bỏ qua nếu request đi qua Cloudflare Proxy (có header CF-Ray) để tránh vòng lặp redirect.
+    /// </summary>
+    public static string? GetCanonicalRedirectUrl(HttpContext context, bool isDevelopment, IConfiguration config)
+    {
+        if (isDevelopment)
+            return null;
+
+        if (!HttpMethods.IsGet(context.Request.Method) && !HttpMethods.IsHead(context.Request.Method))
+            return null;
+
+        // Tránh vòng lặp nếu request đã đi qua Cloudflare Proxy nhưng origin host bị rewrite về .etempurl.com
+        if (context.Request.Headers.ContainsKey("CF-Ray"))
+            return null;
+
+        var host = context.Request.Host.Host;
+        if (string.IsNullOrWhiteSpace(host) ||
+            !host.EndsWith(".etempurl.com", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var baseUrl = ResolvePublicBaseUrl(config, isDevelopment);
+        if (string.IsNullOrEmpty(baseUrl))
+            return null;
+
+        return $"{baseUrl}{context.Request.PathBase}{context.Request.Path}{context.Request.QueryString}";
+    }
+
+    /// <summary>
+    /// Lấy địa chỉ IP thực của client (ưu tiên header CF-Connecting-IP khi bật Cloudflare Proxy).
+    /// </summary>
+    public static string GetClientIpKey(HttpContext httpContext)
+    {
+        if (httpContext.Request.Headers.TryGetValue("CF-Connecting-IP", out var cfIpValues))
+        {
+            var rawCfIp = cfIpValues.ToString().Split(',', StringSplitOptions.TrimEntries)[0];
+            if (IPAddress.TryParse(rawCfIp, out var parsedIp))
+                return parsedIp.ToString();
+        }
+
+        return httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+    }
+
+    /// <summary>
+    /// Tạo phân vùng giới hạn tần suất theo địa chỉ IP thực của client.
     /// </summary>
     public static RateLimitPartition<string> CreateIpFixedWindowPartition(
         HttpContext httpContext, int permitLimit, int windowMinutes)
     {
-        var ipKey = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var ipKey = GetClientIpKey(httpContext);
         return RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: ipKey,
             factory: _ => new FixedWindowRateLimiterOptions

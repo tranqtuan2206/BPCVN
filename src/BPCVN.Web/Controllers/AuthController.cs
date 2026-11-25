@@ -17,17 +17,20 @@ public class AuthController : Controller
     private readonly AppDbContext           _db;
     private readonly EmailService          _emailService;
     private readonly IConfiguration        _config;
+    private readonly IWebHostEnvironment   _env;
     private readonly ILogger<AuthController> _logger;
 
     public AuthController(
         AppDbContext db,
         EmailService emailService,
         IConfiguration config,
+        IWebHostEnvironment env,
         ILogger<AuthController> logger)
     {
         _db           = db;
         _emailService = emailService;
         _config       = config;
+        _env          = env;
         _logger       = logger;
     }
 
@@ -247,6 +250,13 @@ public class AuthController : Controller
             return View(vm);
         }
 
+        // Chặn đổi sang mật khẩu trùng với mật khẩu hiện tại
+        if (BCrypt.Net.BCrypt.Verify(vm.NewPassword, user.PasswordHash))
+        {
+            ModelState.AddModelError(nameof(vm.NewPassword), "Mật khẩu mới không được trùng với mật khẩu cũ.");
+            return View(vm);
+        }
+
         // Cập nhật mật khẩu mới (đã hash)
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(vm.NewPassword);
         await _db.SaveChangesAsync();
@@ -373,6 +383,13 @@ public class AuthController : Controller
             return RedirectToAction(nameof(ForgotPassword));
         }
 
+        // Chặn đặt lại mật khẩu trùng với mật khẩu cũ (giữ nguyên token để người dùng nhập lại ngay)
+        if (BCrypt.Net.BCrypt.Verify(vm.NewPassword, user.PasswordHash))
+        {
+            ModelState.AddModelError(nameof(vm.NewPassword), "Mật khẩu mới không được trùng với mật khẩu cũ.");
+            return View(vm);
+        }
+
         // Cập nhật mật khẩu mới và vô hiệu hóa token ngay để đảm bảo chỉ dùng một lần
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(vm.NewPassword);
         user.PasswordResetTokenHash = null;
@@ -392,15 +409,15 @@ public class AuthController : Controller
 
     /// <summary>
     /// Tạo URL công khai cho liên kết xác thực/đặt lại mật khẩu trong email.
-    /// Ưu tiên AppSettings:PublicBaseUrl để tránh rủi ro Host Header Injection.
+    /// Ưu tiên AppSettings:PublicBaseUrl hoặc mặc định https://bpcvn.dev ở Production.
     /// </summary>
     private string BuildPublicActionUrl(string action, string controller, object values)
     {
-        var configuredBaseUrl = _config["AppSettings:PublicBaseUrl"]?.Trim();
-        if (!string.IsNullOrEmpty(configuredBaseUrl))
+        var publicBaseUrl = Program.ResolvePublicBaseUrl(_config, _env.IsDevelopment());
+        if (!string.IsNullOrEmpty(publicBaseUrl))
         {
             var relativePath = Url.Action(action: action, controller: controller, values: values) ?? "/";
-            return $"{configuredBaseUrl.TrimEnd('/')}{relativePath}";
+            return $"{publicBaseUrl}{relativePath}";
         }
 
         return Url.Action(action: action, controller: controller, values: values, protocol: Request.Scheme) ?? "/";

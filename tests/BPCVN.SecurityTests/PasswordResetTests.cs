@@ -2,6 +2,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using BPCVN.Application.Services;
 using BPCVN.Application.ViewModels;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace BPCVN.SecurityTests;
@@ -127,6 +129,66 @@ public class PasswordResetTests
             var count = Regex.Matches(content, Regex.Escape($"'{key}':")).Count;
             Assert.Equal(2, count);
         }
+    }
+
+    [Fact]
+    public void ResolvePublicBaseUrl_ShouldFallbackToBpcvnDevInProduction_AndNullInDevelopment()
+    {
+        var emptyConfig = new ConfigurationBuilder().AddInMemoryCollection().Build();
+        Assert.Equal("https://bpcvn.dev", Program.ResolvePublicBaseUrl(emptyConfig, isDevelopment: false));
+        Assert.Null(Program.ResolvePublicBaseUrl(emptyConfig, isDevelopment: true));
+
+        var customConfig = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["AppSettings:PublicBaseUrl"] = "https://bpcvn.dev/"
+            })
+            .Build();
+        Assert.Equal("https://bpcvn.dev", Program.ResolvePublicBaseUrl(customConfig, isDevelopment: true));
+    }
+
+    [Fact]
+    public void GetCanonicalRedirectUrl_ShouldRedirectDirectTempHost_AndAvoidLoopBehindCloudflare()
+    {
+        var emptyConfig = new ConfigurationBuilder().AddInMemoryCollection().Build();
+
+        // Truy cập trực tiếp domain tạm của hosting ở Production → chuyển về https://bpcvn.dev
+        var directTempCtx = new DefaultHttpContext();
+        directTempCtx.Request.Method = "GET";
+        directTempCtx.Request.Host = new HostString("tranqtuan18-001-site1.etempurl.com");
+        directTempCtx.Request.Path = "/Auth/ResetPassword";
+        directTempCtx.Request.QueryString = new QueryString("?email=a&token=b");
+
+        Assert.Equal(
+            "https://bpcvn.dev/Auth/ResetPassword?email=a&token=b",
+            Program.GetCanonicalRedirectUrl(directTempCtx, isDevelopment: false, emptyConfig));
+
+        // Đi qua Cloudflare Proxy (có CF-Ray) → không redirect dù Host bị rewrite về etempurl.com
+        var cfCtx = new DefaultHttpContext();
+        cfCtx.Request.Method = "GET";
+        cfCtx.Request.Host = new HostString("tranqtuan18-001-site1.etempurl.com");
+        cfCtx.Request.Headers["CF-Ray"] = "1234567890abcdef-SIN";
+        Assert.Null(Program.GetCanonicalRedirectUrl(cfCtx, isDevelopment: false, emptyConfig));
+
+        // Môi trường Development hoặc phương thức POST → không redirect
+        Assert.Null(Program.GetCanonicalRedirectUrl(directTempCtx, isDevelopment: true, emptyConfig));
+        directTempCtx.Request.Method = "POST";
+        Assert.Null(Program.GetCanonicalRedirectUrl(directTempCtx, isDevelopment: false, emptyConfig));
+    }
+
+    [Fact]
+    public void AuthControllerAndLayout_ShouldEnforceAndTranslatePasswordReuseRejection()
+    {
+        var root = TestFactory.FindRepoRoot();
+        var authCtrl = File.ReadAllText(Path.Combine(root, "src/BPCVN.Web/Controllers/AuthController.cs"));
+
+        // Đảm bảo kiểm tra trùng mật khẩu cũ xuất hiện ở cả ChangePassword và ResetPassword
+        var occurrences = Regex.Matches(authCtrl, Regex.Escape("BCrypt.Net.BCrypt.Verify(vm.NewPassword, user.PasswordHash)")).Count;
+        Assert.Equal(2, occurrences);
+
+        var layout = File.ReadAllText(Path.Combine(root, "src/BPCVN.Web/Views/Shared/_Layout.cshtml"));
+        Assert.Contains("Mật khẩu mới không được trùng với mật khẩu cũ.", layout);
+        Assert.Contains("New password cannot be the same as your current password.", layout);
     }
 
     private static List<ValidationResult> ValidateModel(object model)

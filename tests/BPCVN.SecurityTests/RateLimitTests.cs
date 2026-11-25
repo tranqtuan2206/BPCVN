@@ -41,4 +41,18 @@ public class RateLimitTests
             Assert.True(normalLease.IsAcquired);
         }
     }
+
+    [Fact]
+    public void GetClientIpKey_ShouldPreferValidCloudflareConnectingIp()
+    {
+        var ctx = new DefaultHttpContext();
+        ctx.Connection.RemoteIpAddress = IPAddress.Parse("172.68.10.5"); // IP proxy của Cloudflare
+        ctx.Request.Headers["CF-Connecting-IP"] = "203.0.113.77";
+
+        Assert.Equal("203.0.113.77", Program.GetClientIpKey(ctx));
+
+        // Bỏ qua giá trị giả mạo không phải IP hợp lệ
+        ctx.Request.Headers["CF-Connecting-IP"] = "not-an-ip";
+        Assert.Equal("172.68.10.5", Program.GetClientIpKey(ctx));
+    }
 }
