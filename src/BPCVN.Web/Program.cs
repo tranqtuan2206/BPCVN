@@ -36,21 +36,28 @@ builder.Services.AddControllersWithViews()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
-// Cấu hình Rate Limiting (giới hạn số lần thử đăng nhập)
+// Cấu hình Rate Limiting phân vùng theo địa chỉ IP (tránh 1 IP làm khóa toàn bộ người dùng khác)
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddFixedWindowLimiter("LoginRateLimit", opt =>
-    {
-        opt.Window = TimeSpan.FromMinutes(15);
-        opt.PermitLimit = 5;
-        opt.QueueLimit = 0;
-    });
+    options.AddPolicy("LoginRateLimit", httpContext =>
+        CreateIpFixedWindowPartition(httpContext, permitLimit: 5, windowMinutes: 15));
+
+    options.AddPolicy("AuthActionRateLimit", httpContext =>
+        CreateIpFixedWindowPartition(httpContext, permitLimit: 10, windowMinutes: 15));
+
     options.OnRejected = async (context, token) =>
     {
         context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-        // Chuyển hướng tới trang Login với cờ locked=true để hiện thông báo
-        context.HttpContext.Response.Redirect("/Auth/Login?locked=true");
-        await Task.CompletedTask;
+        if (context.HttpContext.Request.Path.StartsWithSegments("/Auth/Login", StringComparison.OrdinalIgnoreCase))
+        {
+            // Chuyển hướng tới trang Login với cờ locked=true để hiện thông báo
+            context.HttpContext.Response.Redirect("/Auth/Login?locked=true");
+            return;
+        }
+
+        context.HttpContext.Response.ContentType = "text/plain; charset=utf-8";
+        await context.HttpContext.Response.WriteAsync(
+            "Quá nhiều yêu cầu từ địa chỉ của bạn. Vui lòng thử lại sau ít phút.", token);
     };
 });
 
@@ -75,6 +82,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LogoutPath = "/Auth/Logout";
         options.AccessDeniedPath = "/Auth/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
+        // Tăng cường bảo mật Cookie xác thực
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+            ? CookieSecurePolicy.SameAsRequest
+            : CookieSecurePolicy.Always;
     });
 
 var app = builder.Build();
@@ -89,9 +102,9 @@ using (var scope = app.Services.CreateScope())
     // Tự động chạy migration mới khi deploy (thay cho dotnet ef database update thủ công)
     await db.Database.MigrateAsync();
 
-    // Khởi tạo DbSeeder với IConfiguration (không còn hardcode mật khẩu)
+    // Khởi tạo DbSeeder với cờ môi trường để tránh lộ mật khẩu sinh ngẫu nhiên ra stdout ở Production
     var seeder = new DbSeeder(config);
-    await seeder.SeedAsync(db);
+    await seeder.SeedAsync(db, app.Environment.IsDevelopment());
 }
 
 
@@ -124,6 +137,19 @@ app.Use(async (context, next) =>
     // Giới hạn các browser API nguy hiểm
     headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), payment=()";
 
+    // Chính sách bảo mật nội dung (CSP) — cho phép đúng các CDN và Cloudinary đang dùng
+    headers["Content-Security-Policy"] =
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; " +
+        "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; " +
+        "img-src 'self' data: blob: https:; " +
+        "media-src 'self' blob: https://res.cloudinary.com; " +
+        "connect-src 'self' https://res.cloudinary.com https://cdn.jsdelivr.net; " +
+        "object-src 'none'; " +
+        "base-uri 'self'; " +
+        "frame-ancestors 'self';";
+
     await next();
 });
 
@@ -142,3 +168,23 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+public partial class Program
+{
+    /// <summary>
+    /// Tạo phân vùng giới hạn tần suất theo địa chỉ IP của client.
+    /// </summary>
+    public static RateLimitPartition<string> CreateIpFixedWindowPartition(
+        HttpContext httpContext, int permitLimit, int windowMinutes)
+    {
+        var ipKey = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: ipKey,
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                Window = TimeSpan.FromMinutes(windowMinutes),
+                PermitLimit = permitLimit,
+                QueueLimit = 0
+            });
+    }
+}

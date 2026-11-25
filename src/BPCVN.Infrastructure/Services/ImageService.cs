@@ -45,8 +45,21 @@ public class ImageService
 
     public async Task<string> UploadImageAsync(IFormFile file)
     {
+        // Kiểm tra dung lượng, phần mở rộng và chữ ký đầu file ảnh trước khi gửi lên Cloudinary
+        if (file == null || file.Length == 0)
+            throw new InvalidOperationException("File ảnh trống hoặc không hợp lệ.");
+
+        if (file.Length > MediaSecurityHelper.MaxImageSizeBytes)
+            throw new InvalidOperationException($"Dung lượng ảnh vượt quá giới hạn ({MediaSecurityHelper.MaxImageSizeBytes / 1024 / 1024}MB).");
+
+        var ext = MediaSecurityHelper.NormalizeExtension(Path.GetExtension(file.FileName));
+        if (!MediaSecurityHelper.IsAllowedImageExtension(ext))
+            throw new InvalidOperationException($"Định dạng ảnh '{ext}' không được hỗ trợ (chỉ nhận JPG, PNG, GIF, WEBP, BMP, AVIF).");
+
         // Upload trực tiếp từ stream lên Cloudinary thay vì tạo file tạm trên ổ cứng
         await using var stream = file.OpenReadStream();
+        if (!MediaSecurityHelper.IsValidImageSignature(stream, ext))
+            throw new InvalidOperationException("Nội dung file ảnh không hợp lệ hoặc đã bị đổi đuôi giả mạo.");
 
         var uploadParams = new ImageUploadParams
         {

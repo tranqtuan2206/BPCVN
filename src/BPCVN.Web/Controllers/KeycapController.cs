@@ -1,6 +1,7 @@
 using BPCVN.Application.Interfaces;
 using BPCVN.Domain.Entities;
 using BPCVN.Infrastructure.Data;
+using BPCVN.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -67,6 +68,13 @@ public class KeycapController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("KeycapId,Name,Brand,Profile,Material,ImageUrl,Description")] Keycap keycap)
     {
+        // Chỉ cho phép URL http(s) hoặc đường dẫn nội bộ an toàn cho ảnh
+        if (!string.IsNullOrWhiteSpace(keycap.ImageUrl) &&
+            !MediaSecurityHelper.IsSafeImageUrlOrLocalPath(keycap.ImageUrl))
+        {
+            ModelState.AddModelError(nameof(keycap.ImageUrl), "URL ảnh chỉ được dùng http://, https:// hoặc đường dẫn nội bộ hợp lệ.");
+        }
+
         if (!ModelState.IsValid)
         {
             // Trả lại form với lỗi validation
@@ -101,6 +109,13 @@ public class KeycapController : Controller
     {
         // Đảm bảo id trên URL khớp với KeycapId trong form
         if (id != keycap.KeycapId) return NotFound();
+
+        // Chỉ cho phép URL http(s) hoặc đường dẫn nội bộ an toàn cho ảnh
+        if (!string.IsNullOrWhiteSpace(keycap.ImageUrl) &&
+            !MediaSecurityHelper.IsSafeImageUrlOrLocalPath(keycap.ImageUrl))
+        {
+            ModelState.AddModelError(nameof(keycap.ImageUrl), "URL ảnh chỉ được dùng http://, https:// hoặc đường dẫn nội bộ hợp lệ.");
+        }
 
         if (!ModelState.IsValid)
         {

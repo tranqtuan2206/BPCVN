@@ -1,31 +1,58 @@
-## .NET
+## .NET & IDE
 bin/
 obj/
 *.user
 *.suo
 .vs/
+.vscode/
+.idea/
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+*.mdf
+*.ldf
+*.ndf
+*.sqlite
+*.sqlite3
+*.db
 
 ## Secrets — KHÔNG BAO GIỜ commit
 appsettings.*.json
 !appsettings.json
 **/appsettings.*.json
 !**/appsettings.json
+.env
+.env.*
+!.env.example
+secrets.json
+**/secrets.json
 Properties/serviceDependencies.json
 **/Properties/serviceDependencies.json
+Properties/serviceDependencies.*.json
+**/Properties/serviceDependencies.*.json
+*.pfx
+*.p12
+*.key
+*.pem
 
 ## Logs
 *.log
 logs/
+**/logs/
 
 ## Uploads
 wwwroot/uploads/
 wwwroot/temp/
 **/wwwroot/uploads/
 **/wwwroot/temp/
+App_Data/
+**/App_Data/
 
 ## Publish
 publish/
 publish_test/
+out/
 
 ## Node.js
 node_modules/
@@ -55,3 +82,17 @@ opencode.json
 skills-lock.json
 DESIGN.md
 graft/
+
+## Spec Kit
+.specify/
+specs/
+
+.archify/
+
+## OS & Editor temp
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.tmp
+*.bak

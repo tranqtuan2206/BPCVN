@@ -71,6 +71,9 @@ public class KitController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(KitCreateViewModel model)
     {
+        // Kiểm tra file ảnh upload và URL ảnh nhập tay trước khi tạo Kit trong DB
+        ValidateKitMediaInputs(model.UploadImages, model.ExternalImageUrls);
+
         if (!ModelState.IsValid)
             return View(model);
 
@@ -179,6 +182,9 @@ public class KitController : Controller
     public async Task<IActionResult> Edit(int id, KitEditViewModel model)
     {
         if (id != model.KitId) return NotFound();
+
+        // Kiểm tra file ảnh upload và URL ảnh nhập tay trước khi cập nhật DB
+        ValidateKitMediaInputs(model.UploadImages, model.ExternalImageUrls);
 
         if (!ModelState.IsValid)
         {
@@ -320,5 +326,51 @@ public class KitController : Controller
 
         TempData["Success"] = "toast.kit.delete.success";
         return RedirectToAction(nameof(Index));
+    }
+
+    /// <summary>
+    /// Kiểm tra hợp lệ cho danh sách file ảnh upload (đuôi, dung lượng, magic bytes)
+    /// và danh sách URL ảnh nhập tay (chỉ cho phép http:// hoặc https://).
+    /// </summary>
+    private void ValidateKitMediaInputs(List<IFormFile>? uploadImages, List<string>? externalUrls)
+    {
+        if (uploadImages != null)
+        {
+            foreach (var file in uploadImages)
+            {
+                if (file == null || file.Length == 0)
+                {
+                    ModelState.AddModelError("UploadImages", "Có file ảnh trống hoặc không hợp lệ.");
+                    continue;
+                }
+
+                if (file.Length > MediaSecurityHelper.MaxImageSizeBytes)
+                {
+                    ModelState.AddModelError("UploadImages", $"Ảnh '{file.FileName}' vượt quá giới hạn 10MB.");
+                    continue;
+                }
+
+                var ext = MediaSecurityHelper.NormalizeExtension(Path.GetExtension(file.FileName));
+                if (!MediaSecurityHelper.IsAllowedImageExtension(ext))
+                {
+                    ModelState.AddModelError("UploadImages", $"Định dạng ảnh '{ext}' không được hỗ trợ.");
+                    continue;
+                }
+
+                using var stream = file.OpenReadStream();
+                if (!MediaSecurityHelper.IsValidImageSignature(stream, ext))
+                    ModelState.AddModelError("UploadImages", $"Ảnh '{file.FileName}' có nội dung không khớp với định dạng.");
+            }
+        }
+
+        if (externalUrls != null)
+        {
+            foreach (var rawUrl in externalUrls)
+            {
+                if (string.IsNullOrWhiteSpace(rawUrl)) continue;
+                if (!MediaSecurityHelper.IsSafeHttpUrl(rawUrl))
+                    ModelState.AddModelError("ExternalImageUrls", "URL ảnh chỉ được phép dùng giao thức http:// hoặc https://.");
+            }
+        }
     }
 }

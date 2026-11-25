@@ -295,22 +295,32 @@ function _t(key) {
     return translations?.[lang]?.[key] || translations?.vi?.[key] || key;
 }
 
-// Hiển thị toast
+// Hiển thị toast an toàn (dùng textContent tránh DOM XSS)
 function _showToast(msg, type) {
     const existing = document.querySelector('.toast-fixed');
     if (existing) existing.remove();
 
+    const safeType = type === 'success' ? 'success' : 'error';
     const toast = document.createElement('div');
     toast.className = 'toast-fixed';
-    toast.innerHTML = `
-        <div class="toast-lovable toast-${type}">
-            <i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'exclamation-circle-fill'} toast-icon"></i>
-            <span>${msg}</span>
-            <button type="button" class="toast-close" onclick="this.closest('.toast-fixed').remove()">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-    `;
+
+    const box = document.createElement('div');
+    box.className = `toast-lovable toast-${safeType}`;
+
+    const icon = document.createElement('i');
+    icon.className = `bi bi-${safeType === 'success' ? 'check-circle-fill' : 'exclamation-circle-fill'} toast-icon`;
+
+    const textSpan = document.createElement('span');
+    textSpan.textContent = String(msg ?? '');
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'toast-close';
+    closeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
+    closeBtn.addEventListener('click', () => toast.remove());
+
+    box.append(icon, textSpan, closeBtn);
+    toast.appendChild(box);
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 4000);
 }
@@ -418,11 +428,14 @@ function renderTree(nodes, testId, depth = 0) {
     }).join('');
 }
 
-// Escape HTML防止 XSS
+// Mã hóa đầy đủ các ký tự HTML đặc biệt (bao gồm dấu nháy kép/đơn cho attribute) để chống XSS
 function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+    return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 // ═══════════════════════════════════════════════════════════════════

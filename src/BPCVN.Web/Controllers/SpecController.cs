@@ -3,6 +3,7 @@ using BPCVN.Application.ViewModels;
 using BPCVN.Domain.Entities;
 using BPCVN.Domain.Enums;
 using BPCVN.Infrastructure.Data;
+using BPCVN.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -273,14 +274,10 @@ public class SpecController : Controller
         if (!isOwner && !isAdmin)
             return Forbid();
 
-        // Xóa file âm thanh local — bỏ qua nếu là Cloudinary URL (https://...)
+        // Xóa an toàn file âm thanh cục bộ (chỉ trong wwwroot/uploads/soundtests)
         foreach (var st in spec.SoundTests)
         {
-            if (st.AudioUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)) continue;
-            var relativePath = st.AudioUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-            var filePath = Path.Combine(_env.WebRootPath, relativePath);
-            if (System.IO.File.Exists(filePath))
-                System.IO.File.Delete(filePath);
+            MediaSecurityHelper.TryDeleteSafeLocalAudio(_env.WebRootPath, st.AudioUrl);
         }
 
         // EF Cascade tự xóa SoundTests khi xóa Spec

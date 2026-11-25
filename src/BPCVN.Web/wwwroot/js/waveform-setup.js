@@ -107,10 +107,15 @@ function initWaveformPlayers() {
             hideScrollbar: true,                  // Ẩn scrollbar ngang
         });
 
-        // Xử lý lỗi load audio
+        // Xử lý lỗi load audio an toàn bằng textContent (tránh DOM XSS)
         wavesurfer.on('error', (err) => {
             console.error('WaveSurfer Error:', err);
-            waveformDiv.innerHTML = `<div class="text-danger small" style="line-height:48px; padding-left:10px;">Lỗi: ${err}</div>`;
+            const errDiv = document.createElement('div');
+            errDiv.className = 'text-danger small';
+            errDiv.style.lineHeight = '48px';
+            errDiv.style.paddingLeft = '10px';
+            errDiv.textContent = `Lỗi: ${err}`;
+            waveformDiv.replaceChildren(errDiv);
             playBtn.disabled = true;
             playBtn.innerHTML = '<i class="bi bi-exclamation-triangle text-danger" title="Lỗi tải âm thanh"></i>';
         });

@@ -17,14 +17,10 @@ public class SoundTestController : Controller
     private readonly IWebHostEnvironment  _env;
     private readonly ILogger<SoundTestController> _logger;
 
-    // Loại file được chấp nhận — audio lưu local, video qua FFmpeg → Cloudinary
-    private static readonly string[] AudioExtensions =
-        [".mp3", ".m4a", ".aac", ".flac", ".ogg", ".wav", ".bwf", ".aiff", ".dsf", ".dff", ".alac"];
-    private static readonly string[] VideoExtensions =
-        [".mp4", ".mov", ".mkv", ".webm", ".avi", ".wmv", ".mxf"];
-    private static readonly string[] AllowedExtensions = [.. AudioExtensions, .. VideoExtensions];
-    private const long MaxAudioSizeBytes = 100 * 1024 * 1024;  // 100 MB — WAV/FLAC dài nặng
-    private const long MaxVideoSizeBytes = 200 * 1024 * 1024;  // 200 MB — video từ iPhone
+    // Loại file được chấp nhận — dùng chung chuẩn bảo mật từ MediaSecurityHelper
+    private static readonly HashSet<string> AllowedExtensions = MediaSecurityHelper.AllowedMediaExtensions;
+    private const long MaxAudioSizeBytes = MediaSecurityHelper.MaxAudioSizeBytes; // 100 MB
+    private const long MaxVideoSizeBytes = MediaSecurityHelper.MaxVideoSizeBytes; // 200 MB
 
     public SoundTestController(AppDbContext db, IWebHostEnvironment env,
         AudioService audioService, ILogger<SoundTestController> logger)
@@ -89,7 +85,7 @@ public class SoundTestController : Controller
             return View();
         }
 
-        var ext = Path.GetExtension(audioFile.FileName).ToLowerInvariant();
+        var ext = MediaSecurityHelper.NormalizeExtension(Path.GetExtension(audioFile.FileName));
         if (!AllowedExtensions.Contains(ext))
         {
             var msg = $"Chỉ chấp nhận: {string.Join(", ", AllowedExtensions)}";
@@ -100,7 +96,7 @@ public class SoundTestController : Controller
         }
 
         // Kiểm tra dung lượng theo loại file (audio nhỏ hơn, video lớn hơn)
-        var isVideo = VideoExtensions.Contains(ext);
+        var isVideo = MediaSecurityHelper.IsVideoExtension(ext);
         var maxSize = isVideo ? MaxVideoSizeBytes : MaxAudioSizeBytes;
         var maxSizeLabel = isVideo ? "200MB" : "100MB";
 
@@ -111,6 +107,19 @@ public class SoundTestController : Controller
             ModelState.AddModelError("audioFile", msg);
             ViewBag.Spec = spec;
             return View();
+        }
+
+        // Kiểm tra chữ ký đầu file (magic bytes) để chặn đổi đuôi giả mạo
+        await using (var sigStream = audioFile.OpenReadStream())
+        {
+            if (!MediaSecurityHelper.IsValidMediaSignature(sigStream, ext))
+            {
+                const string sigMsg = "Nội dung file không khớp với định dạng khai báo (nghi ngờ đổi đuôi giả mạo).";
+                if (isAjax) return Json(new { success = false, message = sigMsg });
+                ModelState.AddModelError("audioFile", sigMsg);
+                ViewBag.Spec = spec;
+                return View();
+            }
         }
 
         // ── Xử lý file (tách âm nếu là video) và lưu trữ ────────────────────
@@ -156,11 +165,10 @@ public class SoundTestController : Controller
     // server ghép lại rồi xử lý bằng FFmpeg như cũ.
 
     private const long ChunkSizeBytes = 18 * 1024 * 1024; // 18MB mỗi chunk
-    private const string ChunkTempSubPath = "temp/chunks";
+    private const string ChunkTempRelPath = "App_Data/temp/chunks";
 
     /// <summary>
-    /// Nhận 1 chunk file-upload từ client. Lưu vào temp/chunks/{uploadId}/chunk_{index}.
-    /// Client gọi endpoint này nhiều lần cho đến khi hết chunk.
+    /// Nhận 1 chunk file-upload từ client. Lưu cô lập theo userId trong App_Data/temp/chunks/{userId}/{uploadId}.
     /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -175,14 +183,21 @@ public class SoundTestController : Controller
         if (spec == null) return NotFound();
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (spec.UserId.ToString() != userId) return Forbid();
+        if (string.IsNullOrEmpty(userId) || spec.UserId.ToString() != userId) return Forbid();
+
+        // Kiểm tra biên số chunk để chống Path Traversal / spam tạo hàng nghìn file
+        if (totalChunks < 1 || totalChunks > MediaSecurityHelper.MaxChunkCount ||
+            chunkIndex < 0 || chunkIndex >= totalChunks)
+        {
+            return Json(new { success = false, message = "Thông số chunk không hợp lệ." });
+        }
 
         // Validate chunk
         if (chunk == null || chunk.Length == 0)
             return Json(new { success = false, message = "Chunk trống." });
 
-        // Tạo thư mục tạm cho upload session này
-        var sessionDir = Path.Combine(_env.WebRootPath, ChunkTempSubPath, uploadId.ToString());
+        // Lưu trong App_Data (ngoài wwwroot) và cô lập theo userId để tránh IDOR uploadId
+        var sessionDir = Path.Combine(_env.ContentRootPath, "App_Data", "temp", "chunks", userId, uploadId.ToString());
         Directory.CreateDirectory(sessionDir);
 
         // Lưu chunk vào file tạm
@@ -200,8 +215,7 @@ public class SoundTestController : Controller
     }
 
     /// <summary>
-    /// Ghép tất cả chunks lại thành file hoàn chỉnh, rồi xử lý bằng AudioService.
-    /// Client gọi endpoint này SAU KHI đã upload hết tất cả chunks.
+    /// Ghép tất cả chunks lại thành file hoàn chỉnh, kiểm tra định dạng/dung lượng/magic bytes rồi xử lý bằng AudioService.
     /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -216,20 +230,38 @@ public class SoundTestController : Controller
         if (spec == null) return NotFound();
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (spec.UserId.ToString() != userId) return Forbid();
+        if (string.IsNullOrEmpty(userId) || spec.UserId.ToString() != userId) return Forbid();
 
-        var sessionDir = Path.Combine(_env.WebRootPath, ChunkTempSubPath, uploadId.ToString());
+        // Kiểm tra tổng số chunk hợp lệ
+        if (totalChunks < 1 || totalChunks > MediaSecurityHelper.MaxChunkCount)
+            return Json(new { success = false, message = "Số lượng chunk không hợp lệ." });
+
+        // Kiểm tra phần mở rộng từ originalFileName ngay trước khi tạo file ghép
+        var ext = MediaSecurityHelper.NormalizeExtension(Path.GetExtension(originalFileName));
+        if (!MediaSecurityHelper.IsAllowedMediaExtension(ext))
+        {
+            return Json(new
+            {
+                success = false,
+                message = $"Chỉ chấp nhận: {string.Join(", ", AllowedExtensions)}"
+            });
+        }
+
+        var sessionDir = Path.Combine(_env.ContentRootPath, "App_Data", "temp", "chunks", userId, uploadId.ToString());
 
         // Kiểm tra đủ số chunk
         if (!Directory.Exists(sessionDir))
             return Json(new { success = false, message = "Không tìm thấy session upload." });
 
-        var ext = Path.GetExtension(originalFileName).ToLowerInvariant();
+        var isVideo = MediaSecurityHelper.IsVideoExtension(ext);
+        var maxAllowedSize = isVideo ? MaxVideoSizeBytes : MaxAudioSizeBytes;
         var mergedPath = Path.Combine(sessionDir, $"merged{ext}");
 
         try
         {
-            // Ghép chunks theo thứ tự chunk_0, chunk_1, chunk_2...
+            long totalMergedBytes = 0;
+
+            // Ghép chunks theo thứ tự chunk_0, chunk_1, chunk_2... và kiểm tra tổng dung lượng cộng dồn
             await using (var mergedStream = new FileStream(mergedPath, FileMode.Create))
             {
                 for (int i = 0; i < totalChunks; i++)
@@ -238,21 +270,44 @@ public class SoundTestController : Controller
                     if (!System.IO.File.Exists(chunkPath))
                         return Json(new { success = false, message = $"Thiếu chunk {i + 1}/{totalChunks}." });
 
+                    var chunkSize = new FileInfo(chunkPath).Length;
+                    totalMergedBytes += chunkSize;
+                    if (totalMergedBytes > maxAllowedSize)
+                    {
+                        var limitMb = maxAllowedSize / 1024 / 1024;
+                        return Json(new { success = false, message = $"File không được vượt quá {limitMb}MB." });
+                    }
+
                     await using var chunkStream = new FileStream(chunkPath, FileMode.Open, FileAccess.Read);
                     await chunkStream.CopyToAsync(mergedStream);
                 }
             }
 
-            var mergedSize = new FileInfo(mergedPath).Length;
-            _logger.LogInformation("[ChunkedUpload] Ghép xong {Chunks} chunk → {Path} ({Size}MB)",
-                totalChunks, mergedPath, mergedSize / 1024 / 1024);
+            if (totalMergedBytes == 0)
+                return Json(new { success = false, message = "File upload trống." });
 
-            // Xử lý file hoàn chỉnh qua AudioService (giống flow cũ)
+            // Kiểm tra chữ ký đầu file (magic bytes) sau khi ghép xong để chặn đổi đuôi giả mạo
+            await using (var sigStream = new FileStream(mergedPath, FileMode.Open, FileAccess.Read))
+            {
+                if (!MediaSecurityHelper.IsValidMediaSignature(sigStream, ext))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Nội dung file không khớp với định dạng khai báo (nghi ngờ đổi đuôi giả mạo)."
+                    });
+                }
+            }
+
+            _logger.LogInformation("[ChunkedUpload] Ghép xong {Chunks} chunk → {Path} ({Size}MB)",
+                totalChunks, mergedPath, totalMergedBytes / 1024 / 1024);
+
+            // Xử lý file hoàn chỉnh qua AudioService
             string audioUrl;
             await using (var stream = new FileStream(mergedPath, FileMode.Open, FileAccess.Read))
             {
                 // Tạo IFormFile tạm từ stream đã ghép
-                var tempFormFile = new FormFile(stream, 0, mergedSize, "audioFile", originalFileName);
+                var tempFormFile = new FormFile(stream, 0, totalMergedBytes, "audioFile", $"upload{ext}");
                 audioUrl = await _audioService.ProcessAndSaveAsync(tempFormFile);
             }
 
@@ -311,14 +366,8 @@ public class SoundTestController : Controller
         if (!isOwner && !isAdmin)
             return Forbid();
 
-        // Chỉ xóa file local — bỏ qua nếu AudioUrl là Cloudinary URL (https://...)
-        if (!soundTest.AudioUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-        {
-            var relativePath = soundTest.AudioUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-            var filePath = Path.Combine(_env.WebRootPath, relativePath);
-            if (System.IO.File.Exists(filePath))
-                System.IO.File.Delete(filePath);
-        }
+        // Xóa an toàn file âm thanh cục bộ (chỉ trong wwwroot/uploads/soundtests)
+        MediaSecurityHelper.TryDeleteSafeLocalAudio(_env.WebRootPath, soundTest.AudioUrl);
 
         var specId = soundTest.SpecId;
 

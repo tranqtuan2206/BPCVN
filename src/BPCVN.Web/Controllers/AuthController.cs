@@ -16,11 +16,13 @@ public class AuthController : Controller
 {
     private readonly AppDbContext    _db;
     private readonly EmailService   _emailService;
+    private readonly IConfiguration _config;
 
-    public AuthController(AppDbContext db, EmailService emailService)
+    public AuthController(AppDbContext db, EmailService emailService, IConfiguration config)
     {
         _db           = db;
         _emailService = emailService;
+        _config       = config;
     }
 
     // ── REGISTER ──────────────────────────────────────────────────────────────
@@ -30,6 +32,7 @@ public class AuthController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("AuthActionRateLimit")]
     public async Task<IActionResult> Register(RegisterViewModel vm)
     {
         if (!ModelState.IsValid) return View(vm);
@@ -69,22 +72,37 @@ public class AuthController : Controller
             await _db.SaveChangesAsync();
 
             // ── Gửi email xác thực ──────────────────────────────────────────
-            var verifyLink = Url.Action(
-                action:     "VerifyEmail",
-                controller: "Auth",
-                values:     new { email = user.Email, token = verificationToken },
-                protocol:   Request.Scheme
-            );
+            // Ưu tiên PublicBaseUrl cấu hình sẵn để tránh rủi ro Host Header Injection
+            var configuredBaseUrl = _config["AppSettings:PublicBaseUrl"]?.Trim();
+            string? verifyLink;
+            if (!string.IsNullOrEmpty(configuredBaseUrl))
+            {
+                var relativeVerify = Url.Action(
+                    action:     "VerifyEmail",
+                    controller: "Auth",
+                    values:     new { email = user.Email, token = verificationToken });
+                verifyLink = $"{configuredBaseUrl.TrimEnd('/')}{relativeVerify}";
+            }
+            else
+            {
+                verifyLink = Url.Action(
+                    action:     "VerifyEmail",
+                    controller: "Auth",
+                    values:     new { email = user.Email, token = verificationToken },
+                    protocol:   Request.Scheme);
+            }
 
+            var safeUsername = System.Net.WebUtility.HtmlEncode(user.Username);
+            var safeVerifyLink = System.Net.WebUtility.HtmlEncode(verifyLink);
             var emailBody = $@"
                 <h2>Chào mừng bạn đến với BPCVN!</h2>
-                <p>Xin chào <strong>{user.Username}</strong>,</p>
+                <p>Xin chào <strong>{safeUsername}</strong>,</p>
                 <p>Vui lòng nhấn vào link bên dưới để kích hoạt tài khoản của bạn:</p>
-                <p><a href='{verifyLink}' style='display:inline-block;padding:10px 20px;background:#333;color:#fff;text-decoration:none;border-radius:5px;'>
+                <p><a href='{safeVerifyLink}' style='display:inline-block;padding:10px 20px;background:#333;color:#fff;text-decoration:none;border-radius:5px;'>
                     ✅ Kích hoạt tài khoản
                 </a></p>
                 <p>Hoặc copy link này vào trình duyệt:</p>
-                <p>{verifyLink}</p>
+                <p>{safeVerifyLink}</p>
                 <hr/>
                 <p style='color:#888;font-size:12px;'>Nếu bạn không đăng ký tài khoản này, vui lòng bỏ qua email này.</p>
             ";
@@ -111,6 +129,7 @@ public class AuthController : Controller
     /// Action xác thực email — user click link trong email sẽ gọi tới đây.
     /// </summary>
     [HttpGet]
+    [EnableRateLimiting("AuthActionRateLimit")]
     public async Task<IActionResult> VerifyEmail(string email, string token)
     {
         // Validate tham số đầu vào
@@ -215,6 +234,7 @@ public class AuthController : Controller
     [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("AuthActionRateLimit")]
     public async Task<IActionResult> ChangePassword(ChangePasswordViewModel vm)
     {
         if (!ModelState.IsValid) return View(vm);
@@ -230,6 +250,8 @@ public class AuthController : Controller
         // Xác minh mật khẩu hiện tại
         if (!BCrypt.Net.BCrypt.Verify(vm.CurrentPassword, user.PasswordHash))
         {
+            // Thêm độ trễ nhỏ để hạn chế dò mật khẩu
+            await Task.Delay(TimeSpan.FromMilliseconds(300));
             ModelState.AddModelError(nameof(vm.CurrentPassword), "Mật khẩu hiện tại không đúng.");
             return View(vm);
         }

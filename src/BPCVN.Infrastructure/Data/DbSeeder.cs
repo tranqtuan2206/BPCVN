@@ -23,8 +23,9 @@ public class DbSeeder
 
     /// <summary>
     /// Thực hiện seed dữ liệu mẫu vào database.
+    /// Chỉ cho phép tự sinh mật khẩu Admin ngẫu nhiên và in ra Console khi đang ở môi trường Development.
     /// </summary>
-    public async Task SeedAsync(AppDbContext db)
+    public async Task SeedAsync(AppDbContext db, bool isDevelopment = false)
     {
         await db.Database.MigrateAsync();
 
@@ -169,7 +170,15 @@ public class DbSeeder
 
             if (string.IsNullOrWhiteSpace(adminPassword) || weakPasswords.Contains(adminPassword))
             {
-                // Generate random strong password và in ra console để admin biết
+                if (!isDevelopment)
+                {
+                    // Ở Production/Staging bắt buộc cấu hình mật khẩu mạnh qua biến môi trường hoặc User Secrets
+                    throw new InvalidOperationException(
+                        "AdminSettings:DefaultPassword chưa được cấu hình an toàn cho môi trường Production. " +
+                        "Hãy thiết lập qua biến môi trường AdminSettings__DefaultPassword.");
+                }
+
+                // Ở môi trường Development: sinh mật khẩu mạnh ngẫu nhiên và in ra console để tiện thử nghiệm
                 adminPassword = GenerateRandomPassword();
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine(" ╔══════════════════════════════════════════════════════════╗");

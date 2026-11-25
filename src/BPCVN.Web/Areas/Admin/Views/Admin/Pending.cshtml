@@ -138,21 +138,33 @@
         document.getElementById('mergeItemId').value   = pendingId;
         document.getElementById('mergeSourceName').textContent = pendingName;
         document.getElementById('mergeConfirmBtn').disabled    = true;
-        document.getElementById('mergeTargetSelect').innerHTML = `<option>${dict['admin.pending.loading'] || 'Đang tải...'}</option>`;
+        const sel = document.getElementById('mergeTargetSelect');
+        const loadingOpt = document.createElement('option');
+        loadingOpt.textContent = dict['admin.pending.loading'] || 'Đang tải...';
+        sel.replaceChildren(loadingOpt);
 
         // Load danh sách entity approved cùng type
-        const res  = await fetch(`/Admin/MergeTargets?type=${type}`);
+        const res  = await fetch(`/Admin/MergeTargets?type=${encodeURIComponent(type)}`);
         const list = await res.json();
 
-        const sel = document.getElementById('mergeTargetSelect');
-        sel.innerHTML = `<option value="">${dict['admin.pending.selectTarget'] || '-- Chọn entity chuẩn --'}</option>` +
-            list.map(x => `<option value="${x.id}">${x.name}</option>`).join('');
+        // Tạo option bằng DOM API + textContent để chống Stored XSS từ tên entity
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.textContent = dict['admin.pending.selectTarget'] || '-- Chọn entity chuẩn --';
 
-        sel.addEventListener('change', function () {
+        const options = [defaultOpt, ...list.map(x => {
+            const opt = document.createElement('option');
+            opt.value = x.id;
+            opt.textContent = x.name;
+            return opt;
+        })];
+        sel.replaceChildren(...options);
+
+        sel.onchange = function () {
             const targetId = this.value;
             document.getElementById('mergeTargetId').value = targetId;
             document.getElementById('mergeConfirmBtn').disabled = !targetId;
-        });
+        };
 
         new bootstrap.Modal(document.getElementById('mergeModal')).show();
     });

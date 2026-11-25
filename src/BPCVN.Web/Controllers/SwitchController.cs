@@ -1,6 +1,7 @@
 using BPCVN.Application.Interfaces;
 using BPCVN.Domain.Entities;
 using BPCVN.Infrastructure.Data;
+using BPCVN.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -67,6 +68,13 @@ public class SwitchController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("SwitchId,Name,Brand,Type,ActuationForce,ImageUrl")] Switch switchObj)
     {
+        // Chỉ cho phép URL http(s) hoặc đường dẫn nội bộ an toàn cho ảnh
+        if (!string.IsNullOrWhiteSpace(switchObj.ImageUrl) &&
+            !MediaSecurityHelper.IsSafeImageUrlOrLocalPath(switchObj.ImageUrl))
+        {
+            ModelState.AddModelError(nameof(switchObj.ImageUrl), "URL ảnh chỉ được dùng http://, https:// hoặc đường dẫn nội bộ hợp lệ.");
+        }
+
         if (!ModelState.IsValid)
         {
             // Trả lại form với lỗi validation
@@ -101,6 +109,13 @@ public class SwitchController : Controller
     {
         // Đảm bảo id trên URL khớp với SwitchId trong form
         if (id != switchObj.SwitchId) return NotFound();
+
+        // Chỉ cho phép URL http(s) hoặc đường dẫn nội bộ an toàn cho ảnh
+        if (!string.IsNullOrWhiteSpace(switchObj.ImageUrl) &&
+            !MediaSecurityHelper.IsSafeImageUrlOrLocalPath(switchObj.ImageUrl))
+        {
+            ModelState.AddModelError(nameof(switchObj.ImageUrl), "URL ảnh chỉ được dùng http://, https:// hoặc đường dẫn nội bộ hợp lệ.");
+        }
 
         if (!ModelState.IsValid)
         {

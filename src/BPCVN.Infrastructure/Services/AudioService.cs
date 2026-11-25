@@ -19,9 +19,6 @@ namespace BPCVN.Infrastructure.Services;
 /// </summary>
 public class AudioService
 {
-    private static readonly HashSet<string> VideoExtensions =
-        [".mp4", ".mov", ".mkv", ".webm", ".avi", ".wmv", ".mxf"];
-
     private const string UploadSubPath = "uploads/soundtests";
     private const string TempSubPath = "temp";
     private const string FFmpegSubPath = "FFmpeg";
@@ -31,14 +28,17 @@ public class AudioService
     private readonly ILogger<AudioService> _logger;
     private readonly Cloudinary _cloudinary;
     private readonly string _ffmpegDir;
+    private readonly string _tempDir;
 
     public AudioService(IWebHostEnvironment env, ILogger<AudioService> logger, IConfiguration config)
     {
         _env    = env;
         _logger = logger;
 
-        // FFmpeg lưu vào wwwroot/FFmpeg/ — thư mục ghi được trên IIS shared hosting
-        _ffmpegDir = Path.Combine(_env.WebRootPath, FFmpegSubPath);
+        // Đặt FFmpeg và thư mục tạm trong App_Data (ngoài wwwroot) để không bị truy cập trực tiếp qua HTTP
+        var appDataRoot = Path.Combine(_env.ContentRootPath, "App_Data");
+        _ffmpegDir = Path.Combine(appDataRoot, FFmpegSubPath);
+        _tempDir   = Path.Combine(appDataRoot, TempSubPath);
         FFmpeg.SetExecutablesPath(_ffmpegDir);
 
         var cloudName = config["CloudinarySettings:CloudName"];
@@ -59,12 +59,31 @@ public class AudioService
 
     public async Task<string> ProcessAndSaveAsync(IFormFile file)
     {
-        var tempDir = Path.Combine(_env.WebRootPath, TempSubPath);
-        Directory.CreateDirectory(tempDir);
+        // Kiểm tra file cơ bản trước khi ghi xuống ổ cứng
+        if (file == null || file.Length == 0)
+            throw new InvalidOperationException("File âm thanh/video không hợp lệ hoặc bị trống.");
 
-        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var ext = MediaSecurityHelper.NormalizeExtension(Path.GetExtension(file.FileName));
+        if (!MediaSecurityHelper.IsAllowedMediaExtension(ext))
+            throw new InvalidOperationException($"Định dạng file '{ext}' không được hỗ trợ.");
+
+        var isVideo = MediaSecurityHelper.IsVideoExtension(ext);
+        var maxBytes = isVideo ? MediaSecurityHelper.MaxVideoSizeBytes : MediaSecurityHelper.MaxAudioSizeBytes;
+        if (file.Length > maxBytes)
+            throw new InvalidOperationException($"Dung lượng file vượt quá giới hạn cho phép ({maxBytes / 1024 / 1024}MB).");
+
+        // Kiểm tra chữ ký đầu file (magic bytes) để chặn đổi đuôi giả mạo trước khi ghi đĩa/chạy FFmpeg
+        await using (var inspectStream = file.OpenReadStream())
+        {
+            if (!MediaSecurityHelper.IsValidMediaSignature(inspectStream, ext))
+                throw new InvalidOperationException(
+                    "Nội dung file không khớp với định dạng khai báo (có thể đã bị đổi đuôi giả mạo).");
+        }
+
+        Directory.CreateDirectory(_tempDir);
+
         var tempFileName = $"{Guid.NewGuid()}{ext}";
-        var tempFilePath = Path.Combine(tempDir, tempFileName);
+        var tempFilePath = Path.Combine(_tempDir, tempFileName);
 
         try
         {
@@ -74,7 +93,7 @@ public class AudioService
             }
             _logger.LogInformation("[AudioService] Đã lưu file tạm: {Path}", tempFilePath);
 
-            if (VideoExtensions.Contains(ext))
+            if (isVideo)
             {
                 // Video: đảm bảo FFmpeg có sẵn → tách âm → upload .mp3 lên Cloudinary
                 var ffmpegReady = await EnsureFFmpegAvailableAsync();

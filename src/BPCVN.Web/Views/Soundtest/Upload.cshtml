@@ -114,19 +114,29 @@
         return (translations[lang] && translations[lang][key]) || key;
     }
 
-    /* ── Hiển thị Toast ──────────────────────────────────── */
+    /* ── Hiển thị Toast an toàn bằng DOM API (tránh DOM XSS) ── */
     function showToast(type, msg) {
         var isSuccess = type === 'success';
         var wrap = document.createElement('div');
         wrap.className = 'toast-fixed';
-        wrap.innerHTML =
-            '<div class="toast-lovable ' + (isSuccess ? 'toast-success' : 'toast-error') + '">' +
-                '<i class="bi bi-' + (isSuccess ? 'check-circle-fill' : 'exclamation-circle-fill') + ' toast-icon"></i>' +
-                '<span>' + msg + '</span>' +
-                '<button type="button" class="toast-close" onclick="this.closest(\'.toast-fixed\').remove()">' +
-                    '<i class="bi bi-x-lg"></i>' +
-                '</button>' +
-            '</div>';
+
+        var box = document.createElement('div');
+        box.className = 'toast-lovable ' + (isSuccess ? 'toast-success' : 'toast-error');
+
+        var icon = document.createElement('i');
+        icon.className = 'bi bi-' + (isSuccess ? 'check-circle-fill' : 'exclamation-circle-fill') + ' toast-icon';
+
+        var textSpan = document.createElement('span');
+        textSpan.textContent = String(msg ?? '');
+
+        var closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'toast-close';
+        closeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
+        closeBtn.addEventListener('click', function () { wrap.remove(); });
+
+        box.append(icon, textSpan, closeBtn);
+        wrap.appendChild(box);
         document.body.appendChild(wrap);
         setTimeout(function () { wrap.remove(); }, 4000);
     }
