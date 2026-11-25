@@ -20,7 +20,11 @@
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
                 <div class="mb-3">
-                    <label asp-for="Password" class="form-label-lovable" data-i18n="login.passwordLabel">Mật khẩu</label>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mb-1">
+                        <label asp-for="Password" class="form-label-lovable mb-0" data-i18n="login.passwordLabel">Mật khẩu</label>
+                        <a asp-controller="Auth" asp-action="ForgotPassword" class="link-lovable small"
+                           style="font-weight:700" data-i18n="login.forgotPassword">Quên mật khẩu?</a>
+                    </div>
                     <input asp-for="Password" class="form-control" data-i18n-placeholder="login.passwordPlaceholder" placeholder="Mật khẩu của bạn" />
                     <span asp-validation-for="Password" class="text-danger small"></span>
                 </div>

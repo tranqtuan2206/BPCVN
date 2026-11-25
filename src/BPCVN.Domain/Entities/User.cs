@@ -33,6 +33,14 @@ public class User
     /// <summary>Token dùng để xác thực email (Guid), null sau khi đã kích hoạt.</summary>
     public string? VerificationToken { get; set; }
 
+    // ── Đặt lại mật khẩu (Quên mật khẩu) ─────────────────────────────────
+    /// <summary>Mã băm SHA-256 (hex 64 ký tự) của token đặt lại mật khẩu, không lưu token gốc.</summary>
+    [StringLength(64)]
+    public string? PasswordResetTokenHash { get; set; }
+
+    /// <summary>Thời điểm hết hạn của token đặt lại mật khẩu (giờ UTC).</summary>
+    public DateTime? PasswordResetTokenExpiry { get; set; }
+
     // Navigation
     public ICollection<Spec> Specs { get; set; } = new List<Spec>();
 

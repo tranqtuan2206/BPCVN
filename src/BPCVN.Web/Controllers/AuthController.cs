@@ -14,15 +14,21 @@ namespace BPCVN.Web.Controllers;
 
 public class AuthController : Controller
 {
-    private readonly AppDbContext    _db;
-    private readonly EmailService   _emailService;
-    private readonly IConfiguration _config;
+    private readonly AppDbContext           _db;
+    private readonly EmailService          _emailService;
+    private readonly IConfiguration        _config;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(AppDbContext db, EmailService emailService, IConfiguration config)
+    public AuthController(
+        AppDbContext db,
+        EmailService emailService,
+        IConfiguration config,
+        ILogger<AuthController> logger)
     {
         _db           = db;
         _emailService = emailService;
         _config       = config;
+        _logger       = logger;
     }
 
     // ── REGISTER ──────────────────────────────────────────────────────────────
@@ -72,25 +78,10 @@ public class AuthController : Controller
             await _db.SaveChangesAsync();
 
             // ── Gửi email xác thực ──────────────────────────────────────────
-            // Ưu tiên PublicBaseUrl cấu hình sẵn để tránh rủi ro Host Header Injection
-            var configuredBaseUrl = _config["AppSettings:PublicBaseUrl"]?.Trim();
-            string? verifyLink;
-            if (!string.IsNullOrEmpty(configuredBaseUrl))
-            {
-                var relativeVerify = Url.Action(
-                    action:     "VerifyEmail",
-                    controller: "Auth",
-                    values:     new { email = user.Email, token = verificationToken });
-                verifyLink = $"{configuredBaseUrl.TrimEnd('/')}{relativeVerify}";
-            }
-            else
-            {
-                verifyLink = Url.Action(
-                    action:     "VerifyEmail",
-                    controller: "Auth",
-                    values:     new { email = user.Email, token = verificationToken },
-                    protocol:   Request.Scheme);
-            }
+            var verifyLink = BuildPublicActionUrl(
+                "VerifyEmail",
+                "Auth",
+                new { email = user.Email, token = verificationToken });
 
             var safeUsername = System.Net.WebUtility.HtmlEncode(user.Username);
             var safeVerifyLink = System.Net.WebUtility.HtmlEncode(verifyLink);
@@ -267,12 +258,153 @@ public class AuthController : Controller
         return RedirectToAction("Profile", "User");
     }
 
+    // ── FORGOT PASSWORD (QUÊN MẬT KHẨU) ───────────────────────────────────────
+
+    [HttpGet]
+    public IActionResult ForgotPassword()
+    {
+        if (User.Identity?.IsAuthenticated == true)
+            return RedirectToAction("Index", "Home");
+
+        // Dùng TempData theo mẫu Post-Redirect-Get để tránh gửi lại form khi F5
+        ViewBag.EmailSent = TempData["ForgotSent"] != null;
+        return View(new ForgotPasswordViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting("AuthActionRateLimit")]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel vm)
+    {
+        if (!ModelState.IsValid) return View(vm);
+
+        var email = vm.Email.Trim().ToLower();
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+        // Chỉ phát hành token khi tài khoản tồn tại và đã xác thực email (hoặc là Admin)
+        if (user != null && (user.IsEmailConfirmed || user.Role == "Admin"))
+        {
+            var rawToken = PasswordResetTokenHelper.GenerateToken();
+            user.PasswordResetTokenHash = PasswordResetTokenHelper.HashToken(rawToken);
+            user.PasswordResetTokenExpiry = DateTime.UtcNow.AddMinutes(15);
+            await _db.SaveChangesAsync();
+
+            var resetLink = BuildPublicActionUrl(
+                "ResetPassword",
+                "Auth",
+                new { email = user.Email, token = rawToken });
+
+            var safeUsername = System.Net.WebUtility.HtmlEncode(user.Username);
+            var safeResetLink = System.Net.WebUtility.HtmlEncode(resetLink);
+            var emailBody = $@"
+                <h2>BPCVN - Yêu cầu đặt lại mật khẩu</h2>
+                <p>Xin chào <strong>{safeUsername}</strong>,</p>
+                <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.</p>
+                <p><a href='{safeResetLink}' style='display:inline-block;padding:10px 20px;background:#1a1a1a;color:#fffdf0;text-decoration:none;font-weight:bold;border:2px solid #1a1a1a;'>
+                    Đặt lại mật khẩu
+                </a></p>
+                <p>Hoặc sao chép liên kết này vào trình duyệt:</p>
+                <p>{safeResetLink}</p>
+                <p><strong>Lưu ý:</strong> Liên kết này chỉ có hiệu lực trong <strong>15 phút</strong> và chỉ sử dụng được một lần.</p>
+                <hr/>
+                <p style='color:#666;font-size:12px;'>Nếu bạn không thực hiện yêu cầu này, hãy bỏ qua email này.</p>
+            ";
+
+            try
+            {
+                await _emailService.SendEmailAsync(user.Email, "BPCVN - Đặt lại mật khẩu", emailBody);
+            }
+            catch (Exception ex)
+            {
+                // Ghi log để vận hành kiểm tra nhưng không làm rò rỉ trạng thái email ra ngoài
+                _logger.LogWarning(ex, "[Auth] Không thể gửi email đặt lại mật khẩu tới {UserId}", user.UserId);
+            }
+        }
+
+        // Độ trễ nhỏ + phản hồi giống nhau mọi trường hợp để chống email enumeration
+        await Task.Delay(TimeSpan.FromMilliseconds(250));
+        TempData["ForgotSent"] = true;
+        TempData["Success"] = "toast.auth.forgot.sent";
+        return RedirectToAction(nameof(ForgotPassword));
+    }
+
+    // ── RESET PASSWORD (ĐẶT LẠI MẬT KHẨU) ─────────────────────────────────────
+
+    [HttpGet]
+    [EnableRateLimiting("AuthActionRateLimit")]
+    public async Task<IActionResult> ResetPassword(string? email, string? token)
+    {
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(token))
+        {
+            TempData["Error"] = "toast.auth.reset.invalid";
+            return RedirectToAction(nameof(ForgotPassword));
+        }
+
+        var normalizedEmail = email.Trim().ToLower();
+        var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+
+        if (user == null || !PasswordResetTokenHelper.VerifyToken(token, user.PasswordResetTokenHash, user.PasswordResetTokenExpiry))
+        {
+            TempData["Error"] = "toast.auth.reset.invalid";
+            return RedirectToAction(nameof(ForgotPassword));
+        }
+
+        return View(new ResetPasswordViewModel
+        {
+            Email = normalizedEmail,
+            Token = token.Trim()
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting("AuthActionRateLimit")]
+    public async Task<IActionResult> ResetPassword(ResetPasswordViewModel vm)
+    {
+        if (!ModelState.IsValid) return View(vm);
+
+        var normalizedEmail = vm.Email.Trim().ToLower();
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+
+        if (user == null || !PasswordResetTokenHelper.VerifyToken(vm.Token, user.PasswordResetTokenHash, user.PasswordResetTokenExpiry))
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(300));
+            TempData["Error"] = "toast.auth.reset.invalid";
+            return RedirectToAction(nameof(ForgotPassword));
+        }
+
+        // Cập nhật mật khẩu mới và vô hiệu hóa token ngay để đảm bảo chỉ dùng một lần
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(vm.NewPassword);
+        user.PasswordResetTokenHash = null;
+        user.PasswordResetTokenExpiry = null;
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = "toast.auth.reset.success";
+        return RedirectToAction(nameof(Login));
+    }
+
     // ── ACCESS DENIED ─────────────────────────────────────────────────────────
 
     [HttpGet]
     public IActionResult AccessDenied() => View();
 
     // ── HELPER ───────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Tạo URL công khai cho liên kết xác thực/đặt lại mật khẩu trong email.
+    /// Ưu tiên AppSettings:PublicBaseUrl để tránh rủi ro Host Header Injection.
+    /// </summary>
+    private string BuildPublicActionUrl(string action, string controller, object values)
+    {
+        var configuredBaseUrl = _config["AppSettings:PublicBaseUrl"]?.Trim();
+        if (!string.IsNullOrEmpty(configuredBaseUrl))
+        {
+            var relativePath = Url.Action(action: action, controller: controller, values: values) ?? "/";
+            return $"{configuredBaseUrl.TrimEnd('/')}{relativePath}";
+        }
+
+        return Url.Action(action: action, controller: controller, values: values, protocol: Request.Scheme) ?? "/";
+    }
 
     private async Task SignInUser(User user, bool isPersistent)
     {
